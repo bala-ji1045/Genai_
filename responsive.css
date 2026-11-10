@@ -1,0 +1,126 @@
+/* Shared phone layout for the standalone course pages. */
+html {
+  overflow-x: hidden;
+}
+
+img,
+svg,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (max-width: 620px) {
+  .hero {
+    padding: 2.75rem 1rem 2.25rem;
+  }
+
+  .hero-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+  }
+
+  .hero p {
+    font-size: 0.95rem;
+  }
+
+  .toc {
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    gap: 1rem;
+    padding: 0.9rem 1rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .toc::-webkit-scrollbar {
+    display: none;
+  }
+
+  .toc a {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .section {
+    width: 100%;
+    padding: 2.5rem 1rem;
+  }
+
+  .section h2 {
+    line-height: 1.15;
+  }
+
+  .compare-grid,
+  .steps {
+    grid-template-columns: 1fr;
+  }
+
+  .diagram-wrap,
+  .math-box,
+  .promptbox {
+    padding: 1rem;
+  }
+
+  .math-box,
+  .promptbox {
+    font-size: 0.76rem;
+    overflow-x: auto;
+  }
+
+  table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  th,
+  td {
+    min-width: 9rem;
+  }
+
+  .topbar {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 1rem;
+    font-size: 0.68rem;
+  }
+
+  .stage {
+    padding: 1.5rem 1rem;
+  }
+
+  .icon-wrap {
+    width: 88px;
+    height: 88px;
+    margin-bottom: 1.5rem;
+  }
+
+  .icon-wrap svg {
+    width: 44px;
+    height: 44px;
+  }
+
+  .q-text {
+    font-size: clamp(1.55rem, 8vw, 2.2rem);
+    margin-bottom: 1.5rem;
+  }
+
+  .reveal-hint {
+    max-width: 100%;
+    padding: 0.75rem 1rem;
+    text-align: center;
+  }
+
+  .answer-box {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .answer-box.shown {
+    padding: 1rem;
+  }
+}

@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Part 2a · Alignment: CLIP in Depth — Study Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Fraunces:ital,wght@0,300;0,700;1,300&family=Inter:wght@400;500;600&display=swap');
+  :root {
+    --ink: #0f1117; --paper: #f7f6f2; --mid: #e8e5dd; --rule: #c9c4b8; --accent: #1a3a5c;
+    --highlight: #e8a020; --green: #2a7a4b; --red: #b83232; --blue: #2255aa; --purple: #6b3fa0; --teal: #0d7a7a;
+    --mono: 'IBM Plex Mono', monospace; --display: 'Fraunces', Georgia, serif; --body: 'Inter', system-ui, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--body); background: var(--paper); color: var(--ink); line-height: 1.7; font-size: 16px; }
+  .hero { background: linear-gradient(160deg, #0f1117 0%, #1a3a5c 100%); color: #fff; padding: 4rem 2rem 3rem; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 20% 30%, rgba(232,160,32,0.10), transparent 40%), radial-gradient(circle at 80% 70%, rgba(42,122,75,0.12), transparent 40%); }
+  .hero-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--highlight); margin-bottom: 1rem; position: relative; }
+  .hero h1 { font-family: var(--display); font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; line-height: 1.1; margin-bottom: 1rem; position: relative; }
+  .hero p { font-size: 1.1rem; opacity: 0.82; max-width: 680px; margin: 0 auto; position: relative; }
+  .toc { background: var(--ink); color: #fff; padding: 1.2rem 2rem; display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; position: sticky; top: 0; z-index: 100; }
+  .toc a { color: rgba(255,255,255,0.7); text-decoration: none; font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.02em; transition: color 0.2s; }
+  .toc a:hover { color: var(--highlight); }
+  .section { max-width: 900px; margin: 0 auto; padding: 4rem 2rem; border-bottom: 1px solid var(--rule); }
+  .section-eyebrow { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.5rem; }
+  .section h2 { font-family: var(--display); font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 700; margin-bottom: 1.5rem; color: var(--ink); }
+  .section h3 { font-family: var(--display); font-size: 1.25rem; font-weight: 700; margin: 2rem 0 0.8rem; color: var(--accent); }
+  .section h4 { font-size: 0.95rem; font-weight: 600; margin: 1.4rem 0 0.5rem; color: var(--ink); }
+  .section p { margin-bottom: 1rem; color: #333; }
+  .section ul, .section ol { margin: 0 0 1rem 1.4rem; color: #333; }
+  .section li { margin-bottom: 0.35rem; }
+  .callout { border-left: 4px solid var(--highlight); background: #fff8ee; padding: 1rem 1.25rem; border-radius: 0 6px 6px 0; margin: 1.5rem 0; font-size: 0.95rem; }
+  .callout strong { color: var(--accent); }
+  .callout-blue  { border-left-color: var(--blue);   background: #eef3ff; }
+  .callout-green { border-left-color: var(--green);  background: #edfaf3; }
+  .callout-red   { border-left-color: var(--red);    background: #fff0f0; }
+  .callout-purple{ border-left-color: var(--purple); background: #f5f0ff; }
+  .callout-teal  { border-left-color: var(--teal);   background: #eaf7f7; }
+  .math-box { background: var(--ink); color: #e8e8e8; font-family: var(--mono); font-size: 0.84rem; line-height: 1.85; padding: 1.5rem; border-radius: 8px; margin: 1.5rem 0; overflow-x: auto; white-space: pre; }
+  .math-box .comment { color: #6a9f6a; } .math-box .var { color: #f0b060; } .math-box .eq { color: #7ab8f5; } .math-box .hi { color: #ff9090; }
+  table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.86rem; }
+  .table-wrap { overflow-x: auto; margin: 1.5rem 0; } .table-wrap table { margin: 0; min-width: 640px; }
+  th { background: var(--accent); color: #fff; padding: 0.6rem 0.9rem; text-align: left; font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.04em; }
+  td { padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--mid); vertical-align: top; }
+  tr:nth-child(even) td { background: #fafaf7; }
+  .diagram-wrap { background: #fff; border: 1px solid var(--rule); border-radius: 10px; padding: 1.5rem; margin: 2rem 0; overflow-x: auto; }
+  .diagram-caption { text-align: center; font-family: var(--mono); font-size: 0.74rem; color: #777; margin-top: 0.75rem; letter-spacing: 0.04em; line-height: 1.6; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+  .step-card { background: #fff; border: 1px solid var(--rule); border-radius: 8px; padding: 1.1rem; }
+  .step-num { font-family: var(--mono); font-size: 1.9rem; font-weight: 600; color: var(--mid); line-height: 1; margin-bottom: 0.4rem; }
+  .step-card h4 { font-size: 0.88rem; font-weight: 600; color: var(--accent); margin: 0 0 0.35rem; }
+  .step-card p { font-size: 0.82rem; margin: 0; color: #444; }
+  .shape { font-family: var(--mono); font-size: 0.8em; background: #eef3ff; color: var(--blue); padding: 0.05rem 0.35rem; border-radius: 4px; white-space: nowrap; }
+  code { font-family: var(--mono); font-size: 0.86em; background: #efece4; padding: 0.05rem 0.3rem; border-radius: 3px; }
+  .model-card { background: #fff; border: 1px solid var(--rule); border-top: 4px solid var(--accent); border-radius: 8px; padding: 1.2rem 1.4rem; margin: 1.5rem 0; }
+  .model-card .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.6rem 1.2rem; margin-top: 0.6rem; }
+  .model-card .facts div { font-size: 0.82rem; color: #444; } .model-card .facts b { display: block; font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  @media (max-width: 620px) { .steps { grid-template-columns: 1fr 1fr; } .section { padding: 2.5rem 1.2rem; } }
+
+  .roadmap { max-width: 900px; margin: 2.5rem auto 0; padding: 0 2rem; }
+  .roadmap-inner { background: #fff; border: 1px solid var(--rule); border-left: 5px solid var(--highlight); border-radius: 10px; padding: 1.3rem 1.5rem; }
+  .roadmap-path { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; margin-bottom: 1rem; font-family: var(--mono); font-size: 0.72rem; }
+  .roadmap-path a, .roadmap-path span.cur { padding: 0.25rem 0.6rem; border-radius: 999px; text-decoration: none; border: 1px solid var(--rule); color: #555; }
+  .roadmap-path span.cur { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+  .roadmap-path a:hover { border-color: var(--highlight); color: var(--accent); }
+  .roadmap-path i { color: #aaa; font-style: normal; }
+  .roadmap-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+  .roadmap-grid h5 { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin: 0 0 0.35rem; }
+  .roadmap-grid p, .roadmap-grid li { font-size: 0.9rem; color: #333; margin: 0 0 0.3rem; }
+  .roadmap-grid ul { margin: 0 0 0 1.1rem; padding: 0; }
+  .roadmap-contrast { margin-top: 1rem; padding: 0.7rem 0.9rem; background: var(--paper); border-radius: 8px; font-size: 0.88rem; color: #333; }
+  .next-part { max-width: 900px; margin: 2rem auto; padding: 0 2rem; text-align: right; font-family: var(--mono); font-size: 0.85rem; }
+  .next-part a { color: var(--accent); text-decoration: none; border: 1px solid var(--accent); border-radius: 6px; padding: 0.5rem 0.9rem; display: inline-block; }
+  .next-part a:hover { background: var(--accent); color: #fff; }
+  @media (max-width: 620px) { .roadmap, .next-part { padding: 0 1.2rem; } }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-label">Module 5 · Part 2a — Alignment (matching images and text)</div>
+  <h1>Alignment: CLIP in Depth</h1>
+  <p>What “aligning” images with text means, how a Vision Transformer turns pixels into vectors, and CLIP from end to end: the contrastive loss and its gradient, temperature and batch size, training at scale, zero-shot inference, the geometry of the shared space, adapting CLIP to your task, and where CLIP is used today.</p>
+</div>
+
+<nav class="toc">
+  <a href="#s1">01 What Alignment Means</a>
+  <a href="#s2">02 Vision Transformer</a>
+  <a href="#s3">03 Contrastive Loss &amp; Gradient</a>
+  <a href="#s4">04 CLIP: Architecture &amp; Training</a>
+  <a href="#s5">05 CLIP: Inference</a>
+  <a href="#s6">06 ALIGN, SigLIP &amp; Data</a>
+  <a href="#s7">07 Embedding Geometry</a>
+  <a href="#s8">08 Adapting CLIP</a>
+  <a href="#s9">09 CLIP as a Building Block</a>
+  <a href="#s10">10 Hands-On Code</a>
+  <a href="#s11">11 Takeaways</a>
+</nav>
+
+<div class="roadmap"><div class="roadmap-inner">
+  <div class="roadmap-path"><a href="1_Foundations_of_Multimodal_AI.html">1 Foundations</a> <i>→</i> <span class="cur">2a Alignment</span> <i>→</i> <a href="2b_Generation_VLMs.html">2b Generation</a> <i>→</i> <a href="3_Challenges_in_Multimodal_AI.html">3 Challenges</a> <i>→</i> <a href="4_Multimodal_Applications.html">4 Applications</a> <i>→</i> <a href="Lab/1_Multimodal_PDF_QA_Lab.ipynb">Lab</a></div>
+  <div class="roadmap-grid">
+    <div><h5>What you learned before</h5><ul><li>Part 1: images and text can share one vector space (§03).</li><li>Part 1 card 3: contrastive learning, at overview level.</li></ul></div>
+    <div><h5>What this part answers</h5><ul><li>How that shared space is actually built: the image encoder (ViT), the contrastive loss with its maths, CLIP's training and zero-shot use.</li><li>Variants (ALIGN, SigLIP), the geometry of the space, and how to adapt CLIP.</li><li>Output of everything here: a <b>similarity score</b>. CLIP can match, but it cannot write a word.</li></ul></div>
+    <div><h5>Where it leads</h5><ul><li>Part 2b: connect this aligned image encoder to a language model so it can answer questions.</li></ul></div>
+  </div>
+  <div class="roadmap-contrast"><b>2a vs 2b in one line:</b> <b>Alignment (2a)</b> = image + text → a <em>similarity score</em> (“do these match?”). <b>Generation (2b)</b> = image + question → a <em>written answer</em> (“what is in this image?”). 2b reuses 2a’s aligned image encoder as its eyes, so read 2a first.</div>
+</div></div>
+
+
+<!-- ============================================================ 01 -->
+<section class="section" id="s1">
+  <div class="section-eyebrow">Section 01</div>
+  <h2>What “Alignment” Means, and What This Part Covers</h2>
+
+  <p>Part 1 (§03) ended with one idea: put images and text into a <strong>shared vector space</strong>. This Part explains, in full, how that space is built. The model that made it work at scale is <strong>CLIP</strong> (OpenAI, 2021), so CLIP is the backbone of this Part.</p>
+
+  <h3>The problem in plain words</h3>
+  <p>An image encoder turns a photo into a list of numbers, say 512 of them. A text encoder turns a sentence into another list of 512 numbers. If the two encoders are trained separately, those numbers mean completely different things: it is like two maps of the same city drawn with different coordinate systems. Position 17 in the image vector has no relation to position 17 in the text vector, so comparing the two vectors is meaningless.</p>
+  <p><strong>Alignment</strong> means training both encoders together so they share <em>one</em> coordinate system: a photo of a dog and the sentence “a photo of a dog” end up at nearly the same point, and a photo of a car ends up far from both. Once that is true, “does this image match this text?” becomes a simple calculation: the cosine similarity of two vectors.</p>
+
+  <div class="math-box"><span class="comment">// what alignment changes (illustrative cosine similarities for one dog photo)</span>
+                     "a photo of a dog"   "a photo of a car"   "a photo of a cat"
+<span class="var">before training</span>        0.02                −0.01                 0.03      <span class="comment">// random: no meaning</span>
+<span class="var">after training</span>         <span class="eq">0.31</span>                 0.12                 0.21      <span class="comment">// the right caption wins</span></div>
+
+  <h3>Where “vision” and “language” fit</h3>
+  <div class="table-wrap"><table>
+    <tr><th>Part of the system</th><th>Job</th><th>In CLIP</th><th>Covered in</th></tr>
+    <tr><td><b>Vision</b> (image encoder)</td><td>Turn pixels into a vector</td><td>A Vision Transformer (ViT) or a ResNet</td><td>§02</td></tr>
+    <tr><td><b>Language</b> (text encoder)</td><td>Turn a sentence into a vector</td><td>A 12-layer Transformer</td><td>§04</td></tr>
+    <tr><td><b>Alignment</b> (the training objective)</td><td>Make matching image and text vectors close</td><td>Contrastive loss over a batch</td><td>§03–§04</td></tr>
+  </table></div>
+
+  <h3>Two problems, two Parts</h3>
+  <div class="table-wrap"><table>
+    <tr><th>Problem</th><th>Question it answers</th><th>Typical output</th><th>Landmark models</th><th>Where</th></tr>
+    <tr><td><b>1 · Alignment</b> (representation)</td><td>“Does this image match this text?”</td><td>Two embedding vectors and a similarity score</td><td>CLIP (2021), ALIGN (2021), SigLIP (2023)</td><td><b>This Part</b></td></tr>
+    <tr><td><b>2 · Generation</b> (vision-language models, VLMs)</td><td>“Describe / answer / reason about this image.”</td><td>Free-form text conditioned on the image</td><td>Flamingo, BLIP-2, LLaVA, Qwen2-VL, Gemini, GPT-4o</td><td>Part 2b</td></tr>
+  </table></div>
+
+  <div class="callout callout-blue">
+    <strong>Why study alignment first:</strong> almost every VLM in Part 2b uses an aligned vision encoder from problem 1 as its eyes. LLaVA's eyes are literally CLIP's ViT-L/14. Understand CLIP, and half of every VLM is already explained.
+  </div>
+</section>
+
+<!-- ============================================================ 02 -->
+<section class="section" id="s2">
+  <div class="section-eyebrow">Section 02</div>
+  <h2>How a Vision Transformer (ViT) Turns an Image into Tokens</h2>
+
+  <p>Text models read tokens. The Vision Transformer (Dosovitskiy et al., 2020) made images look like tokens too, which is why the same Transformer machinery from Module 1 now works on pictures. Almost every vision encoder in this guide (CLIP's ViT-L/14, EVA-CLIP, SigLIP, Qwen2-VL's encoder) is a ViT.</p>
+
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 760 250" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;display:block;margin:0 auto" font-family="IBM Plex Mono,monospace">
+      <text x="380" y="18" text-anchor="middle" font-size="11" font-weight="600" fill="#333" letter-spacing="1.5">VIT: IMAGE → PATCHES → TOKENS → TRANSFORMER</text>
+      <rect x="20" y="40" width="120" height="120" fill="#cfe0f5" stroke="#1a3a5c"/>
+      <g stroke="#1a3a5c" stroke-width="0.6" opacity="0.7">
+        <line x1="50" y1="40" x2="50" y2="160"/><line x1="80" y1="40" x2="80" y2="160"/><line x1="110" y1="40" x2="110" y2="160"/>
+        <line x1="20" y1="70" x2="140" y2="70"/><line x1="20" y1="100" x2="140" y2="100"/><line x1="20" y1="130" x2="140" y2="130"/>
+      </g>
+      <text x="80" y="178" text-anchor="middle" font-size="9" fill="#333">224×224×3 image</text>
+      <text x="80" y="191" text-anchor="middle" font-size="9" fill="#333">cut into 16×16 patches</text>
+      <text x="80" y="204" text-anchor="middle" font-size="9" fill="#2255aa">= 14×14 = 196 patches</text>
+      <path d="M150 100 L185 100" stroke="#777" stroke-width="2" marker-end="url(#a1)"/>
+      <defs><marker id="a1" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#777"/></marker></defs>
+      <rect x="190" y="70" width="130" height="60" rx="6" fill="#fff" stroke="#2255aa"/>
+      <text x="255" y="92" text-anchor="middle" font-size="9" fill="#333">flatten each patch</text>
+      <text x="255" y="105" text-anchor="middle" font-size="9" fill="#333">16·16·3 = 768 numbers</text>
+      <text x="255" y="118" text-anchor="middle" font-size="9" fill="#2255aa">× W (768 → D)</text>
+      <path d="M325 100 L360 100" stroke="#777" stroke-width="2" marker-end="url(#a1)"/>
+      <g font-size="8" text-anchor="middle">
+        <rect x="365" y="60" width="34" height="80" rx="4" fill="#e8a020"/><text x="382" y="104" fill="#fff">CLS</text>
+        <rect x="403" y="60" width="34" height="80" rx="4" fill="#2255aa"/><text x="420" y="104" fill="#fff">p1</text>
+        <rect x="441" y="60" width="34" height="80" rx="4" fill="#2255aa"/><text x="458" y="104" fill="#fff">p2</text>
+        <text x="492" y="104" fill="#333">…</text>
+        <rect x="507" y="60" width="34" height="80" rx="4" fill="#2255aa"/><text x="524" y="104" fill="#fff">p196</text>
+      </g>
+      <text x="453" y="155" text-anchor="middle" font-size="9" fill="#333">+ learned position embeddings</text>
+      <text x="453" y="168" text-anchor="middle" font-size="9" fill="#2255aa">197 tokens × D</text>
+      <path d="M548 100 L583 100" stroke="#777" stroke-width="2" marker-end="url(#a1)"/>
+      <rect x="588" y="45" width="150" height="110" rx="8" fill="#1a3a5c"/>
+      <text x="663" y="80" text-anchor="middle" font-size="10" fill="#fff">L × Transformer</text>
+      <text x="663" y="96" text-anchor="middle" font-size="10" fill="#fff">encoder layers</text>
+      <text x="663" y="118" text-anchor="middle" font-size="8" fill="#c9d6ea">(self-attention over</text>
+      <text x="663" y="130" text-anchor="middle" font-size="8" fill="#c9d6ea">all 197 tokens)</text>
+      <text x="663" y="180" text-anchor="middle" font-size="9" fill="#333">CLS output → image vector</text>
+      <text x="663" y="193" text-anchor="middle" font-size="9" fill="#333">patch outputs → grid features</text>
+      <text x="380" y="235" text-anchor="middle" font-size="9" fill="#777">The patch embedding is just a convolution with kernel = stride = patch size. Everything after it is a standard Transformer encoder.</text>
+    </svg>
+    <div class="diagram-caption">FIG 1 — A ViT treats an image as a sentence of patches. CLIP uses the CLS output as “the image”; LLaVA-style VLMs use the per-patch outputs (“grid features”) as a sequence of visual tokens.</div>
+  </div>
+
+  <h3>The arithmetic you should be able to do</h3>
+  <div class="math-box"><span class="comment">// number of visual tokens = (image side / patch side)²</span>
+<span class="var">ViT-B/16</span> at 224px:  (224/16)² = <span class="eq">14² = 196</span> patch tokens  (+1 CLS)
+<span class="var">ViT-L/14</span> at 224px:  (224/14)² = <span class="eq">16² = 256</span> patch tokens  (+1 CLS)      <span class="comment">// LLaVA v1</span>
+<span class="var">ViT-L/14</span> at 336px:  (336/14)² = <span class="eq">24² = 576</span> patch tokens  (+1 CLS)      <span class="comment">// LLaVA-1.5</span>
+
+<span class="comment">// each patch, flattened: patch_h × patch_w × 3 channels</span>
+16 × 16 × 3 = <span class="eq">768</span> raw numbers → linear projection to model width D
+
+<span class="comment">// self-attention cost grows with the SQUARE of the token count</span>
+576 tokens vs 196 tokens  →  (576/196)² ≈ <span class="hi">8.6× more attention compute</span></div>
+
+  <h3>Inside a ViT, step by step with shapes (CLIP ViT-B/32)</h3>
+  <div class="math-box"><span class="var">image</span>                                     224 × 224 × 3
+<span class="comment">① cut into a 7 × 7 grid of 32 × 32 patches</span>      49 patches, each 32 × 32 × 3 = <span class="eq">3,072</span> numbers
+<span class="comment">② patch embedding: one shared linear layer</span>     3,072 → 768        →  49 × 768
+<span class="comment">   (implemented as a convolution with kernel = stride = 32)</span>
+<span class="comment">③ prepend a learned [CLS] vector</span>                                    →  50 × 768
+<span class="comment">④ add learned position embeddings (one per slot)</span>                    →  50 × 768
+<span class="comment">⑤ 12 Transformer blocks, each:</span>
+      x ← x + MultiHeadAttention( LayerNorm(x) )     <span class="comment">// 12 heads × 64 dims</span>
+      x ← x + MLP( LayerNorm(x) )                    <span class="comment">// 768 → 3,072 → 768</span>
+<span class="comment">⑥ take the [CLS] output, LayerNorm, project</span>        768 → 512  →  <span class="eq">image embedding (512)</span></div>
+
+  <p><b>One attention head</b>, the operation inside step ⑤, is the same as in Module 1's text Transformer:</p>
+  <div class="math-box">Attention(Q, K, V) = softmax( Q Kᵀ / √d_k ) V          <span class="comment">// d_k = 64 per head</span>
+<span class="comment">// Q, K, V are the 50 token vectors times three learned matrices.</span>
+<span class="comment">// Row i of softmax(Q Kᵀ/√d_k) says how much patch i looks at every other patch.</span></div>
+
+  <div class="table-wrap"><table>
+    <tr><th>Piece</th><th>Parameter count (ViT-B/32)</th><th>How it is computed</th></tr>
+    <tr><td>Patch embedding</td><td>2.36M</td><td>3,072 × 768</td></tr>
+    <tr><td>Position embeddings + [CLS]</td><td>0.04M</td><td>(50 + 1) × 768</td></tr>
+    <tr><td>One Transformer block</td><td>7.09M</td><td>attention 4 × 768² ≈ 2.36M + MLP 2 × 768 × 3,072 ≈ 4.72M (+ small biases and norms)</td></tr>
+    <tr><td>12 blocks</td><td>85.1M</td><td>12 × 7.09M</td></tr>
+    <tr><td><b>Image encoder total</b></td><td><b>≈ 88M</b></td><td>Almost all of it in the 12 blocks</td></tr>
+  </table></div>
+
+  <div class="callout callout-teal">
+    <strong>Why position embeddings are essential:</strong> self-attention treats its input as a <em>set</em>. Shuffle the 49 patches and, without position embeddings, the output would be identical: the model could not tell the sky from the sea. Adding a learned vector per position tells each patch where it came from. When CLIP ViT-L/14 was fine-tuned at 336px, the grid grew from 16 × 16 to 24 × 24, and the learned position embeddings were <em>interpolated</em> in 2D to fill the larger grid.
+  </div>
+
+  <div class="table-wrap"><table>
+    <tr><th>Encoder</th><th>Layers</th><th>Width D</th><th>Heads</th><th>Params</th><th>Used by</th></tr>
+    <tr><td>ViT-B/16</td><td>12</td><td>768</td><td>12</td><td>~86M</td><td>CLIP ViT-B/16, many classifiers</td></tr>
+    <tr><td>ViT-L/14</td><td>24</td><td>1024</td><td>16</td><td>~304M</td><td>CLIP ViT-L/14 → LLaVA</td></tr>
+    <tr><td>SigLIP So400m/14</td><td>27</td><td>1152</td><td>16</td><td>~400M</td><td>PaliGemma, many 2024–25 VLMs</td></tr>
+    <tr><td>EVA-CLIP ViT-g/14</td><td>40</td><td>1408</td><td>16</td><td>~1B</td><td>BLIP-2, InstructBLIP</td></tr>
+  </table></div>
+
+  <div class="callout callout-purple">
+    <strong>Why ViT and not a CNN?</strong> CNNs (ResNets) bake in locality: each layer only looks at a neighbourhood. A ViT's self-attention lets any patch attend to any other from layer 1, and it scales smoothly with data and compute. With little data, CNNs win (their built-in assumptions help); with hundreds of millions of image–text pairs, ViTs win. CLIP trained both kinds and its best model was a ViT (ViT-L/14).
+  </div>
+</section>
+
+<!-- ============================================================ 03 -->
+<section class="section" id="s3">
+  <div class="section-eyebrow">Section 03</div>
+  <h2>The Contrastive Loss, Its Gradient, and Why Temperature and Batch Size Matter</h2>
+
+  <p>Goal: train an image encoder <em>f</em> and a text encoder <em>g</em> so that a photo and its caption land close together, and unrelated pairs land far apart — using only (image, caption) pairs scraped from the web, with no class labels at all.</p>
+
+  <h3>Step 1 — Embed and normalise</h3>
+  <p>For a batch of <em>N</em> pairs, compute image embeddings <span class="shape">x_i = f(image_i)</span> and text embeddings <span class="shape">y_i = g(text_i)</span>, project both to the same dimension <em>d</em> (512 for CLIP ViT-B, 768 for ViT-L/14), and L2-normalise them so that a dot product <em>is</em> the cosine similarity.</p>
+
+  <h3>Step 2 — Build the N × N similarity matrix</h3>
+  <p><span class="shape">S_ij = x_i · y_j</span>. The diagonal holds the true pairs; every off-diagonal cell is a mismatched pair. With <em>N</em> = 32,768 (CLIP's batch), that is about a billion comparisons per step — and every one is free supervision.</p>
+
+  <h3>Step 3 — Turn each row into a classification problem</h3>
+  <div class="math-box"><span class="comment">// InfoNCE (image → text direction): "which of the N texts belongs to image i?"</span>
+<span class="var">L_img</span> = −(1/N) Σ_i log [ exp(S_ii / τ) / Σ_j exp(S_ij / τ) ]
+
+<span class="comment">// the same thing column-wise (text → image): "which of the N images belongs to text i?"</span>
+<span class="var">L_txt</span> = −(1/N) Σ_i log [ exp(S_ii / τ) / Σ_j exp(S_ji / τ) ]
+
+<span class="comment">// CLIP's final loss is the symmetric average</span>
+<span class="var">L</span> = (L_img + L_txt) / 2
+
+<span class="comment">//   τ = temperature (CLIP learns log(1/τ); initialised at τ = 0.07, logit scale capped at 100)</span>
+<span class="comment">//   This is exactly softmax cross-entropy with "label = the diagonal index".</span></div>
+
+  <h3>Worked example: 3 pairs, and why temperature matters</h3>
+  <p>Suppose a batch of three pairs — (dog photo, “a dog”), (car photo, “a car”), (cat photo, “a cat”) — gives this cosine-similarity matrix:</p>
+  <div class="table-wrap"><table style="max-width:520px">
+    <tr><th></th><th>“a dog”</th><th>“a car”</th><th>“a cat”</th></tr>
+    <tr><td><b>dog photo</b></td><td><b>0.9</b></td><td>0.1</td><td>0.2</td></tr>
+    <tr><td><b>car photo</b></td><td>0.2</td><td><b>0.8</b></td><td>0.3</td></tr>
+    <tr><td><b>cat photo</b></td><td>0.1</td><td>0.3</td><td><b>0.7</b></td></tr>
+  </table></div>
+  <div class="math-box"><span class="comment">// Row 1 (dog photo), temperature τ = 1  → logits are the raw similarities</span>
+exp(0.9) = 2.4596   exp(0.1) = 1.1052   exp(0.2) = 1.2214    sum = 4.7862
+P(correct) = 2.4596 / 4.7862 = <span class="eq">0.514</span>       loss = −ln(0.514) = <span class="hi">0.666</span>
+
+<span class="comment">// Same row, τ = 0.1 → logits are similarities × 10 = [9, 1, 2]</span>
+exp(9) = 8103.08    exp(1) = 2.72       exp(2) = 7.39        sum = 8113.19
+P(correct) = 8103.08 / 8113.19 = <span class="eq">0.9988</span>      loss = −ln(0.9988) = <span class="hi">0.0012</span>
+
+<span class="comment">// Whole batch (symmetric loss):  τ = 1 → 0.744      τ = 0.1 → 0.011</span></div>
+  <p><strong>What this shows.</strong> The embeddings are identical in both cases; only τ changed. A small τ turns modest similarity gaps (0.9 vs 0.2) into near-certain predictions, so the gradient focuses on the pairs that are still confused (the hard negatives). Too small and training becomes unstable; that is why CLIP <em>learns</em> τ and caps the logit scale at 100.</p>
+
+  <h3>The gradient: what one training step actually does</h3>
+  <p>Write the logits of row <em>i</em> as <span class="shape">z_ij = S_ij / τ</span> and the softmax probabilities as <span class="shape">p_ij</span>. The derivative of a softmax cross-entropy has a famously simple form:</p>
+  <div class="math-box"><span class="comment">// derivative of the row loss L_i with respect to each logit</span>
+∂L_i / ∂z_ij = p_ij − 1[j = i]                   <span class="comment">// prediction − target (target = 1 on the diagonal)</span>
+
+<span class="comment">// pushed back to the image embedding x_i (before the normalisation step)</span>
+∂L_i / ∂x_i = (1/τ) · ( Σ_j p_ij · y_j  −  y_i )
+<span class="comment">//            "where the model currently points"  minus  "where the true caption is"</span></div>
+  <p>Gradient descent moves <em>x_i</em> in the opposite direction: <b>towards its own caption y_i</b> and <b>away from a probability-weighted average of the other captions</b>. Captions the model currently confuses with the right one have high <em>p_ij</em>, so they get pushed away hardest. Hard-negative mining happens automatically, without any extra code.</p>
+
+  <div class="math-box"><span class="comment">// Row 1 of the worked example (dog photo), τ = 1:  p = [0.514, 0.231, 0.255]</span>
+gradient on logits = [0.514 − 1, 0.231, 0.255] = [<span class="eq">−0.486</span>, <span class="hi">+0.231</span>, <span class="hi">+0.255</span>]
+<span class="comment">//  → raise S(dog, "a dog");  lower S(dog, "a cat") a little MORE than S(dog, "a car"),</span>
+<span class="comment">//    because "a cat" (0.2) was the more confusable caption than "a car" (0.1)</span>
+
+<span class="comment">// Same row, τ = 0.1:  p = [0.9988, 0.0003, 0.0009]</span>
+gradient w.r.t. S = (p − target) / τ = [<span class="eq">−0.0125</span>, +0.0034, +0.0091]
+<span class="comment">//  → the pair is nearly solved, so the step is small; "a cat" still gets 2.7× the push of "a car"</span></div>
+
+  <h3>Temperature: the knob that sets how sharply negatives are punished</h3>
+  <div class="table-wrap"><table style="max-width:640px">
+    <tr><th>τ</th><th>Logit scale 1/τ</th><th>Symmetric loss on the 3-pair example</th><th>Behaviour</th></tr>
+    <tr><td>1.0</td><td>1</td><td>0.744</td><td>Soft: all negatives pushed almost equally</td></tr>
+    <tr><td>0.5</td><td>2</td><td>0.482</td><td></td></tr>
+    <tr><td>0.1</td><td>10</td><td>0.011</td><td>Sharp: focus on the most confusable negatives</td></tr>
+    <tr><td>0.07</td><td>14.3</td><td>0.0016</td><td>CLIP's starting value</td></tr>
+    <tr><td>0.01</td><td>100</td><td>≈ 0</td><td>CLIP's limit (logit scale capped at 100)</td></tr>
+  </table></div>
+  <ul>
+    <li><b>τ very large:</b> every probability tends to 1/N and the loss to log N, whatever the embeddings are. Nothing can be learned.</li>
+    <li><b>τ very small:</b> the softmax becomes a hard maximum, so only the single hardest negative matters. Gradients become spiky and training unstable.</li>
+    <li><b>CLIP's choice:</b> learn <span class="shape">t = log(1/τ)</span> as a parameter, starting at log(1/0.07) ≈ 2.66 (scale 14.3), and clip the scale at 100. Learning the log keeps τ positive and makes updates smooth.</li>
+  </ul>
+
+  <h3>Why bigger batches help: the information view</h3>
+  <p>InfoNCE was introduced with a guarantee (van den Oord et al., 2018): it gives a lower bound on the mutual information between the two views.</p>
+  <div class="math-box">I( image ; text )  ≥  log N  −  L_InfoNCE
+
+<span class="comment">// N = 3       → the bound can never exceed log 3      = 1.10 nats</span>
+<span class="comment">// N = 32,768  → the bound can reach up to log 32,768 = 10.40 nats</span>
+
+<span class="comment">// Sanity check for your own training: at initialisation all similarities are about equal,</span>
+<span class="comment">// so every p_ij ≈ 1/N and the loss starts at about  ln N  (≈ 10.4 for CLIP's batch).</span></div>
+  <p>In plain words: with a small batch, picking the right caption out of a few is easy, so the model only needs coarse features. With 32,768 candidates there are many near-misses, and only fine-grained features can tell them apart. Batch size is the size of the multiple-choice question.</p>
+
+  <div class="callout callout-blue">
+    <strong>Why no labels are needed:</strong> the “label” for image <em>i</em> is simply “the caption it was published with”. This is the same trick as LLM pretraining (the label for token <em>t</em> is the next token in the text that already exists), applied to pairs. The internet supplies the supervision for free.
+  </div>
+  <div class="callout callout-purple">
+    <strong>Why batch size is the negative budget:</strong> each image is contrasted against <em>N − 1</em> negatives. At N = 32 the negatives are mostly easy (“a dog” vs “a spreadsheet”); at N = 32,768 there are many near-misses (“a husky” vs “a malamute”), which forces fine-grained features. This is also why CLIP training is memory-hungry: the N × N matrix must be gathered across all GPUs.
+  </div>
+</section>
+
+<!-- ============================================================ 04 -->
+<section class="section" id="s4">
+  <div class="section-eyebrow">Section 04</div>
+  <h2>CLIP: Architecture and Training in Full</h2>
+
+  <div class="model-card">
+    <b>CLIP — Contrastive Language-Image Pre-training</b> (Radford et al., OpenAI, 2021)
+    <div class="facts">
+      <div><b>Data</b>WIT: 400M (image, text) pairs from the web, collected with 500,000 search queries</div>
+      <div><b>Image encoder</b>5 ResNets and 3 ViTs; best: ViT-L/14 (fine-tuned at 336px)</div>
+      <div><b>Text encoder</b>Transformer, 63M params, 12 layers, width 512, 8 heads, BPE vocab 49,152, max 76 tokens</div>
+      <div><b>Training</b>32 epochs, batch 32,768, Adam, cosine schedule, mixed precision</div>
+      <div><b>Compute</b>ViT-L/14: 12 days on 256 V100 GPUs</div>
+      <div><b>Headline result</b>76.2% zero-shot ImageNet top-1 — matching a supervised ResNet-50, with none of its 1.28M labels</div>
+    </div>
+  </div>
+
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;display:block;margin:0 auto" font-family="IBM Plex Mono,monospace">
+      <defs><marker id="a2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#777"/></marker></defs>
+      <text x="380" y="18" text-anchor="middle" font-size="11" font-weight="600" fill="#333" letter-spacing="1.5">CLIP: TWO TOWERS, ONE SPACE</text>
+      <rect x="20" y="45" width="110" height="60" rx="6" fill="#cfe0f5" stroke="#2255aa"/><text x="75" y="80" text-anchor="middle" font-size="9">N images</text>
+      <rect x="20" y="185" width="110" height="60" rx="6" fill="#d8efe2" stroke="#2a7a4b"/><text x="75" y="213" text-anchor="middle" font-size="9">N captions</text><text x="75" y="226" text-anchor="middle" font-size="8" fill="#555">“a photo of a dog”…</text>
+      <path d="M135 75 L170 75" stroke="#777" stroke-width="2" marker-end="url(#a2)"/><path d="M135 215 L170 215" stroke="#777" stroke-width="2" marker-end="url(#a2)"/>
+      <rect x="175" y="45" width="130" height="60" rx="6" fill="#2255aa"/><text x="240" y="72" text-anchor="middle" font-size="9" fill="#fff">Image encoder</text><text x="240" y="86" text-anchor="middle" font-size="8" fill="#dbe6f7">ViT-L/14 → CLS</text>
+      <rect x="175" y="185" width="130" height="60" rx="6" fill="#2a7a4b"/><text x="240" y="212" text-anchor="middle" font-size="9" fill="#fff">Text encoder</text><text x="240" y="226" text-anchor="middle" font-size="8" fill="#dcf1e5">Transformer → [EOS]</text>
+      <path d="M310 75 L345 75" stroke="#777" stroke-width="2" marker-end="url(#a2)"/><path d="M310 215 L345 215" stroke="#777" stroke-width="2" marker-end="url(#a2)"/>
+      <rect x="350" y="55" width="100" height="40" rx="6" fill="#fff" stroke="#2255aa"/><text x="400" y="72" text-anchor="middle" font-size="8">linear W_i</text><text x="400" y="85" text-anchor="middle" font-size="8">+ L2 norm</text>
+      <rect x="350" y="195" width="100" height="40" rx="6" fill="#fff" stroke="#2a7a4b"/><text x="400" y="212" text-anchor="middle" font-size="8">linear W_t</text><text x="400" y="225" text-anchor="middle" font-size="8">+ L2 norm</text>
+      <path d="M455 75 L520 120" stroke="#777" stroke-width="2" marker-end="url(#a2)"/><path d="M455 215 L520 170" stroke="#777" stroke-width="2" marker-end="url(#a2)"/>
+      <g font-size="7" text-anchor="middle">
+        <rect x="525" y="100" width="28" height="22" fill="#e8a020"/><rect x="555" y="100" width="28" height="22" fill="#eee"/><rect x="585" y="100" width="28" height="22" fill="#eee"/><rect x="615" y="100" width="28" height="22" fill="#eee"/>
+        <rect x="525" y="124" width="28" height="22" fill="#eee"/><rect x="555" y="124" width="28" height="22" fill="#e8a020"/><rect x="585" y="124" width="28" height="22" fill="#eee"/><rect x="615" y="124" width="28" height="22" fill="#eee"/>
+        <rect x="525" y="148" width="28" height="22" fill="#eee"/><rect x="555" y="148" width="28" height="22" fill="#eee"/><rect x="585" y="148" width="28" height="22" fill="#e8a020"/><rect x="615" y="148" width="28" height="22" fill="#eee"/>
+        <rect x="525" y="172" width="28" height="22" fill="#eee"/><rect x="555" y="172" width="28" height="22" fill="#eee"/><rect x="585" y="172" width="28" height="22" fill="#eee"/><rect x="615" y="172" width="28" height="22" fill="#e8a020"/>
+      </g>
+      <text x="584" y="212" text-anchor="middle" font-size="9" fill="#333">N × N cosine matrix × e^t</text>
+      <text x="584" y="226" text-anchor="middle" font-size="8" fill="#e8a020">diagonal = positives</text>
+      <text x="652" y="135" font-size="8" fill="#333">cross-entropy</text><text x="652" y="148" font-size="8" fill="#333">rows + columns</text>
+      <text x="380" y="285" text-anchor="middle" font-size="9" fill="#777">Only two small linear projections connect the towers. No cross-attention: each modality is encoded independently.</text>
+    </svg>
+    <div class="diagram-caption">FIG 2 — CLIP is a dual encoder. Because images and texts are encoded separately, embeddings can be precomputed and cached: that is what makes CLIP fast for retrieval and zero-shot classification.</div>
+  </div>
+
+  <h3>Before CLIP: why this was a leap</h3>
+  <p>Learning visual concepts from captions was not new. In 2017, <b>Visual N-Grams</b> (Li et al.) tried zero-shot ImageNet classification from web text and reached <b>11.5%</b> top-1. CLIP reached <b>76.2%</b> with the same idea at a much larger scale and with a contrastive objective. The design table below explains which choices closed that gap.</p>
+
+  <h3>End to end: one example through both towers (ViT-B/32 CLIP)</h3>
+  <div class="math-box"><span class="comment">// TEXT TOWER</span>
+"a photo of a dog"
+ → byte-pair tokens:   [SOS] a photo of a dog [EOS]          <span class="comment">// vocabulary 49,152; padded to 77 positions</span>
+ → token embedding (49,152 × 512) + position embedding (77 × 512)   →  77 × 512
+ → 12 Transformer layers, width 512, 8 heads, <span class="hi">causal mask</span>      →  77 × 512
+ → take the vector at the [EOS] position, LayerNorm                →  512
+ → projection W_t (512 × 512), L2-normalise                       →  <span class="eq">text embedding (512)</span>
+
+<span class="comment">// IMAGE TOWER (§02)</span>
+224 × 224 × 3 → 49 patches + [CLS] → 12 ViT blocks → [CLS] → W_i (768 × 512) → <span class="eq">image embedding (512)</span>
+
+<span class="comment">// THE BATCH</span>
+I_e : 32,768 × 512      T_e : 32,768 × 512
+logits = exp(t) · I_e · T_eᵀ      →  32,768 × 32,768                 <span class="comment">// ≈ 1.07 billion scores</span></div>
+
+  <h3>The CLIP model family</h3>
+  <div class="table-wrap"><table>
+    <tr><th>Model</th><th>Image encoder</th><th>Input size</th><th>Joint embedding size</th></tr>
+    <tr><td>RN50, RN101</td><td>ResNet-50 / -101 with attention pooling instead of average pooling</td><td>224</td><td>1,024 / 512</td></tr>
+    <tr><td>RN50x4, RN50x16, RN50x64</td><td>ResNet-50 scaled up in width, depth and resolution (about 4×, 16×, 64× the compute)</td><td>288 / 384 / 448</td><td>640 / 768 / 1,024</td></tr>
+    <tr><td>ViT-B/32, ViT-B/16</td><td>ViT-Base, 32px or 16px patches</td><td>224</td><td>512</td></tr>
+    <tr><td>ViT-L/14</td><td>ViT-Large, 14px patches</td><td>224</td><td>768</td></tr>
+    <tr><td><b>ViT-L/14@336</b></td><td>ViT-L/14 fine-tuned one extra epoch at higher resolution</td><td>336</td><td>768</td></tr>
+  </table></div>
+  <p>The “/32”, “/16”, “/14” is the patch size. Smaller patches mean more tokens per image (49, 196 and 256 at 224px), more compute, and finer detail.</p>
+
+  <h3>The training step, exactly as in the paper</h3>
+  <div class="math-box"><span class="comment"># Numpy-style pseudocode from the CLIP paper (Figure 3)</span>
+<span class="var">I_f</span> = image_encoder(I)                 <span class="comment"># [n, d_i]   e.g. ViT CLS outputs</span>
+<span class="var">T_f</span> = text_encoder(T)                  <span class="comment"># [n, d_t]   activations at the [EOS] token</span>
+<span class="var">I_e</span> = l2_normalize(I_f @ W_i, axis=1)   <span class="comment"># [n, d_e]   joint embedding</span>
+<span class="var">T_e</span> = l2_normalize(T_f @ W_t, axis=1)   <span class="comment"># [n, d_e]</span>
+<span class="var">logits</span> = (I_e @ T_e.T) * exp(t)        <span class="comment"># [n, n]     t = learned log temperature</span>
+<span class="var">labels</span> = arange(n)                     <span class="comment"># the diagonal</span>
+<span class="var">loss</span> = (cross_entropy(logits, labels, axis=0) + cross_entropy(logits, labels, axis=1)) / 2</div>
+
+  <h3>Design decisions that mattered</h3>
+  <div class="table-wrap"><table>
+    <tr><th>Decision</th><th>What CLIP did</th><th>Why</th></tr>
+    <tr><td>Objective</td><td>Contrastive (match the pair), not generative (predict the caption)</td><td>The paper compared: predicting the exact caption learned slowest; predicting a bag of words was about 3× faster to the same zero-shot accuracy; contrastive matching was a further ~4× faster. Matching is an easier, better-posed task than reproducing noisy web text word for word.</td></tr>
+    <tr><td>Projection heads</td><td>Single linear layers W_i, W_t</td><td>Non-linear heads gave no benefit at this scale.</td></tr>
+    <tr><td>Initialisation</td><td>Both encoders trained from scratch</td><td>No ImageNet or BERT pretraining needed with 400M pairs.</td></tr>
+    <tr><td>Augmentation</td><td>Only random square crops</td><td>The diversity of the data replaced heavy augmentation.</td></tr>
+    <tr><td>Temperature</td><td>Learned, initialised to 0.07, logit scale clipped at 100</td><td>Avoids hand-tuning and prevents instability.</td></tr>
+    <tr><td>Text feature</td><td>Final-layer activation at the [EOS] token</td><td>Like a CLS token for a causal text Transformer.</td></tr>
+  </table></div>
+
+  <h3>Training at scale: the arithmetic</h3>
+  <div class="math-box"><span class="comment">// how much data the model sees</span>
+400M pairs × 32 epochs           = <span class="eq">12.8 billion</span> image–text examples
+12.8B ÷ 32,768 per batch         ≈ <span class="eq">390,000</span> optimiser steps
+
+<span class="comment">// the similarity matrix is the memory problem</span>
+32,768 × 32,768 logits           = 1.07 billion numbers  ≈ <span class="hi">2.1 GB in 16-bit</span>, before gradients
+
+<span class="comment">// the fix: shard it (256 GPUs → 128 local pairs each)</span>
+all-gather the text embeddings:  32,768 × 512 × 2 bytes ≈ 34 MB     <span class="comment">// cheap to share</span>
+each GPU computes its own rows:  128 × 32,768          ≈ 4.2M logits   <span class="comment">// 256× smaller</span></div>
+  <p>The paper also used mixed precision, gradient checkpointing, half-precision Adam statistics and half-precision text-encoder weights to fit the encoders in memory. The largest ResNet (RN50x64) took 18 days on 592 V100 GPUs; ViT-L/14 took 12 days on 256 V100s. ViTs were about 3× more compute-efficient than ResNets for the same accuracy.</p>
+
+  <div class="callout callout-green">
+    <strong>Where CLIP's knowledge comes from:</strong> WIT's 500,000 queries were built from every word appearing at least 100 times in English Wikipedia plus popular bigrams and article titles, with up to 20,000 pairs per query to balance concepts. That breadth — not a clever architecture — is why CLIP recognises far more concepts than any fixed label set.
+  </div>
+</section>
+
+<!-- ============================================================ 05 -->
+<section class="section" id="s5">
+  <div class="section-eyebrow">Section 05</div>
+  <h2>CLIP at Inference: Zero-Shot Classification, Retrieval and Beyond</h2>
+
+  <h3>Zero-shot classification, step by step</h3>
+  <div class="steps">
+    <div class="step-card"><div class="step-num">1</div><h4>Write labels as sentences</h4><p>“a photo of a driver using a phone”, “a photo of a driver eating”, “a photo of a driver looking at the road”.</p></div>
+    <div class="step-card"><div class="step-num">2</div><h4>Encode the labels once</h4><p>Text encoder → 3 normalised vectors. Cache them; they never change.</p></div>
+    <div class="step-card"><div class="step-num">3</div><h4>Encode the image</h4><p>Image encoder → 1 normalised vector per dashcam frame.</p></div>
+    <div class="step-card"><div class="step-num">4</div><h4>Compare and softmax</h4><p>Cosine with each label × 100 (the learned logit scale), then softmax.</p></div>
+  </div>
+  <div class="math-box"><span class="comment">// Illustrative numbers for one dashcam frame (CLIP cosine similarities are typically 0.2–0.35)</span>
+cos(frame, "…using a phone")         = 0.31   →  × 100 = 31
+cos(frame, "…eating")                = 0.24   →  × 100 = 24
+cos(frame, "…looking at the road")   = 0.27   →  × 100 = 27
+softmax([31, 24, 27]) = [<span class="eq">0.981</span>, 0.001, 0.018]   →  prediction: <span class="hi">using a phone</span>
+<span class="comment">// A 0.04 gap in cosine becomes a 98% decision because of the ×100 scale learned in training.</span></div>
+
+  <h3>Zero-shot classification is a linear classifier written in English</h3>
+  <p>Stack the K normalised label embeddings as the rows of a matrix <b>W</b> (K × 512). Then the whole zero-shot classifier is one line:</p>
+  <div class="math-box">probabilities = softmax( 100 · W · x )          <span class="comment">// x = normalised image embedding (512)</span>
+
+<span class="comment">// This is exactly a linear (logistic-regression) classifier with no bias.</span>
+<span class="comment">// The difference: its weights W were not learned from labelled images —</span>
+<span class="comment">// the text encoder WROTE them from the class names.</span></div>
+  <p>This is why the CLIP paper describes the text encoder as a <em>hypernetwork</em>: a network that produces the weights of another model. Changing the label set changes the classifier instantly, with no training.</p>
+
+  <h3>Prompt engineering and ensembling (a real, measured effect)</h3>
+  <p>A bare class name is ambiguous (“crane” the bird or the machine?) and unlike the captions CLIP saw. The paper measured that the template <code>"A photo of a {label}."</code> improved ImageNet accuracy by 1.3 points, and averaging the text embeddings of 80 templates (“a blurry photo of a {}”, “a sketch of a {}”, …) added 3.5 more — almost 5 points in total, for free at inference.</p>
+  <div class="math-box"><span class="comment">// prompt ensembling for class c with K templates (CLIP used K = 80 for ImageNet)</span>
+w_c = normalise( (1/K) · Σ_k normalise( text_encoder( template_k(c) ) ) )
+
+<span class="comment">// computed ONCE per class and cached → zero extra cost per image</span>
+<span class="comment">// e.g. "a photo of a dog." · "a blurry photo of a dog." · "a sketch of a dog." · "a close-up photo of a dog."</span></div>
+
+  <h3>Zero-shot vs few-shot vs linear probe (from the paper)</h3>
+  <div class="table-wrap"><table>
+    <tr><th>Comparison</th><th>Result</th><th>What it tells you</th></tr>
+    <tr><td>Zero-shot CLIP vs a linear classifier on ResNet-50 features (fully supervised, 27 datasets)</td><td>CLIP wins on 16 of 27</td><td>Natural-language supervision can replace labelled training sets for many everyday tasks</td></tr>
+    <tr><td>Zero-shot CLIP vs few-shot linear probes on CLIP's own features</td><td>Zero-shot matches a 4-shot probe on average</td><td>The text prompt is worth about 4 labelled examples per class</td></tr>
+    <tr><td>Linear probe on the best CLIP features vs the best ImageNet model (27 datasets)</td><td>CLIP wins on 21 of 27</td><td>Even with labels, CLIP's features transfer better</td></tr>
+  </table></div>
+
+  <h3>Retrieval, in numbers</h3>
+  <div class="math-box"><span class="comment">// offline: embed the gallery once</span>
+1,000,000 images × 512 dims × 2 bytes  ≈ <span class="eq">1 GB</span> of vectors
+
+<span class="comment">// online: one query</span>
+text → 1 vector  →  1M dot products (512M multiply-adds)  →  top-k     <span class="comment">// milliseconds on a GPU, or FAISS (Module 3)</span>
+
+<span class="comment">// how retrieval is scored</span>
+<span class="var">Recall@K</span> = fraction of queries whose correct item appears in the top K results</div>
+
+
+  <h3>What zero-shot CLIP is good and bad at (from the paper)</h3>
+  <div class="table-wrap"><table>
+    <tr><th>Strong</th><th>Weak</th></tr>
+    <tr><td>General object categories (ImageNet 76.2%), action recognition, OCR of large text, geo-localisation, robustness to distribution shift: on ImageNet variants such as sketches, renditions and ObjectNet, zero-shot CLIP closes up to ~75% of the robustness gap of supervised ImageNet models.</td>
+        <td>Counting objects, precise spatial relations, fine-grained or specialised domains (satellite imagery, medical images, tumour detection), and abstract tasks. Zero-shot MNIST digits: about 88% — worse than simple logistic regression on raw pixels, because handwritten digits are rare in web image–caption data.</td></tr>
+  </table></div>
+
+  <p><b>Other uses of the same embeddings</b> (retrieval systems, data filtering, CLIPScore, conditioning image generators, and the eyes of VLMs) are covered in §09.</p>
+
+  <div class="callout callout-red">
+    <strong>Real failure: the typographic attack.</strong> OpenAI researchers studying CLIP's “multimodal neurons” (Goh et al., 2021) showed that a Granny Smith apple with a handwritten paper label reading “iPod” was classified as an iPod. CLIP learned to read text in images so well that written words can override what the object looks like. The same weakness reappears in VLMs as <em>prompt injection through images</em> (text in a picture that instructs the model).
+  </div>
+</section>
+
+<!-- ============================================================ 06 -->
+<section class="section" id="s6">
+  <div class="section-eyebrow">Section 06</div>
+  <h2>After CLIP: ALIGN, SigLIP, and Why Data Curation Matters</h2>
+
+  <h3>ALIGN — scale beats cleanliness (Jia et al., Google, 2021)</h3>
+  <p>Same dual-encoder recipe, but with <b>1.8 billion</b> image–alt-text pairs and only minimal filtering, an EfficientNet image encoder and a BERT text encoder. Despite the noise, ALIGN reached zero-shot ImageNet accuracy comparable to CLIP. The lesson: with enough scale, noisy free data can substitute for expensive curation.</p>
+
+  <h3>SigLIP — replace the softmax with a sigmoid (Zhai et al., Google, 2023)</h3>
+  <p>Softmax InfoNCE needs every row normalised across the whole batch, which forces a global all-gather of the N × N matrix. SigLIP treats every cell as an independent binary question: <em>is this a matching pair, yes or no?</em></p>
+  <div class="math-box"><span class="comment">// z_ij = +1 on the diagonal (match), −1 everywhere else; t and b are learned (init t = 10, b = −10)</span>
+<span class="var">L</span> = −(1/N) Σ_i Σ_j log σ( z_ij · ( t · x_i·y_j + b ) )
+
+<span class="comment">// worked cells at initialisation (t = 10, b = −10):</span>
+matching pair,    cos 0.9:  σ(+1·(9 − 10))  = σ(−1)  → loss <span class="hi">1.313</span>   <span class="comment">// still pushed up</span>
+mismatched pair,  cos 0.1:  σ(−1·(1 − 10))  = σ(+9)  → loss 0.0001
+mismatched pair,  cos 0.2:  σ(−1·(2 − 10))  = σ(+8)  → loss 0.0003
+<span class="comment">// the strongly negative bias b reflects that almost every cell is a negative pair</span></div>
+  <div class="table-wrap"><table>
+    <tr><th></th><th>Softmax (CLIP)</th><th>Sigmoid (SigLIP)</th></tr>
+    <tr><td>Each cell is…</td><td>one option in an N-way choice per row/column</td><td>an independent yes/no decision</td></tr>
+    <tr><td>Needs the whole batch at once?</td><td>Yes — global normalisation</td><td>No — can be computed in chunks across devices</td></tr>
+    <tr><td>Small batches</td><td>Degrade noticeably</td><td>Work well (strong results even at a few thousand)</td></tr>
+    <tr><td>Beyond ~32k batch</td><td>—</td><td>Little further gain, which the paper reported explicitly</td></tr>
+  </table></div>
+  <p>SigLIP's So400m/14 encoder became the default vision tower for many 2024–25 VLMs (PaliGemma, and many open LLaVA-style models).</p>
+
+  <h3>Open reproductions and the data lesson</h3>
+  <ul>
+    <li><b>OpenCLIP + LAION-5B (2022):</b> open training code and 5.85 billion CLIP-filtered pairs; reproduced and exceeded CLIP and established scaling laws for contrastive models.</li>
+    <li><b>DataComp (2023)</b> and <b>MetaCLIP (2023):</b> holding the model fixed and changing only the data selection produced large gains — curation (balancing concepts, removing near-duplicates and junk) matters as much as scale.</li>
+  </ul>
+  <div class="callout callout-green">
+    <strong>Exam-ready summary:</strong> CLIP = softmax contrastive, curated 400M; ALIGN = same idea, noisy 1.8B; SigLIP = sigmoid loss, memory-efficient, strong at small batch. All three are dual encoders: great for retrieval and classification, unable to generate text.
+  </div>
+</section>
+
+<!-- ============================================================ 07 -->
+<section class="section" id="s7">
+  <div class="section-eyebrow">Section 07</div>
+  <h2>The Geometry of the Shared Space</h2>
+
+  <h3>The modality gap</h3>
+  <p>Liang et al. (2022) found that CLIP's image embeddings and text embeddings occupy <b>two separate narrow cones</b> of the sphere rather than intermixing. A matching image and caption are closer to each other than to non-matching items, but their absolute cosine similarity is modest — often around 0.3, not near 1.0.</p>
+  <div class="callout callout-blue">
+    <strong>Practical consequence:</strong> never threshold CLIP scores as if 0.3 meant “30% match”. Use <em>relative</em> ranking (which caption scores highest), or calibrate a threshold on your own data. This is also why the ×100 logit scale exists.
+  </div>
+
+  <div class="math-box"><span class="comment">// measuring the modality gap</span>
+Δ = mean( image embeddings ) − mean( text embeddings )        <span class="comment">// one vector; ‖Δ‖ is clearly non-zero in CLIP</span>
+<span class="comment">// Liang et al. traced it to two causes: (1) at random initialisation each encoder already maps</span>
+<span class="comment">// its inputs into a narrow cone; (2) the contrastive loss at low temperature preserves that gap.</span>
+<span class="comment">// Shifting all embeddings along Δ changes zero-shot accuracy and fairness metrics.</span></div>
+
+  <h3>Bag-of-words behaviour</h3>
+  <p>Because the contrastive task can usually be solved by noticing <em>which</em> objects are present, CLIP-style models often ignore <em>how</em> they are related.</p>
+  <ul>
+    <li><b>Winoground (Thrush et al., 2022):</b> pairs like “a mug in some grass” vs “some grass in a mug” — same words, different meaning. CLIP and other contemporary models scored at or below chance.</li>
+    <li><b>ARO benchmark (Yuksekgonul et al., 2023):</b> “the horse is eating the grass” vs “the grass is eating the horse” — models frequently preferred the wrong order. The authors called this behaving like a <em>bag of words</em>, and showed that training with <b>hard negatives</b> (captions with swapped word order) partly fixes it (NegCLIP).</li>
+  </ul>
+
+  <h3>Cross-modal arithmetic</h3>
+  <p>Because both modalities share one space, you can query across them: text→image (search), image→text (zero-shot labels, caption ranking), image→image (visual similarity). Every downstream system in Part 4 is one of these three queries on top of the same embeddings.</p>
+</section>
+
+<!-- ============================================================ 08 -->
+<section class="section" id="s8">
+  <div class="section-eyebrow">Section 08</div>
+  <h2>Adapting CLIP to Your Task</h2>
+
+  <p>Zero-shot CLIP is a strong start, but on specialised data (medical scans, factory defects, satellite images) it can be weak (§05). How much you adapt depends on how many labelled examples you have.</p>
+
+  <div class="table-wrap"><table>
+    <tr><th>Method</th><th>What is trained</th><th>Labels needed</th><th>Main risk</th></tr>
+    <tr><td><b>Zero-shot + prompt ensembling</b></td><td>Nothing</td><td>None</td><td>Weak on rare or specialised concepts</td></tr>
+    <tr><td><b>Linear probe</b></td><td>A logistic-regression layer on frozen image features</td><td>A few to thousands per class</td><td>With 1–2 examples per class it can be worse than zero-shot</td></tr>
+    <tr><td><b>CoOp</b> — prompt learning (Zhou et al., 2022)</td><td>M context vectors that replace the words “a photo of a”</td><td>1–16 per class</td><td>Overfits to the training classes; CoCoOp makes the context depend on the image to generalise better</td></tr>
+    <tr><td><b>CLIP-Adapter</b> (Gao et al., 2021)</td><td>A small MLP on top of the frozen features, mixed with the original features</td><td>Few-shot</td><td>Low</td></tr>
+    <tr><td><b>Full fine-tuning</b></td><td>All weights</td><td>Thousands+</td><td>Gains on your data, but loses CLIP's robustness to distribution shift</td></tr>
+    <tr><td><b>WiSE-FT</b> (Wortsman et al., 2022)</td><td>Fine-tune, then average the weights with the original</td><td>Thousands+</td><td>Choosing α</td></tr>
+    <tr><td><b>LiT</b> — locked-image tuning (Zhai et al., 2022)</td><td>Only the text tower, trained contrastively against a frozen pretrained image encoder</td><td>Image–text pairs</td><td>Image features cannot improve</td></tr>
+  </table></div>
+
+  <div class="math-box"><span class="comment">// Linear probe: ordinary logistic regression on frozen features x = f(image)</span>
+p(class | x) = softmax( A x + b )                  <span class="comment">// only A and b are learned</span>
+
+<span class="comment">// CoOp: learn the prompt's words as vectors instead of writing them</span>
+prompt for class c = [v_1] [v_2] … [v_M] [embedding of "c"]     <span class="comment">// v_1…v_M trained, encoders frozen</span>
+
+<span class="comment">// WiSE-FT: interpolate the weights of the zero-shot and the fine-tuned model</span>
+θ_α = (1 − α) · θ_zero-shot + α · θ_fine-tuned       <span class="comment">// α ≈ 0.5 keeps most of the in-domain gain</span>
+                                                     <span class="comment">// and recovers much of the robustness</span></div>
+
+  <div class="callout callout-green">
+    <strong>Decision guide:</strong> no labels → zero-shot with prompt ensembling. 1–16 labels per class → CoOp, CLIP-Adapter or a linear probe. Thousands of labels → fine-tune, then WiSE-FT to keep robustness. Always compare against the zero-shot baseline: it is free and often surprisingly hard to beat.
+  </div>
+</section>
+
+<!-- ============================================================ 09 -->
+<section class="section" id="s9">
+  <div class="section-eyebrow">Section 09</div>
+  <h2>CLIP as a Building Block</h2>
+
+  <p>CLIP's embeddings are reused far beyond classification. Five uses cover most of what you will meet.</p>
+
+  <div class="table-wrap"><table>
+    <tr><th>Use</th><th>What CLIP provides</th><th>Example</th></tr>
+    <tr><td><b>Search and retrieval</b></td><td>Image and text vectors in one space</td><td>Search a million product photos by text (“red running shoe”) or by image; Part 4's multimodal retrieval and RAG</td></tr>
+    <tr><td><b>Filtering training data</b></td><td>A similarity score per image–caption pair</td><td>LAION-5B kept English pairs whose CLIP ViT-B/32 cosine similarity was at least 0.28; pairs below are mostly mismatched</td></tr>
+    <tr><td><b>Scoring generated images</b></td><td>How well an image matches its prompt</td><td>CLIPScore (below), used to evaluate text-to-image models and captioners</td></tr>
+    <tr><td><b>Conditioning image generators</b></td><td>The text embedding of a prompt</td><td>Stable Diffusion 1.x feeds CLIP ViT-L/14's text-encoder outputs (77 × 768) into its denoiser via cross-attention; DALL·E 2 (“unCLIP”) generates an image from a CLIP image embedding</td></tr>
+    <tr><td><b>The eyes of VLMs</b></td><td>The image tower's patch features</td><td>LLaVA plugs CLIP ViT-L/14 into an LLM (Part 2b §04)</td></tr>
+  </table></div>
+
+  <div class="math-box"><span class="comment">// CLIPScore (Hessel et al., 2021): reference-free caption / image–prompt quality</span>
+CLIPScore(image, text) = 2.5 · max( cos( E_image, E_text ), 0 )
+
+<span class="comment">// e.g. cosine 0.32 → CLIPScore 0.80;  cosine 0.18 → 0.45</span>
+<span class="comment">// the 2.5 only rescales typical CLIP cosines (≈ 0–0.4) to a 0–1 range</span></div>
+
+  <div class="callout callout-red">
+    <strong>Every use inherits CLIP's weaknesses.</strong> If CLIP treats “a mug in the grass” and “grass in a mug” alike (§07), a CLIP-filtered dataset, a CLIPScore metric and a CLIP-conditioned generator will all share that blind spot. This is one reason image generators struggled with spatial prompts and counting.
+  </div>
+</section>
+
+<!-- ============================================================ 10 -->
+<section class="section" id="s10">
+  <div class="section-eyebrow">Section 10</div>
+  <h2>Hands-On Code (Hugging Face Transformers)</h2>
+
+  <h3>CLIP zero-shot classification</h3>
+  <div class="math-box"><span class="comment">import torch</span>
+from PIL import Image
+from transformers import CLIPModel, CLIPProcessor
+
+model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
+processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+
+image = Image.open("dashcam_frame.jpg")
+labels = ["a photo of a driver using a phone", "a photo of a driver eating",
+          "a photo of a driver looking at the road"]
+inputs = processor(text=labels, images=image, return_tensors="pt", padding=True)
+with torch.no_grad():
+    out = model(**inputs)
+probs = out.logits_per_image.softmax(dim=1)     <span class="comment"># logits already include the learned ×100 scale</span>
+print(dict(zip(labels, probs[0].tolist())))</div>
+
+  <h3>The CLIP loss in PyTorch (what you would train)</h3>
+  <div class="math-box">import torch, torch.nn.functional as F
+
+def clip_loss(img_emb, txt_emb, logit_scale):
+    img_emb = F.normalize(img_emb, dim=-1)          <span class="comment"># [N, d]</span>
+    txt_emb = F.normalize(txt_emb, dim=-1)          <span class="comment"># [N, d]</span>
+    logits = logit_scale.exp() * img_emb @ txt_emb.t()   <span class="comment"># [N, N]</span>
+    labels = torch.arange(len(logits), device=logits.device)
+    return (F.cross_entropy(logits, labels) + F.cross_entropy(logits.t(), labels)) / 2
+
+<span class="comment"># logit_scale = nn.Parameter(torch.tensor(math.log(1 / 0.07)));  clamp it to log(100) after each step</span></div>
+
+  <h3>Prompt ensembling (§05) in a few lines</h3>
+  <div class="math-box">templates = ["a photo of a {}.", "a blurry photo of a {}.", "a sketch of a {}.", "a close-up photo of a {}."]
+classes = ["dog", "cat", "car"]
+
+with torch.no_grad():
+    W = []
+    for c in classes:
+        t = processor(text=[tp.format(c) for tp in templates], return_tensors="pt", padding=True)
+        e = model.get_text_features(**t)
+        e = e / e.norm(dim=-1, keepdim=True)          <span class="comment"># normalise each template</span>
+        m = e.mean(dim=0)
+        W.append(m / m.norm())                        <span class="comment"># average, then normalise again</span>
+    W = torch.stack(W)                                <span class="comment"># [num_classes, 512] = the classifier weights</span>
+
+    x = model.get_image_features(**processor(images=image, return_tensors="pt"))
+    x = x / x.norm(dim=-1, keepdim=True)
+    probs = (model.logit_scale.exp() * x @ W.T).softmax(dim=-1)</div>
+
+  <h3>Text-to-image search with FAISS</h3>
+  <div class="math-box">import faiss, numpy as np
+
+<span class="comment"># gallery: N images → normalised CLIP image embeddings, float32 [N, 512]</span>
+index = faiss.IndexFlatIP(512)          <span class="comment"># inner product = cosine, because vectors are normalised</span>
+index.add(gallery_emb)
+
+q = model.get_text_features(**processor(text=["a dog carrying a ball"], return_tensors="pt", padding=True))
+q = (q / q.norm(dim=-1, keepdim=True)).detach().numpy().astype("float32")
+scores, ids = index.search(q, 5)         <span class="comment"># top-5 images</span></div>
+
+  <div class="callout callout-blue">
+    <strong>Exercises:</strong> (1) Run CLIP with and without the “a photo of a …” template on 20 of your own images and measure the accuracy difference. (2) Print the loss of <code>clip_loss</code> on random embeddings for N = 8, 64 and 512 and check that it is close to ln N (§03). (3) Compute the 3 × 3 similarity matrix for three of your own photos and captions, and redo the τ = 1 and τ = 0.1 calculations from §03 by hand. (4) Build a 200-image FAISS index and report Recall@5 for 20 text queries.
+  </div>
+</section>
+
+<!-- ============================================================ 11 -->
+<section class="section" id="s11">
+  <div class="section-eyebrow">Section 11</div>
+  <h2>Key Takeaways &amp; Exam Prep</h2>
+  <div class="steps">
+    <div class="step-card"><div class="step-num">✓</div><h4>Alignment = one shared coordinate system</h4><p>Train both encoders so matching image and text vectors are close.</p></div>
+    <div class="step-card"><div class="step-num">✓</div><h4>Images become tokens</h4><p>ViT: (side / patch)² patch tokens; 336px with 14px patches = 576.</p></div>
+    <div class="step-card"><div class="step-num">✓</div><h4>Contrastive = N-way classification</h4><p>Symmetric InfoNCE; the gradient pulls to the true pair and pushes hardest on confusable negatives.</p></div>
+    <div class="step-card"><div class="step-num">✓</div><h4>τ and N set the difficulty</h4><p>Low τ sharpens; large N gives more near-misses; initial loss ≈ ln N.</p></div>
+    <div class="step-card"><div class="step-num">✓</div><h4>Zero-shot = a linear classifier from text</h4><p>The text encoder writes the classifier's weights from class names.</p></div>
+  </div>
+
+  <h3>Common exam questions</h3>
+  <div class="table-wrap"><table>
+    <tr><th>Question</th><th>Short answer</th></tr>
+    <tr><td>What does “multimodal alignment” mean?</td><td>Training an image encoder and a text encoder so they share one embedding space, in which matching images and texts have high cosine similarity and non-matching ones low</td></tr>
+    <tr><td>How many visual tokens does a ViT-L/14 produce for a 336×336 image?</td><td>(336/14)² = 24² = 576 patch tokens (+1 CLS)</td></tr>
+    <tr><td>Why does a ViT need position embeddings?</td><td>Self-attention is permutation-invariant; without positions, shuffled patches would give the same output</td></tr>
+    <tr><td>Write CLIP's loss and explain each term.</td><td>Symmetric cross-entropy over the cosine-similarity matrix scaled by 1/τ; rows classify texts for each image, columns images for each text; the diagonal is the label</td></tr>
+    <tr><td>What is the gradient of the InfoNCE row loss with respect to a logit, and what does it do?</td><td>p_ij − 1[j = i]. It raises the true pair's score and lowers each negative in proportion to its current probability, so confusable (hard) negatives are pushed hardest</td></tr>
+    <tr><td>What happens to the loss if τ is lowered from 1 to 0.1 for the same embeddings?</td><td>Logits are multiplied by 10, the softmax sharpens, and the loss on correctly ranked pairs collapses (0.744 → 0.011 in the worked example); gradients concentrate on hard negatives</td></tr>
+    <tr><td>What loss should a freshly initialised CLIP show with batch size N, and why?</td><td>About ln N (≈ 10.4 for N = 32,768), because all similarities are roughly equal so each p_ij ≈ 1/N</td></tr>
+    <tr><td>Why does a larger batch help contrastive learning?</td><td>More negatives per example, including near-misses, which forces fine-grained features; the InfoNCE mutual-information bound log N − L also grows with N</td></tr>
+    <tr><td>Why is the 32,768 × 32,768 similarity matrix not a problem in practice?</td><td>It is sharded: each GPU gathers all text embeddings (small) and computes only its own rows</td></tr>
+    <tr><td>How does CLIP do zero-shot classification, and why is it a linear classifier?</td><td>Embed each label as a sentence and pick the highest cosine with the image; the stacked label embeddings act as the weight matrix of a bias-free linear classifier</td></tr>
+    <tr><td>Why does SigLIP work with smaller batches than CLIP?</td><td>Each pair is an independent sigmoid decision, so there is no global softmax normalisation across the batch</td></tr>
+    <tr><td>You have 8 labelled images per class. How would you adapt CLIP?</td><td>Prompt learning (CoOp) or a lightweight adapter / linear probe, compared against the zero-shot baseline</td></tr>
+    <tr><td>What does WiSE-FT do?</td><td>Averages the weights of the zero-shot and fine-tuned models, θ = (1 − α)θ_zs + αθ_ft, keeping most of the fine-tuning gain while recovering robustness to distribution shift</td></tr>
+    <tr><td>What is CLIPScore?</td><td>2.5 · max(cos(image, text), 0): a reference-free score of how well a caption or prompt matches an image</td></tr>
+  </table></div>
+
+  <p style="font-size:0.85rem;color:#555;margin-top:2rem"><b>References:</b> Dosovitskiy et al. (2020) ViT · Radford et al. (2021) CLIP · van den Oord et al. (2018) Contrastive Predictive Coding (InfoNCE) · Li et al. (2017) Visual N-Grams · Jia et al. (2021) ALIGN · Zhai et al. (2023) SigLIP · Zhai et al. (2022) LiT · Schuhmann et al. (2022) LAION-5B · Cherti et al. (2023) OpenCLIP scaling · Gadre et al. (2023) DataComp · Xu et al. (2023) MetaCLIP · Liang et al. (2022) modality gap · Thrush et al. (2022) Winoground · Yuksekgonul et al. (2023) ARO · Goh et al. (2021) Multimodal Neurons · Zhou et al. (2022) CoOp and CoCoOp · Gao et al. (2021) CLIP-Adapter · Wortsman et al. (2022) WiSE-FT · Hessel et al. (2021) CLIPScore · Rombach et al. (2022) Stable Diffusion · Ramesh et al. (2022) DALL·E 2.</p>
+</section>
+
+<p style="text-align:center;font-family:'IBM Plex Mono',monospace;font-size:0.75rem;color:#777;padding:2rem">Module 5 · Part 2a — Multimodal Alignment: CLIP in Depth · Builds on Part 1 (Foundations) · Continues in Part 2b (Vision-Language Models), Part 3 (Challenges) and Part 4 (Applications)</p>
+
+
+<div class="next-part"><a href="2b_Generation_VLMs.html">Next: Part 2b — Generation: Vision-Language Models →</a></div>
+</body>
+</html>

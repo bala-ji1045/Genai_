@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GenAI Learning Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #18251f;
+    --muted: #68756e;
+    --paper: #f5f7f2;
+    --panel: #ffffff;
+    --line: #dfe7de;
+    --lime: #b9e769;
+    --mint: #ddf4e2;
+    --orange: #f2995b;
+    --shadow: 0 18px 50px rgba(24, 37, 31, .10);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-width: 0; min-height: 100vh; overflow-x: hidden; color: var(--ink); background: var(--paper); font-family: 'DM Sans', sans-serif; }
+  .shell { min-height: 100vh; display: grid; grid-template-columns: 360px 1fr; }
+  aside { padding: 34px 26px; background: #edf3e9; border-right: 1px solid var(--line); overflow-y: auto; }
+  .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; }
+  .mark { width: 42px; height: 42px; display: grid; place-items: center; color: var(--ink); background: var(--lime); border-radius: 13px; font: 700 20px 'Space Grotesk', sans-serif; transform: rotate(-5deg); }
+  .brand strong { display: block; font: 700 18px 'Space Grotesk', sans-serif; letter-spacing: -.03em; }
+  .brand span { color: var(--muted); font-size: 12px; }
+  .eyebrow { color: #80907f; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+  h1, h2 { margin: 0; font-family: 'Space Grotesk', sans-serif; letter-spacing: -.05em; }
+  .intro h1 { max-width: 270px; margin-top: 10px; font-size: 33px; line-height: 1.02; }
+  .intro p { margin: 14px 0 25px; color: var(--muted); font-size: 14px; line-height: 1.55; }
+  .search { width: 100%; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; outline: 0; background: #fff; color: var(--ink); font: inherit; }
+  .search:focus { border-color: #96c76a; box-shadow: 0 0 0 3px rgba(185,231,105,.25); }
+  .exam-link { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; padding: 12px 13px; border: 1px solid #c9e59b; border-radius: 10px; color: var(--ink); background: var(--lime); text-decoration: none; font-size: 12px; font-weight: 700; }
+  .exam-link span { font-size: 16px; }
+  nav { margin-top: 25px; }
+  .module { margin: 0 0 25px; }
+  .module-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 9px; color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+  .module-title b { color: #96aa91; font-size: 10px; }
+  .lesson { width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 11px; border: 0; border-radius: 9px; color: var(--ink); background: transparent; text-align: left; cursor: pointer; font: 500 13px 'DM Sans', sans-serif; }
+  .lesson:hover, .lesson.active { background: #fff; box-shadow: 0 4px 14px rgba(24,37,31,.06); }
+  .lesson.active { font-weight: 700; }
+  .lesson.featured { border: 1px solid #c9e59b; background: #f8fce9; }
+  .lesson.featured::after { margin-left: auto; padding: 3px 6px; border-radius: 5px; color: #607936; background: var(--lime); content: 'Focus'; font-size: 9px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+  .lesson-number { min-width: 25px; color: #91a28e; font: 600 11px 'Space Grotesk', sans-serif; }
+  main { display: flex; min-width: 0; flex-direction: column; padding: 30px 34px 34px; }
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 24px; }
+  .top h2 { font-size: 22px; }
+  .top p { margin: 5px 0 0; color: var(--muted); font-size: 13px; }
+  .actions { display: flex; gap: 8px; }
+  .action { display: inline-flex; align-items: center; gap: 7px; padding: 10px 13px; border: 1px solid var(--line); border-radius: 9px; color: var(--ink); background: #fff; text-decoration: none; font-size: 12px; font-weight: 700; }
+  .action.primary { border-color: var(--ink); color: #fff; background: var(--ink); }
+  .viewer { flex: 1; min-height: 620px; overflow: hidden; border: 1px solid var(--line); border-radius: 16px; background: #fff; box-shadow: var(--shadow); }
+  iframe { width: 100%; height: 100%; min-height: 620px; display: block; border: 0; }
+  .empty { display: none; padding: 20px 12px; color: var(--muted); font-size: 13px; text-align: center; }
+  @media (max-width: 900px) {
+    .shell { display: block; }
+    aside { padding: 22px 18px; border-right: 0; border-bottom: 1px solid var(--line); }
+    .brand { margin-bottom: 23px; }
+    .intro h1 { max-width: none; font-size: 29px; }
+    .intro p { margin-bottom: 18px; }
+    nav { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px 20px; }
+    .module { margin-bottom: 12px; }
+    main { padding: 22px 16px 18px; }
+    .top { align-items: flex-start; flex-direction: column; gap: 13px; }
+    .viewer, iframe { min-height: 70vh; }
+  }
+  @media (max-width: 600px) {
+    aside { padding: 18px 14px; }
+    .brand { gap: 10px; }
+    .brand strong { font-size: 16px; }
+    .intro h1 { font-size: 27px; }
+    .intro p { margin: 11px 0 17px; font-size: 13px; }
+    nav { display: block; }
+    .module { margin-bottom: 18px; }
+    .lesson { min-height: 44px; padding: 11px 10px; }
+    main { padding: 18px 12px 14px; }
+    .top { margin-bottom: 16px; }
+    .top h2 { font-size: 20px; line-height: 1.15; }
+    .top p { max-width: 100%; overflow-wrap: anywhere; font-size: 12px; }
+    .viewer, iframe { min-height: 68vh; }
+  }
+  @media (max-width: 480px) {
+    .actions { width: 100%; }
+    .action { min-height: 42px; flex: 1; justify-content: center; }
+    .search { min-height: 44px; }
+    .exam-link { min-height: 44px; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside>
+    <div class="brand"><div class="mark">G</div><div><strong>GenAI Studio</strong><span>Interactive course library</span></div></div>
+    <div class="intro"><div class="eyebrow">Learning path</div><h1>Build your map of modern AI.</h1><p>Browse the lessons by module and open any page inside this workspace.</p><input class="search" id="search" type="search" placeholder="Search lessons..." aria-label="Search lessons"><a class="exam-link" href="common_exam_questions.html">Common exam questions <span>&rarr;</span></a></div>
+    <nav id="lessonList"></nav>
+    <div class="empty" id="empty">No lessons match that search.</div>
+  </aside>
+  <main>
+    <div class="top"><div><div class="eyebrow" id="currentModule">Module 1</div><h2 id="currentTitle">Warm-Up Questions</h2><p id="currentMeta">Choose a lesson from the course index.</p></div><div class="actions"><a class="action" id="openLink" href="Module 1/0_Fun_Questions.html" target="_blank" rel="noopener">↗ Open page</a><a class="action primary" href="Module 1/0_Fun_Questions.html" download>↓ Download</a></div></div>
+    <div class="viewer"><iframe id="viewer" src="Module 1/0_Fun_Questions.html" title="Selected GenAI lesson"></iframe></div>
+  </main>
+</div>
+<script>
+const lessons = [
+  { module: 'Module 1', items: [
+    ['0_Fun_Questions.html', 'Warm-Up Questions'], ['2_NeuralNetworks_RNN_LSTM_Study_Guide.html', 'Neural Networks, RNNs & LSTMs'], ['3_RNN_Attention.html', 'RNN Attention'], ['4_Transformer_SelfAttention.html', 'Transformer Self-Attention'], ['5_LLM_Architecture.html', 'LLM Architecture'], ['6_Fine_Tuning.html', 'Fine-Tuning']
+  ]},
+  { module: 'Module 2', items: [
+    ['0_Fun_Questions.html', 'Warm-Up Questions'], ['1_Prompt_Engineering.html', 'Prompt Engineering'], ['2_Advanced_Reasoning.html', 'Advanced Reasoning'], ['3_Test_Time_Scaling.html', 'Test-Time Scaling'], ['4_Structured_Generation.html', 'Structured Generation']
+  ]},
+  { module: 'Module 3', items: [
+    ['0_Fun_Questions.html', 'Warm-Up Questions'], ['1_Retrieval_Augmented_Generation.html', 'Retrieval-Augmented Generation']
+  ]},
+  { module: 'Module 4', items: [
+    ['0_Fun_Questions.html', 'Warm-Up Questions'], ['1_Evolution_and_Types_of_Agents.html', 'Evolution & Types of Agents'], ['2_How_Agents_Plan.html', 'How Agents Plan'], ['3_Tools_MCP_and_Agent_vs_Tool.html', 'Tools, MCP & Agent vs. Tool'], ['4_Agentic_Systems_and_Harness.html', 'Agentic Systems & the Agent Harness']
+  ]},
+  { module: 'Module 5', items: [
+    ['0_Fun_Questions.html', 'Warm-Up Questions'], ['1_Foundations_of_Multimodal_AI.html', 'Foundations of Multimodal AI'], ['2a_Alignment_CLIP.html', 'Alignment: CLIP in Depth'], ['2b_Generation_VLMs.html', 'Generation: Vision-Language Models'], ['3_Challenges_in_Multimodal_AI.html', 'Challenges in Multimodal AI'], ['4_Multimodal_Applications.html', 'Multimodal Applications']
+  ]},
+  { module: 'Module 6', items: [
+    ['0_Fun_Questions.html', 'Warm-Up Questions'], ['1_Evaluation.html', 'Evaluation of GenAI Systems'], ['2_Safety_and_Security.html', 'Safety and Security for LLM Applications'], ['3_Responsible_AI.html', 'Responsible AI'], ['4_Production_Systems.html', 'Production Systems']
+  ]}
+];
+const list = document.getElementById('lessonList');
+const viewer = document.getElementById('viewer');
+const search = document.getElementById('search');
+const empty = document.getElementById('empty');
+const title = document.getElementById('currentTitle');
+const moduleLabel = document.getElementById('currentModule');
+const meta = document.getElementById('currentMeta');
+const openLink = document.getElementById('openLink');
+const featuredPaths = new Set([
+  'Module 1/3_RNN_Attention.html', 'Module 1/4_Transformer_SelfAttention.html', 'Module 1/6_Fine_Tuning.html',
+  'Module 2/2_Advanced_Reasoning.html', 'Module 4/4_Agentic_Systems_and_Harness.html',
+  'Module 4/1_Evolution_and_Types_of_Agents.html',
+  'Module 5/1_Foundations_of_Multimodal_AI.html', 'Module 5/2a_Alignment_CLIP.html',
+  'Module 5/2b_Generation_VLMs.html', 'Module 6/1_Evaluation.html',
+  'Module 6/2_Safety_and_Security.html', 'Module 6/3_Responsible_AI.html'
+]);
+let selected;
+function render(filter = '') {
+  list.innerHTML = '';
+  let visible = 0;
+  lessons.forEach(group => {
+    const matches = group.items.filter(item => item[1].toLowerCase().includes(filter.toLowerCase()));
+    if (!matches.length) return;
+    visible += matches.length;
+    const section = document.createElement('section'); section.className = 'module';
+    section.innerHTML = `<div class="module-title"><span>${group.module}</span><b>${matches.length} lessons</b></div>`;
+    matches.forEach((item, index) => {
+      const button = document.createElement('button'); button.className = 'lesson'; button.dataset.path = `${group.module}/${item[0]}`;
+      if (featuredPaths.has(button.dataset.path)) button.classList.add('featured');
+      button.innerHTML = `<span class="lesson-number">${String(index + 1).padStart(2, '0')}</span><span>${item[1]}</span>`;
+      button.addEventListener('click', () => select(button, group.module, item[0], item[1]));
+      section.append(button);
+    }); list.append(section);
+  });
+  empty.style.display = visible ? 'none' : 'block';
+  if (!selected && visible) select(list.querySelector('.lesson'), 'Module 1', '0_Fun_Questions.html', 'Warm-Up Questions');
+}
+function select(button, moduleName, file, label) {
+  const path = `${moduleName}/${file}`; selected = path;
+  document.querySelectorAll('.lesson').forEach(item => item.classList.toggle('active', item === button || item.dataset.path === path));
+  viewer.src = encodeURI(path); openLink.href = encodeURI(path); title.textContent = label; moduleLabel.textContent = moduleName; meta.textContent = `${moduleName} / ${file}`;
+}
+search.addEventListener('input', event => { selected = null; render(event.target.value); });
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Responsible AI — Study Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Fraunces:ital,wght@0,300;0,700;1,300&family=Inter:wght@400;500;600&display=swap');
+  :root {
+    --ink: #0f1117; --paper: #f7f6f2; --mid: #e8e5dd; --rule: #c9c4b8; --accent: #1a3a5c;
+    --highlight: #e8a020; --green: #2a7a4b; --red: #b83232; --blue: #2255aa; --purple: #6b3fa0; --teal: #0d7a7a;
+    --mono: 'IBM Plex Mono', monospace; --display: 'Fraunces', Georgia, serif; --body: 'Inter', system-ui, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--body); background: var(--paper); color: var(--ink); line-height: 1.7; font-size: 16px; }
+  .hero { background: linear-gradient(160deg, #0f1117 0%, #1a3a5c 100%); color: #fff; padding: 4rem 2rem 3rem; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 20% 30%, rgba(232,160,32,0.10), transparent 40%), radial-gradient(circle at 80% 70%, rgba(42,122,75,0.12), transparent 40%); }
+  .hero-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--highlight); margin-bottom: 1rem; position: relative; }
+  .hero h1 { font-family: var(--display); font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; line-height: 1.1; margin-bottom: 1rem; position: relative; }
+  .hero p { font-size: 1.1rem; opacity: 0.82; max-width: 640px; margin: 0 auto; position: relative; }
+  .toc { background: var(--ink); color: #fff; padding: 1.2rem 2rem; display: flex; gap: 1.2rem; flex-wrap: wrap; justify-content: center; position: sticky; top: 0; z-index: 100; }
+  .toc a { color: rgba(255,255,255,0.7); text-decoration: none; font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.03em; transition: color 0.2s; }
+  .toc a:hover { color: var(--highlight); }
+  .section { max-width: 900px; margin: 0 auto; padding: 4rem 2rem; border-bottom: 1px solid var(--rule); }
+  .section-eyebrow { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.5rem; }
+  .section h2 { font-family: var(--display); font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 700; margin-bottom: 1.5rem; color: var(--ink); }
+  .section h3 { font-family: var(--display); font-size: 1.25rem; font-weight: 700; margin: 2rem 0 0.8rem; color: var(--accent); }
+  .section p { margin-bottom: 1rem; color: #333; }
+  .callout { border-left: 4px solid var(--highlight); background: #fff8ee; padding: 1rem 1.25rem; border-radius: 0 6px 6px 0; margin: 1.5rem 0; font-size: 0.95rem; }
+  .callout strong { color: var(--accent); }
+  .callout-blue  { border-left-color: var(--blue);   background: #eef3ff; }
+  .callout-green { border-left-color: var(--green);  background: #edfaf3; }
+  .callout-red   { border-left-color: var(--red);    background: #fff0f0; }
+  .callout-purple{ border-left-color: var(--purple); background: #f5f0ff; }
+  .math-box { background: var(--ink); color: #e8e8e8; font-family: var(--mono); font-size: 0.86rem; line-height: 1.9; padding: 1.5rem; border-radius: 8px; margin: 1.5rem 0; overflow-x: auto; white-space: pre; }
+  .math-box .comment { color: #6a9f6a; } .math-box .var { color: #f0b060; } .math-box .eq { color: #7ab8f5; } .math-box .hi { color: #ff9090; }
+  table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.88rem; }
+  th { background: var(--accent); color: #fff; padding: 0.6rem 0.9rem; text-align: left; font-family: var(--mono); font-size: 0.76rem; letter-spacing: 0.04em; }
+  td { padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--mid); vertical-align: top; }
+  tr:nth-child(even) td { background: #fafaf7; }
+  .diagram-wrap { background: #fff; border: 1px solid var(--rule); border-radius: 10px; padding: 1.5rem; margin: 2rem 0; overflow-x: auto; }
+  .diagram-caption { text-align: center; font-family: var(--mono); font-size: 0.74rem; color: #777; margin-top: 0.75rem; letter-spacing: 0.04em; line-height: 1.6; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+  .step-card { background: #fff; border: 1px solid var(--rule); border-radius: 8px; padding: 1.1rem; }
+  .step-num { font-family: var(--mono); font-size: 1.9rem; font-weight: 600; color: var(--mid); line-height: 1; margin-bottom: 0.4rem; }
+  .step-card h4 { font-size: 0.88rem; font-weight: 600; color: var(--accent); margin-bottom: 0.35rem; }
+  .step-card p { font-size: 0.82rem; margin: 0; color: #444; }
+  @media (max-width: 620px) { .steps { grid-template-columns: 1fr 1fr; } .section { padding: 2.5rem 1.2rem; } }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-label">Module 6 · Part 3 — Study Guide</div>
+  <h1>Responsible AI</h1>
+  <p>Fairness, bias, privacy, explainability, and governance — the concerns that don't show up as an error message, only as harm that accumulates quietly until someone measures for it.</p>
+</div>
+
+<nav class="toc">
+  <a href="#s1">01 Fairness</a>
+  <a href="#s2">02 Bias</a>
+  <a href="#s3">03 Privacy</a>
+  <a href="#s4">04 Explainability</a>
+  <a href="#s5">05 Governance</a>
+  <a href="#s6">06 Takeaways</a>
+</nav>
+
+<section class="section" id="s1">
+  <div class="section-eyebrow">Section 01</div>
+  <h2>Fairness</h2>
+
+  <p><strong>Fairness</strong> asks whether a model's outputs treat different groups equitably — and, crucially, "equitably" has more than one formal definition, which can point to different, sometimes incompatible, conclusions about the same system.</p>
+
+  <table>
+    <tr><th>Fairness definition</th><th>What it requires</th></tr>
+    <tr><td><strong>Demographic parity</strong></td><td>Outcomes (e.g. approval rate) are statistically similar across groups, regardless of other differences between them</td></tr>
+    <tr><td><strong>Equalized odds</strong></td><td>Error rates (false positive/negative rates) are similar across groups, conditioned on the true outcome</td></tr>
+    <tr><td><strong>Individual fairness</strong></td><td>Similar individuals receive similar outcomes, regardless of group membership</td></tr>
+  </table>
+
+  <div class="callout callout-red">
+    <strong>Exam favourite:</strong> "Can a system satisfy demographic parity and equalized odds simultaneously?" — Generally not, except in special cases (e.g. equal base rates across groups). This is a proven mathematical result, not an engineering shortfall — choosing a fairness definition is a values decision with real trade-offs, not a technical problem with one correct answer.
+  </div>
+</section>
+
+<section class="section" id="s2">
+  <div class="section-eyebrow">Section 02</div>
+  <h2>Bias</h2>
+
+  <p><strong>Bias</strong> in an LLM is systematic skew in outputs correlated with protected or sensitive attributes — and, given Module 1 §01's core mechanism (next-token prediction on internet-scale text), it enters overwhelmingly through training data, not through any explicit rule anyone wrote.</p>
+
+  <table>
+    <tr><th>Bias source</th><th>Mechanism</th></tr>
+    <tr><td>Training data imbalance</td><td>Under/over-representation of groups, dialects, or viewpoints in the pretraining corpus</td></tr>
+    <tr><td>Historical bias in data</td><td>The internet reflects existing societal biases; a model trained to predict "what comes next" reproduces those patterns faithfully</td></tr>
+    <tr><td>Annotator/labeler bias</td><td>Instruction-tuning and RLHF data (Module 1 §07) reflects the judgments and blind spots of whoever labeled it</td></tr>
+    <tr><td>Evaluation bias</td><td>Benchmarks themselves can be skewed toward particular languages, cultures, or demographics, masking bias that a broader evaluation would reveal</td></tr>
+  </table>
+
+  <div class="callout callout-blue">
+    <strong>Why bias is genuinely hard to "fix" rather than just detect:</strong> Module 1 §01 established that an LLM's fluency and knowledge come entirely from patterns in training data — the same mechanism that produces useful capability also faithfully reproduces whatever skew exists in that data. There's no separate "bias module" to patch; mitigation means changing data composition, training objectives, or adding explicit post-hoc correction layers, each with its own trade-offs against capability and cost.
+  </div>
+</section>
+
+<section class="section" id="s3">
+  <div class="section-eyebrow">Section 03</div>
+  <h2>Privacy</h2>
+
+  <p>Two distinct privacy risks apply to LLM systems, easy to conflate but requiring different mitigations:</p>
+
+  <table>
+    <tr><th>Risk</th><th>Mechanism</th><th>Mitigation</th></tr>
+    <tr><td><strong>Training data memorization</strong></td><td>A model can memorize and later regurgitate specific snippets from its training data, including personal information that was present in it</td><td>Data de-duplication and PII scrubbing before training; differential privacy techniques during training</td></tr>
+    <tr><td><strong>Runtime data exposure</strong></td><td>User inputs (Module 6 Part 2 §01's context window) may be logged, used for further training, or exposed via prompt injection/leakage (Part 2 §01, §04)</td><td>Clear data retention policies, opt-out mechanisms, not training on user data by default without consent</td></tr>
+  </table>
+
+  <div class="callout callout-purple">
+    <strong>Connects directly to Module 6 Part 2:</strong> system prompt leakage (Part 2 §04) is a privacy risk when the leaked system prompt itself contains sensitive business logic; indirect prompt injection (Part 2 §02) can be weaponized specifically to exfiltrate private data an agent has access to. Privacy and security are separate concerns but share the same underlying attack surfaces.
+  </div>
+</section>
+
+<section class="section" id="s4">
+  <div class="section-eyebrow">Section 04</div>
+  <h2>Explainability</h2>
+
+  <p><strong>Explainability</strong> asks: can you say <em>why</em> a model produced a given output? For LLMs, this is genuinely harder than for simpler models — a decision tree's reasoning is inspectable directly; a Transformer's next-token prediction (Module 1 §03) emerges from billions of interacting parameters with no single "reason" to point to.</p>
+
+  <table>
+    <tr><th>Approach</th><th>What it provides</th><th>Limitation</th></tr>
+    <tr><td>Attention visualization</td><td>Which tokens a layer attended to most (Module 1 §03's attention weights)</td><td>Attention weight is not the same as causal explanation — high attention doesn't prove that input caused the output</td></tr>
+    <tr><td>Chain-of-thought as explanation</td><td>The model's own stated reasoning (Module 2 §03)</td><td>A model's stated reasoning isn't guaranteed to reflect its actual computation — it can be a plausible-sounding post-hoc rationalization</td></tr>
+    <tr><td>Feature attribution methods</td><td>Which parts of the input most influenced the output, via perturbation or gradient-based analysis</td><td>Computationally expensive at LLM scale; results can be unstable or hard to interpret</td></tr>
+  </table>
+
+  <div class="callout callout-red">
+    <strong>Exam favourite:</strong> "Does chain-of-thought reasoning make an LLM's decisions explainable?" — Not reliably. CoT (Module 2 §03) improves accuracy by giving the model more computation, but the generated reasoning trace is not guaranteed to be a faithful account of the actual internal computation that produced the answer — it's the model's best guess at a plausible explanation, generated by the same process as the answer itself, not a window into it.
+  </div>
+</section>
+
+<section class="section" id="s5">
+  <div class="section-eyebrow">Section 05</div>
+  <h2>Governance</h2>
+
+  <p><strong>AI governance</strong> is the organizational and regulatory structure around how AI systems get built, deployed, and monitored — the practices that turn SS01-SS04's principles into enforceable process rather than good intentions.</p>
+
+  <table>
+    <tr><th>Governance layer</th><th>What it covers</th></tr>
+    <tr><td>Internal policy</td><td>What data can train models, what use cases require review, who signs off before deployment</td></tr>
+    <tr><td>Documentation &amp; transparency</td><td>Model cards, data sheets — recording what a model was trained on, evaluated for, and known to be limited by</td></tr>
+    <tr><td>Regulatory compliance</td><td>External requirements (e.g. the EU AI Act's risk-tiered obligations) that vary by jurisdiction and use case</td></tr>
+    <tr><td>Ongoing monitoring</td><td>Governance doesn't end at launch — Module 6 Part 4's observability is what makes ongoing governance actually enforceable rather than aspirational</td></tr>
+  </table>
+
+  <div class="callout callout-green">
+    <strong>The throughline connecting this entire Part:</strong> fairness, bias, privacy, and explainability are all measurement problems before they're policy problems — you cannot govern what you haven't defined a way to check. Module 6 Part 1's evaluation frameworks and Part 4's observability are the practical machinery that makes responsible-AI principles actually verifiable in a running system, not just a document nobody checks against.
+  </div>
+</section>
+
+<section class="section" id="s6">
+  <div class="section-eyebrow">Section 06</div>
+  <h2>Key Takeaways &amp; Exam Prep</h2>
+
+  <div class="steps">
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Fairness has multiple, sometimes incompatible definitions</h4><p>Choosing one is a values decision, not a purely technical one.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Bias enters mainly through data, not explicit rules</h4><p>The same mechanism that gives LLMs capability also faithfully reproduces training-data skew.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Privacy has two distinct risk types</h4><p>Training-data memorization vs. runtime data exposure need different mitigations.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Chain-of-thought is not proof of reasoning</h4><p>Stated reasoning can be a plausible rationalization, not a faithful account of actual computation.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Governance requires measurement first</h4><p>Principles become enforceable only once there's a way to check them — Module 6 Parts 1 and 4's job.</p></div>
+  </div>
+
+  <h3>Common exam questions</h3>
+  <table>
+    <tr><th>Question</th><th>Short answer</th></tr>
+    <tr><td>Why can't a system generally satisfy both demographic parity and equalized odds?</td><td>This is a proven mathematical incompatibility except in special cases (e.g. equal base rates across groups) — the two definitions of fairness make genuinely different, sometimes conflicting, demands</td></tr>
+    <tr><td>Why is bias hard to "patch" the way a software bug is patched?</td><td>Bias emerges from the same data-driven mechanism that gives an LLM its capability — there's no separate isolated component to fix; mitigation means changing data, training objectives, or adding correction layers</td></tr>
+    <tr><td>Why doesn't chain-of-thought reasoning guarantee explainability?</td><td>The generated reasoning trace is produced by the same generative process as the final answer, and isn't guaranteed to faithfully reflect the model's actual internal computation — it can be a plausible post-hoc rationalization</td></tr>
+  </table>
+
+  <div class="callout" style="margin-top:2rem">
+    <strong>References:</strong><br>
+    Barocas, Hardt &amp; Narayanan — Fairness and Machine Learning: Limitations and Opportunities.<br>
+    Kleinberg, Mullainathan &amp; Raghavan (2016) — Inherent Trade-Offs in the Fair Determination of Risk Scores.<br>
+    Bender et al. (2021) — On the Dangers of Stochastic Parrots: Can Language Models Be Too Big?<br>
+    Carlini et al. (2021) — Extracting Training Data from Large Language Models.<br>
+    Turpin et al. (2023) — Language Models Don't Always Say What They Think: Unfaithful Explanations in Chain-of-Thought Prompting.<br>
+    European Commission — The EU Artificial Intelligence Act.
+  </div>
+</section>
+
+<footer style="text-align:center;padding:2rem;font-family:var(--mono);font-size:0.75rem;color:#aaa;border-top:1px solid var(--rule)">
+  Module 6 · Part 3 — Responsible AI · Companion to Part 2 (Safety and Security) and Part 4 (Production Systems)
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,1045 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fine-Tuning LLMs — In-Context Learning, Quantization, LoRA &amp; PEFT — Study Guide</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Fraunces:ital,wght@0,300;0,700;1,300&family=Inter:wght@400;500;600&display=swap');
+  :root {
+    --ink:       #0f1117;
+    --paper:     #f7f6f2;
+    --mid:       #e8e5dd;
+    --rule:      #c9c4b8;
+    --accent:    #1a3a5c;
+    --highlight: #e8a020;
+    --green:     #2a7a4b;
+    --red:       #b83232;
+    --blue:      #2255aa;
+    --purple:    #6b3fa0;
+    --teal:      #0d7a7a;
+    --mono:      'IBM Plex Mono', monospace;
+    --display:   'Fraunces', Georgia, serif;
+    --body:      'Inter', system-ui, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--body);
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.7;
+    font-size: 16px;
+  }
+  .hero {
+    background: linear-gradient(160deg, #0f1117 0%, #1a3a5c 100%);
+    color: #fff;
+    padding: 4rem 2rem 3rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(232,160,32,0.10), transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(42,122,75,0.12), transparent 40%);
+  }
+  .hero-label {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--highlight);
+    margin-bottom: 1rem;
+    position: relative;
+  }
+  .hero h1 {
+    font-family: var(--display);
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+  .hero p {
+    font-size: 1.1rem;
+    opacity: 0.82;
+    max-width: 640px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .toc {
+    background: var(--ink);
+    color: #fff;
+    padding: 1.2rem 2rem;
+    display: flex;
+    gap: 1.3rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .toc a {
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    transition: color 0.2s;
+  }
+  .toc a:hover { color: var(--highlight); }
+  .section {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .section-eyebrow {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+  .section h2 {
+    font-family: var(--display);
+    font-size: clamp(1.5rem, 3vw, 2.2rem);
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: var(--ink);
+  }
+  .section h3 {
+    font-family: var(--display);
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 2rem 0 0.8rem;
+    color: var(--accent);
+  }
+  .section p { margin-bottom: 1rem; color: #333; }
+  .callout {
+    border-left: 4px solid var(--highlight);
+    background: #fff8ee;
+    padding: 1rem 1.25rem;
+    border-radius: 0 6px 6px 0;
+    margin: 1.5rem 0;
+    font-size: 0.95rem;
+  }
+  .callout strong { color: var(--accent); }
+  .callout-blue  { border-left-color: var(--blue);   background: #eef3ff; }
+  .callout-green { border-left-color: var(--green);  background: #edfaf3; }
+  .callout-red   { border-left-color: var(--red);    background: #fff0f0; }
+  .callout-purple{ border-left-color: var(--purple); background: #f5f0ff; }
+  .math-box {
+    background: var(--ink);
+    color: #e8e8e8;
+    font-family: var(--mono);
+    font-size: 0.86rem;
+    line-height: 1.9;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .math-box .comment { color: #6a9f6a; }
+  .math-box .var     { color: #f0b060; }
+  .math-box .eq      { color: #7ab8f5; }
+  .math-box .hi      { color: #ff9090; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 0.88rem;
+  }
+  th {
+    background: var(--accent);
+    color: #fff;
+    padding: 0.6rem 0.9rem;
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 0.76rem;
+    letter-spacing: 0.04em;
+  }
+  td {
+    padding: 0.6rem 0.9rem;
+    border-bottom: 1px solid var(--mid);
+    vertical-align: top;
+  }
+  tr:nth-child(even) td { background: #fafaf7; }
+  .tag {
+    display: inline-block;
+    background: var(--mid);
+    padding: 0.12rem 0.45rem;
+    border-radius: 3px;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+  }
+  .diagram-wrap {
+    background: #fff;
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    overflow-x: auto;
+  }
+  .diagram-caption {
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    color: #777;
+    margin-top: 0.75rem;
+    letter-spacing: 0.04em;
+    line-height: 1.6;
+  }
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  .step-card {
+    background: #fff;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 1.1rem;
+  }
+  .step-num {
+    font-family: var(--mono);
+    font-size: 1.9rem;
+    font-weight: 600;
+    color: var(--mid);
+    line-height: 1;
+    margin-bottom: 0.4rem;
+  }
+  .step-card h4 {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 0.35rem;
+  }
+  .step-card p { font-size: 0.82rem; margin: 0; color: #444; }
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  .compare-card {
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+  }
+  .compare-card-header {
+    padding: 0.6rem 1rem;
+    font-family: var(--mono);
+    font-size: 0.76rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .compare-card-body { padding: 1rem; font-size: 0.86rem; }
+  .compare-card-body ul { list-style: none; }
+  .compare-card-body li { margin-bottom: 0.4rem; padding-left: 1.1rem; position: relative; }
+  .compare-card-body li::before { content: '→'; position: absolute; left: 0; color: var(--highlight); }
+  .codebox {
+    background: #1c2333;
+    color: #d8dee9;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    line-height: 1.75;
+    padding: 1.25rem 1.5rem;
+    border-radius: 8px;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .codebox .kw   { color: #c792ea; }
+  .codebox .str  { color: #c3e88d; }
+  .codebox .cm   { color: #6a80a4; }
+  .codebox .fn   { color: #82aaff; }
+  .codebox .num  { color: #f78c6c; }
+  @media (max-width: 620px) {
+    .compare-grid { grid-template-columns: 1fr; }
+    .steps { grid-template-columns: 1fr 1fr; }
+    .section { padding: 2.5rem 1.2rem; }
+  }</style>
+<div class="hero">
+  <div class="hero-label">Module 1 · Part 8 · Part 5 — Study Guide</div>
+  <h1>Fine-Tuning LLMs
+    <br>In-Context · Quantization · LoRA
+  </h1>
+  <p>The full adaptation spectrum — from zero-shot prompting to full fine-tuning — with the complete math of quantization and LoRA, and the PEFT tooling used to fine-tune real models on modest hardware.</p>
+</div>
+<nav class="toc">
+  <a href="#s1">01 Adaptation Spectrum</a>
+  <a href="#s2">02 In-Context Learning</a>
+  <a href="#s3">03 Full Fine-Tuning</a>
+  <a href="#s4">04 Quantization</a>
+  <a href="#s5">05 LoRA</a>
+  <a href="#s6">06 PEFT Ecosystem</a>
+  <a href="#s7">07 Fine-Tuning Workflow</a>
+  <a href="#s8">08 Takeaways</a>
+</nav>
+<!-- ═══════════════════════════════════════════════════
+     SECTION 1 — THE ADAPTATION SPECTRUM
+═══════════════════════════════════════════════════ -->
+<section class="section" id="s1">
+  <div class="section-eyebrow">Section 01</div>
+  <h2>The Adaptation Spectrum</h2>
+  <p>A foundation model (Module 5, §07) is generic. Getting it to do 
+    <em>your</em> task well is "adaptation" — and there isn't one way to do it. There's a spectrum, trading off cost, data requirements, and how deeply the model's behavior actually changes.
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 800 240" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:800px;display:block;margin:0 auto">
+      <defs>
+        <marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#555"></polygon>
+        </marker>
+      </defs>
+      <text x="400" y="24" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#333" font-weight="600" letter-spacing="1.5">CHEAP &amp; SHALLOW  →  EXPENSIVE &amp; DEEP</text>
+      <line x1="60" y1="140" x2="740" y2="140" stroke="#ccc" stroke-width="2" marker-end="url(#a1)"></line>
+      <circle cx="110" cy="140" r="7" fill="#2a7a4b"></circle>
+      <text x="110" y="115" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a5c38" font-weight="700">Zero-shot</text>
+      <text x="110" y="165" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666">prompt only</text>
+      <text x="110" y="178" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666">0 examples</text>
+      <text x="110" y="191" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666">0 weight updates</text>
+      <circle cx="270" cy="140" r="7" fill="#2a7a4b"></circle>
+      <text x="270" y="115" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a5c38" font-weight="700">Few-shot ICL</text>
+      <text x="270" y="165" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666">examples in prompt</text>
+      <text x="270" y="178" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666">0 weight updates</text>
+      <circle cx="440" cy="140" r="7" fill="#e8a020"></circle>
+      <text x="440" y="115" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#7a5000" font-weight="700">PEFT / LoRA</text>
+      <text x="440" y="165" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666">&lt;1% params trained</text>
+      <text x="440" y="178" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666">hundreds–thousands of examples</text>
+      <text x="440" y="191" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666">single consumer/cloud GPU (or slow on CPU)</text>
+      <circle cx="620" cy="140" r="7" fill="#b83232"></circle>
+      <text x="620" y="115" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#7a0000" font-weight="700">Full fine-tuning</text>
+      <text x="620" y="165" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666">100% params trained</text>
+      <text x="620" y="178" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666">large curated dataset</text>
+      <text x="620" y="191" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666">multi-GPU, hours–days</text>
+      <circle cx="710" cy="140" r="7" fill="#6b3fa0"></circle>
+      <text x="710" y="115" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#4a2a70" font-weight="700">Pretrain from scratch</text>
+      <text x="710" y="165" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666">trillions of tokens</text>
+      <text x="710" y="178" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666">$M–$100M, weeks</text>
+    </svg>
+    <div class="diagram-caption">FIG 1 — The adaptation spectrum. Modules 5 covered the far right (foundation-model pretraining). This module lives in the middle three: in-context learning, PEFT/LoRA, and full fine-tuning.</div>
+  </div>
+  <table>
+    <tbody>
+      <tr>
+        <th>Method</th>
+        <th>Weights change?</th>
+        <th>Data needed</th>
+        <th>Compute needed</th>
+        <th>Best when</th>
+      </tr>
+      <tr>
+        <td>Zero/Few-shot prompting</td>
+        <td>No</td>
+        <td>0–10 examples, written into the prompt</td>
+        <td>Inference only</td>
+        <td>Task is close to what the base model already does well</td>
+      </tr>
+      <tr>
+        <td>PEFT (LoRA, etc.)</td>
+        <td>Small adapter only (&lt;1%)</td>
+        <td>Hundreds–thousands of labeled examples</td>
+        <td>1 GPU, hours (or CPU, much slower — §07)</td>
+        <td>Task-specific behavior change, limited hardware/data</td>
+      </tr>
+      <tr>
+        <td>Full fine-tuning</td>
+        <td>All parameters</td>
+        <td>Thousands–millions of examples</td>
+        <td>Multiple GPUs, hours–days</td>
+        <td>Large budget, deep/broad behavior change needed</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    <strong>The question that decides where you sit on this spectrum:</strong> "Can I describe the task well enough in a prompt, or does the model need to actually change?" If a well-written prompt with a few examples gets acceptable quality, stop there — it's free and instant. Only pay the cost of fine-tuning when prompting demonstrably can't get you the reliability, format-consistency, or domain depth you need.
+  </div>
+</section>
+<!-- ═══════════════════════════════════════════════════
+     SECTION 2 — IN-CONTEXT LEARNING
+═══════════════════════════════════════════════════ -->
+<section class="section" id="s2">
+  <div class="section-eyebrow">Section 02</div>
+  <h2>In-Context Learning (ICL)</h2>
+  <p>In-context learning is the striking observation that a large enough pretrained LLM can pick up a new task 
+    <em>just from examples placed in the prompt</em> — with zero gradient updates. The "learning" happens entirely within a single forward pass, at inference time.
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 780 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:780px;display:block;margin:0 auto">
+      <text x="390" y="24" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#333" font-weight="600" letter-spacing="1.5">FEW-SHOT PROMPT STRUCTURE</text>
+      <rect x="30" y="45" width="720" height="34" rx="6" fill="#eef3ff" stroke="#2255aa" stroke-width="1.3"></rect>
+      <text x="45" y="66" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a3a5c">Instruction: "Classify the sentiment of each review as Positive or Negative."</text>
+      <rect x="30" y="85" width="345" height="30" rx="6" fill="#edfaf3" stroke="#2a7a4b" stroke-width="1.3"></rect>
+      <text x="45" y="104" font-family="IBM Plex Mono,monospace" font-size="9.5" fill="#1a5c38">Example 1 — Review: "Loved it!" → Positive</text>
+      <rect x="405" y="85" width="345" height="30" rx="6" fill="#edfaf3" stroke="#2a7a4b" stroke-width="1.3"></rect>
+      <text x="420" y="104" font-family="IBM Plex Mono,monospace" font-size="9.5" fill="#1a5c38">Example 2 — Review: "Broke in a day." → Negative</text>
+      <rect x="30" y="125" width="345" height="30" rx="6" fill="#edfaf3" stroke="#2a7a4b" stroke-width="1.3"></rect>
+      <text x="45" y="144" font-family="IBM Plex Mono,monospace" font-size="9.5" fill="#1a5c38">Example 3 — Review: "It's fine, does the job." → Neutral*</text>
+      <rect x="30" y="165" width="720" height="34" rx="6" fill="#fff3cc" stroke="#e8a020" stroke-width="1.5"></rect>
+      <text x="45" y="186" font-family="IBM Plex Mono,monospace" font-size="10" fill="#7a5000" font-weight="700">Query — Review: "Works okay I guess." → ?  (model completes from here)</text>
+    </svg>
+    <div class="diagram-caption">FIG 2 — A few-shot prompt: instruction + K labeled examples + the new query. All of it is one input sequence — the model was never trained on this specific task, it infers the pattern purely from what's in context.</div>
+  </div>
+  <h3>The ICL family</h3>
+  <table>
+    <tbody>
+      <tr>
+        <th>Variant</th>
+        <th>What's in the prompt</th>
+        <th>Trade-off</th>
+      </tr>
+      <tr>
+        <td>
+          <strong>Zero-shot</strong>
+        </td>
+        <td>Just the instruction, no examples</td>
+        <td>Cheapest, but relies entirely on the base model already understanding the task</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Few-shot</strong>
+        </td>
+        <td>Instruction + K example input→output pairs</td>
+        <td>Better reliability and format-following; costs prompt-length tokens on every call</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Chain-of-thought (CoT)</strong>
+        </td>
+        <td>Examples show step-by-step reasoning before the final answer</td>
+        <td>Meaningfully improves multi-step reasoning tasks; increases output length/cost</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3>Why does this even work? (open research question, current best explanation)</h3>
+  <div class="callout callout-purple">
+    <strong>The leading hypothesis:</strong> during pretraining on trillions of tokens, the model repeatedly encounters implicit "pattern-completion" structures (FAQs, tables, structured documents, code with examples). Next-token prediction on that data implicitly trains a general skill: "infer the pattern governing this sequence and continue it." A few-shot prompt is just a novel instance of exactly that skill — the model isn't learning a new task from scratch, it's recognizing "oh, this is a pattern-completion problem" and applying an already-general capability.
+  </div>
+  <h3>Limits of ICL</h3>
+  <div class="steps">
+    <div class="step-card">
+      <div class="step-num" style="color:#b83232">✗</div>
+      <h4>Doesn't persist</h4>
+      <p>Nothing is learned permanently — every single call must re-supply the examples in the prompt.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#b83232">✗</div>
+      <h4>Context-length cost</h4>
+      <p>More/longer examples = more tokens billed and processed on every single inference call.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#b83232">✗</div>
+      <h4>Ceiling on task depth</h4>
+      <p>Deep domain adaptation (new vocabulary, subtle stylistic consistency) is hard to fully instill via a handful of examples.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#b83232">✗</div>
+      <h4>Sensitive to example choice/order</h4>
+      <p>Which examples, and in what order, can noticeably swing output quality — a known fragility.</p>
+    </div>
+  </div>
+  <p>When these limits bite, the next step on the spectrum is to actually change the weights — which is where quantization and LoRA (§§04–05) come in.</p>
+</section>
+<!-- ═══════════════════════════════════════════════════
+     SECTION 3 — FULL FINE-TUNING
+═══════════════════════════════════════════════════ -->
+<section class="section" id="s3">
+  <div class="section-eyebrow">Section 03</div>
+  <h2>Full Fine-Tuning</h2>
+  <p>Full fine-tuning continues training the entire pretrained model — every parameter — on a smaller, task-specific labeled dataset, using ordinary backpropagation. It's conceptually the simplest adaptation method, and the most expensive.</p>
+  <h3>Why it's expensive: the memory math</h3>
+  <div class="math-box">
+    <span class="comment">// For a model with P parameters, training (not just inference!) needs to hold in memory:</span>
+Model weights                    P × bytes_per_param      
+    <span class="comment">// e.g. P × 2 bytes for fp16</span>
+Gradients                        P × bytes_per_param      
+    <span class="comment">// same shape as weights</span>
+Optimizer state (Adam: m, v)     P × 2 × 4 bytes          
+    <span class="comment">// Adam keeps 2 extra fp32 buffers per param</span>
+Activations (for backprop)       depends on batch size, seq length, depth
+    <span class="comment">// Worked example: a 7B-parameter model, fp16 weights, Adam optimizer</span>
+Weights:      7B × 2 bytes  = 
+    <span class="hi">14 GB</span>
+Gradients:    7B × 2 bytes  = 
+    <span class="hi">14 GB</span>
+Adam states:  7B × 8 bytes  = 
+    <span class="hi">56 GB</span>
+                              ─────────
+                     Total  ≈ 
+    <span class="hi">84 GB</span>   
+    <span class="comment">// before activations — already exceeds a single 80GB GPU</span>
+  </div>
+  <div class="callout callout-red">
+    <strong>This is the core motivation for everything else in this module.</strong> Full fine-tuning of even a "small" 7B model needs multiple high-end GPUs. Quantization (§04) attacks the weight-memory term. LoRA (§05) attacks the gradient + optimizer-state terms, by freezing almost everything.
+  </div>
+  <h3>Other real risks of full fine-tuning</h3>
+  <table>
+    <tbody>
+      <tr>
+        <th>Risk</th>
+        <th>What happens</th>
+      </tr>
+      <tr>
+        <td>
+          <strong>Catastrophic forgetting</strong>
+        </td>
+        <td>Aggressively updating all weights on a narrow dataset can degrade general capabilities the base model had before</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Overfitting on small data</strong>
+        </td>
+        <td>With only hundreds/thousands of examples but billions of parameters, the model can memorize rather than generalize</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Storage cost per task</strong>
+        </td>
+        <td>Every fine-tuned variant is a full copy of the model — 10 tasks = 10 × model size on disk</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>These three problems — memory cost, forgetting, and per-task storage — are exactly what parameter-efficient fine-tuning (PEFT) methods, and LoRA specifically, were designed to solve.</p>
+</section>
+<!-- ═══════════════════════════════════════════════════
+     SECTION 4 — QUANTIZATION
+═══════════════════════════════════════════════════ -->
+<section class="section" id="s4">
+  <div class="section-eyebrow">Section 04</div>
+  <h2>Quantization — Shrinking the Weight-Memory Term</h2>
+  <p>Model weights are normally stored as 32-bit or 16-bit floating point numbers. 
+    <strong>Quantization</strong> represents them with far fewer bits — 8-bit or even 4-bit integers — trading a small amount of numerical precision for a large reduction in memory and (often) faster inference.
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 760 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;display:block;margin:0 auto">
+      <text x="380" y="22" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#333" font-weight="600" letter-spacing="1.5">BITS PER WEIGHT → MEMORY FOR A 7B-PARAMETER MODEL</text>
+      <rect x="40" y="45" width="640" height="26" fill="#eee"></rect>
+      <rect x="40" y="45" width="640" height="26" fill="#b83232" opacity="0.85"></rect>
+      <text x="360" y="63" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">FP32 — 28 GB</text>
+      <rect x="40" y="80" width="320" height="26" fill="#e8a020" opacity="0.85"></rect>
+      <text x="200" y="98" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">FP16 / BF16 — 14 GB</text>
+      <rect x="40" y="115" width="160" height="26" fill="#2255aa" opacity="0.85"></rect>
+      <text x="120" y="133" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">INT8 — 7 GB</text>
+      <rect x="40" y="140" width="80" height="16" fill="#2a7a4b" opacity="0.9"></rect>
+      <text x="80" y="152" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8.5" fill="#fff" font-weight="700">INT4 — 3.5 GB</text>
+    </svg>
+    <div class="diagram-caption">FIG 3 — Halving the bit-width roughly halves memory. INT4 fits a 7B model in under 4GB — small enough for a consumer laptop, or (slowly) a CPU.</div>
+  </div>
+  <h3>The core math: scale + zero-point</h3>
+  <div class="math-box">
+    <span class="comment">// Map a real-valued weight range [min, max] onto integers [0, 2^bits − 1]</span>
+    <span class="var">scale</span> = 
+    <span class="eq">(max − min) / (2^bits − 1)</span>
+    <span class="var">zero_point</span> = 
+    <span class="eq">round(−min / scale)</span>
+    <span class="comment">// Quantize: real weight → integer</span>
+    <span class="var">q</span> = 
+    <span class="eq">round(w / scale) + zero_point</span>
+    <span class="comment">// Dequantize: integer → approximate real weight (used at inference time)</span>
+    <span class="var">ŵ</span> = 
+    <span class="eq">(q − zero_point) × scale</span>
+    <span class="comment">// Worked example: weights range [-2.0, 2.0], 4-bit (16 levels, 0..15)</span>
+scale = 4.0 / 15 = 
+    <span class="hi">0.267</span>
+w = 1.3  →  q = round(1.3/0.267) + round(2.0/0.267) = round(4.87) + round(7.49) = 5 + 7 = 
+    <span class="hi">12</span>
+dequantize: ŵ = (12 − 7) × 0.267 = 
+    <span class="hi">1.335</span>   
+    <span class="comment">// close to original 1.3, small quantization error</span>
+  </div>
+  <table>
+    <tbody>
+      <tr>
+        <th>Method</th>
+        <th>Idea</th>
+        <th>Notes</th>
+      </tr>
+      <tr>
+        <td>
+          <strong>Post-training quantization (PTQ)</strong>
+        </td>
+        <td>Quantize an already-trained model's weights, no retraining</td>
+        <td>Fast, but accuracy loss is fixed after the fact — GPTQ, AWQ are refined PTQ algorithms</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>GGUF</strong>
+        </td>
+        <td>A file format (used by 
+          <code>llama.cpp</code>) packaging quantized weights for efficient CPU/edge inference
+        </td>
+        <td>What lets a fine-tuned model actually run fast on a laptop CPU (see companion notebook)</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>QLoRA</strong>
+        </td>
+        <td>Quantize the frozen base model to 4-bit, then LoRA-fine-tune on top in full precision</td>
+        <td>Combines both techniques — see callout below</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-green">
+    <strong>QLoRA — why quantization and LoRA are usually used together, not as alternatives:</strong> quantization shrinks the frozen base model's memory footprint; LoRA (§05) adds a tiny number of new, full-precision trainable parameters on top. Combined (Dettmers et al., 2023), this is what lets a 7B–13B model be fine-tuned on a single consumer GPU — or, at reduced speed, even a CPU, which is exactly the setup the companion fine-tuning notebook uses.
+  </div>
+</section>
+<!-- ═══════════════════════════════════════════════════
+     SECTION 5 — LoRA
+═══════════════════════════════════════════════════ -->
+<section class="section" id="s5">
+  <div class="section-eyebrow">Section 05</div>
+  <h2>LoRA — Low-Rank Adaptation</h2>
+  <p>LoRA (Hu et al., 2021) is the single most widely used PEFT method. The insight: you don't need to update a full weight matrix to adapt it — a very 
+    <em>low-rank</em> update is usually enough to steer behavior on a new task.
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 780 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:780px;display:block;margin:0 auto">
+      <text x="390" y="24" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#333" font-weight="600" letter-spacing="1.5">LoRA: FREEZE THE BIG MATRIX, TRAIN A SMALL ONE</text>
+      <rect x="40" y="60" width="160" height="160" rx="8" fill="#e8e5dd" stroke="#888" stroke-width="1.5"></rect>
+      <text x="120" y="135" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="16" fill="#555" font-weight="700">W</text>
+      <text x="120" y="155" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#777">d × d</text>
+      <text x="120" y="240" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#b83232" font-weight="700">❄ FROZEN — 0 gradients</text>
+      <text x="225" y="145" text-anchor="middle" font-family="monospace" font-size="20" fill="#555">+</text>
+      <rect x="250" y="80" width="45" height="120" rx="6" fill="#eef3ff" stroke="#2255aa" stroke-width="1.5"></rect>
+      <text x="272" y="145" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#1a3a5c" font-weight="700">B</text>
+      <text x="272" y="215" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#777">d × r</text>
+      <text x="305" y="145" text-anchor="middle" font-family="monospace" font-size="18" fill="#555">×</text>
+      <rect x="315" y="120" width="120" height="50" rx="6" fill="#edfaf3" stroke="#2a7a4b" stroke-width="1.5"></rect>
+      <text x="375" y="150" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#1a5c38" font-weight="700">A</text>
+      <text x="375" y="240" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#777">r × d</text>
+      <text x="240" y="245" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#2a7a4b" font-weight="700">🔥 TRAINABLE — r ≪ d (e.g. r=8, d=4096)</text>
+      <line x1="450" y1="145" x2="490" y2="145" stroke="#555" stroke-width="2"></line>
+      <text x="470" y="135" text-anchor="middle" font-family="monospace" font-size="14" fill="#555">=</text>
+      <rect x="500" y="60" width="160" height="160" rx="8" fill="#fff3cc" stroke="#e8a020" stroke-width="2"></rect>
+      <text x="580" y="140" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="15" fill="#7a5000" font-weight="700">W'</text>
+      <text x="580" y="160" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#7a5000">= W + BA</text>
+      <text x="580" y="240" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#7a5000" font-weight="700">used at inference</text>
+      <rect x="690" y="70" width="80" height="140" rx="6" fill="#f5f0ff" stroke="#6b3fa0" stroke-width="1.3"></rect>
+      <text x="730" y="95" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#4a2a70" font-weight="700">7B model,</text>
+      <text x="730" y="110" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#4a2a70" font-weight="700">r=8, all</text>
+      <text x="730" y="125" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#4a2a70" font-weight="700">proj layers:</text>
+      <text x="730" y="150" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#4a2a70" font-weight="700">~4M</text>
+      <text x="730" y="165" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#4a2a70" font-weight="700">trainable</text>
+      <text x="730" y="180" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#4a2a70" font-weight="700">params</text>
+      <text x="730" y="198" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#6a4a90">(~0.06% of 7B)</text>
+    </svg>
+    <div class="diagram-caption">FIG 4 — LoRA decomposes the weight 
+      <em>update</em> ΔW into two small matrices B (d×r) and A (r×d), whose product BA approximates a full d×d update at a fraction of the parameters. W itself never changes.
+    </div>
+  </div>
+  <h3>The math</h3>
+  <div class="math-box">
+    <span class="comment">// Standard forward pass through a linear layer</span>
+    <span class="var">h</span> = 
+    <span class="eq">W · x</span>                            
+    <span class="comment">// W is d_out × d_in, frozen, pretrained</span>
+    <span class="comment">// LoRA adds a parallel low-rank path</span>
+    <span class="var">h</span> = 
+    <span class="eq">W · x  +  (α/r) · B · A · x</span>       
+    <span class="comment">// B: d_out × r,  A: r × d_in,  r ≪ d_out, d_in</span>
+    <span class="comment">// A is initialized random-small, B initialized to ZERO</span>
+    <span class="comment">// → at the start of training, BA = 0, so the model behaves EXACTLY like the base model</span>
+    <span class="comment">// → training then gradually learns a small, targeted correction</span>
+    <span class="comment">// α (alpha) is a fixed scaling factor — controls how much the LoRA update contributes</span>
+    <span class="comment">// higher α/r → stronger adaptation, at more risk of overfitting/forgetting</span>
+  </div>
+  <h3>Worked example: parameter count at real scale</h3>
+  <table>
+    <tbody>
+      <tr>
+        <th></th>
+        <th>Full fine-tuning</th>
+        <th>LoRA (r=8)</th>
+      </tr>
+      <tr>
+        <td>Trainable parameters (7B model, all attention projections)</td>
+        <td>7,000,000,000</td>
+        <td>≈ 4,000,000</td>
+      </tr>
+      <tr>
+        <td>% of total model</td>
+        <td>100%</td>
+        <td>≈ 0.06%</td>
+      </tr>
+      <tr>
+        <td>Optimizer state (Adam, fp32)</td>
+        <td>56 GB</td>
+        <td>≈ 32 MB</td>
+      </tr>
+      <tr>
+        <td>Checkpoint size to store per task</td>
+        <td>~14 GB (fp16 full model)</td>
+        <td>~8–16 MB (adapter only)</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-blue">
+    <strong>Why does training only ~0.06% of the parameters still work well?</strong> The hypothesis behind LoRA (supported by prior work on the "intrinsic dimensionality" of fine-tuning) is that the 
+    <em>change</em> a downstream task requires — as opposed to the full knowledge the model already has — lives in a low-dimensional subspace. You don't need to re-teach the model language; you need to nudge it, and that nudge has low intrinsic rank.
+  </div>
+  <div class="callout callout-red">
+    <strong>Exam favourite:</strong> "Why is B initialized to zero and A initialized randomly, not the other way around, and not both zero?" — Both zero means the gradient through BA is zero everywhere (dead layer, never learns). Both random means training starts from a random, non-zero perturbation of a working pretrained model — degrading it immediately. B=0, A=random gives BA=0 at init (identical to the base model) while still allowing a non-zero gradient to flow into A immediately, so learning starts cleanly from the base model's exact behavior.
+  </div>
+</section>
+<!-- ═══════════════════════════════════════════════════
+     SECTION 6 — PEFT ECOSYSTEM
+═══════════════════════════════════════════════════ -->
+<section class="section" id="s6">
+  <div class="section-eyebrow">Section 06</div>
+  <h2>The PEFT Ecosystem</h2>
+  <p>LoRA is the most popular parameter-efficient fine-tuning method, but not the only one. Knowing the landscape — and the one library that implements almost all of it — matters for the lab.</p>
+  <table>
+    <tbody>
+      <tr>
+        <th>Method</th>
+        <th>What's trained</th>
+        <th>Trade-off vs. LoRA</th>
+      </tr>
+      <tr>
+        <td>
+          <strong>LoRA</strong>
+        </td>
+        <td>Low-rank BA matrices injected into linear layers (usually attention projections)</td>
+        <td>The default choice — good quality, simple, widely supported</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>QLoRA</strong>
+        </td>
+        <td>Same as LoRA, but the frozen base model is 4-bit quantized</td>
+        <td>Lowest memory footprint — enables fine-tuning larger models on smaller hardware (§04)</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Prefix tuning</strong>
+        </td>
+        <td>A short sequence of trainable "virtual token" vectors prepended to every layer's keys/values</td>
+        <td>No architecture changes to weights at all, but historically less expressive than LoRA</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Prompt tuning</strong>
+        </td>
+        <td>Trainable virtual tokens prepended only at the input embedding layer</td>
+        <td>Fewest trainable parameters of all; needs a larger base model to work well</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Adapters</strong>
+        </td>
+        <td>Small bottleneck feed-forward blocks inserted between existing layers</td>
+        <td>Adds inference latency (extra layers in the forward path); LoRA avoids this by merging into existing weights</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>The table names five methods, but the thing that actually distinguishes them is 
+    <em>where</em>, in a single frozen transformer block, each one inserts its trainable parameters — and whether that insertion sits 
+    <strong>parallel</strong> to the frozen path (free to merge away later) or 
+    <strong>serial</strong>, in the forward path itself (a permanent extra hop). FIG 5 lines all five up against one block so the difference is visible instead of just described.
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 780 460" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:780px;display:block;margin:0 auto">
+      <text x="390" y="22" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#333" font-weight="600" letter-spacing="1.5">WHERE EACH PEFT METHOD ADDS TRAINABLE PARAMETERS</text>
+      <text x="110" y="42" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="7.5" fill="#4a2a70" font-weight="700">PROMPT TUNING</text>
+      <rect x="40" y="48" width="140" height="30" rx="6" fill="#f5f0ff" stroke="#6b3fa0" stroke-width="1.3"></rect>
+      <text x="110" y="67" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#4a2a70">virtual tokens (trainable)</text>
+      <line x1="180" y1="63" x2="205" y2="63" stroke="#6b3fa0" stroke-width="1.5" marker-end="url(#a1)"></line>
+      <rect x="210" y="48" width="180" height="30" rx="6" fill="#fff" stroke="#888" stroke-width="1.3"></rect>
+      <text x="300" y="67" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" fill="#555">Token Embeddings</text>
+      <line x1="300" y1="78" x2="300" y2="98" stroke="#555" stroke-width="1.5" marker-end="url(#a1)"></line>
+      <rect x="55" y="100" width="380" height="252" rx="8" fill="none" stroke="#888" stroke-width="1.3" stroke-dasharray="4,3"></rect>
+      <text x="245" y="118" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9.5" fill="#333" font-weight="700">TRANSFORMER BLOCK — repeated ×N (frozen)</text>
+      <rect x="65" y="132" width="100" height="46" rx="6" fill="#fff8ee" stroke="#e8a020" stroke-width="1.3"></rect>
+      <text x="115" y="151" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#7a5000">prefix</text>
+      <text x="115" y="163" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#7a5000">K, V (trainable)</text>
+      <line x1="165" y1="155" x2="183" y2="155" stroke="#e8a020" stroke-width="1.5" marker-end="url(#a1)"></line>
+      <text x="115" y="190" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="7.2" fill="#7a5000" font-weight="700">PREFIX TUNING</text>
+      <rect x="185" y="132" width="230" height="46" rx="6" fill="#fff" stroke="#555" stroke-width="1.3"></rect>
+      <text x="300" y="150" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" fill="#333">Self-Attention</text>
+      <text x="300" y="164" text-anchor="middle" font-family="Inter,sans-serif" font-size="7.5" fill="#777">(Q,K,V,O — frozen ❄)</text>
+      <line x1="300" y1="178" x2="300" y2="196" stroke="#555" stroke-width="1.3"></line>
+      <text x="300" y="192" text-anchor="middle" font-family="monospace" font-size="11" fill="#2a7a4b">+</text>
+      <rect x="185" y="198" width="230" height="26" rx="5" fill="#edfaf3" stroke="#2a7a4b" stroke-width="1.3"></rect>
+      <text x="300" y="215" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#1a5c38">BA (LoRA / QLoRA) — parallel, trainable</text>
+      <line x1="300" y1="224" x2="300" y2="238" stroke="#555" stroke-width="1.5" marker-end="url(#a1)"></line>
+      <rect x="185" y="240" width="230" height="40" rx="6" fill="#fff" stroke="#555" stroke-width="1.3"></rect>
+      <text x="300" y="257" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" fill="#333">Feed-Forward</text>
+      <text x="300" y="271" text-anchor="middle" font-family="Inter,sans-serif" font-size="7.5" fill="#777">(frozen ❄ — 4-bit under QLoRA)</text>
+      <line x1="300" y1="280" x2="300" y2="296" stroke="#555" stroke-width="1.5" marker-end="url(#a1)"></line>
+      <rect x="185" y="298" width="230" height="32" rx="6" fill="#eef3ff" stroke="#2255aa" stroke-width="1.3"></rect>
+      <text x="300" y="318" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#1a3a5c">adapter bottleneck (trainable, serial)</text>
+      <text x="300" y="342" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="7.2" fill="#1a3a5c" font-weight="700">ADAPTERS — sits IN the forward path</text>
+      <line x1="300" y1="352" x2="300" y2="372" stroke="#555" stroke-width="1.5" marker-end="url(#a1)"></line>
+      <text x="300" y="386" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8.5" fill="#888">⋮ repeats × N layers</text>
+      <line x1="300" y1="392" x2="300" y2="406" stroke="#555" stroke-width="1.5" marker-end="url(#a1)"></line>
+      <rect x="210" y="408" width="180" height="30" rx="6" fill="#fff" stroke="#888" stroke-width="1.3"></rect>
+      <text x="300" y="427" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" fill="#555">Output</text>
+      <rect x="460" y="100" width="300" height="252" rx="8" fill="#faf9f5" stroke="#ccc" stroke-width="1.3"></rect>
+      <text x="610" y="122" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9.5" fill="#333" font-weight="700">READING THE DIAGRAM</text>
+      <rect x="472" y="136" width="13" height="13" fill="#f5f0ff" stroke="#6b3fa0"></rect>
+      <text x="492" y="147" font-family="Inter,sans-serif" font-size="8" fill="#444">PROMPT TUNING — new tokens at</text>
+      <text x="492" y="159" font-family="Inter,sans-serif" font-size="8" fill="#444">the INPUT ONLY, once. Cheapest of</text>
+      <text x="492" y="171" font-family="Inter,sans-serif" font-size="8" fill="#444">all five, needs a larger base model.</text>
+      <rect x="472" y="188" width="13" height="13" fill="#fff8ee" stroke="#e8a020"></rect>
+      <text x="492" y="199" font-family="Inter,sans-serif" font-size="8" fill="#444">PREFIX TUNING — new K/V vectors</text>
+      <text x="492" y="211" font-family="Inter,sans-serif" font-size="8" fill="#444">prepended EVERY layer's attention.</text>
+      <text x="492" y="223" font-family="Inter,sans-serif" font-size="8" fill="#444">No existing weights touched at all.</text>
+      <rect x="472" y="240" width="13" height="13" fill="#edfaf3" stroke="#2a7a4b"></rect>
+      <text x="492" y="251" font-family="Inter,sans-serif" font-size="8" fill="#444">LoRA / QLoRA — low-rank update</text>
+      <text x="492" y="263" font-family="Inter,sans-serif" font-size="8" fill="#444">PARALLEL to each frozen projection,</text>
+      <text x="492" y="275" font-family="Inter,sans-serif" font-size="8" fill="#444">every layer. Merges into W after</text>
+      <text x="492" y="287" font-family="Inter,sans-serif" font-size="8" fill="#444">training → zero extra latency.</text>
+      <rect x="472" y="304" width="13" height="13" fill="#eef3ff" stroke="#2255aa"></rect>
+      <text x="492" y="315" font-family="Inter,sans-serif" font-size="8" fill="#444">ADAPTERS — bottleneck FFN SERIAL</text>
+      <text x="492" y="327" font-family="Inter,sans-serif" font-size="8" fill="#444">in the forward path, every layer.</text>
+      <text x="492" y="339" font-family="Inter,sans-serif" font-size="8" fill="#444">Adds a real hop → real latency.</text>
+    </svg>
+    <div class="diagram-caption">FIG 5 — All five PEFT methods placed against one frozen transformer block. Prompt tuning touches only the input, once. Prefix tuning and LoRA/QLoRA both touch every layer but stay out of the forward path (prefix adds K/V context, LoRA runs parallel and merges away). Adapters are the odd one out: they sit serially inside the forward path itself, which is the direct, visual reason they're the one method that permanently adds inference latency.</div>
+  </div>
+  <div class="callout callout-green">
+    <strong>Why LoRA specifically won out in practice:</strong> because 
+    <code>BA</code> has the exact same shape as the frozen 
+    <code>W</code>, it can be 
+    <strong>merged</strong> into the base weights after training (
+    <code>W' = W + BA</code>) — meaning zero extra inference latency compared to the original model. Adapters and prefix-tuning both add a small amount of runtime cost that LoRA avoids entirely.
+  </div>
+  <h3>HuggingFace PEFT — the library that implements all of this</h3>
+  <div class="codebox">
+    <span class="kw">from</span> peft 
+    <span class="kw">import</span> LoraConfig, get_peft_model, TaskType
+    <span class="kw">from</span> transformers 
+    <span class="kw">import</span> AutoModelForSeq2SeqLM
+model = AutoModelForSeq2SeqLM.from_pretrained(
+    <span class="str">"google/flan-t5-small"</span>)
+config = LoraConfig(
+    task_type
+    <span class="num">=</span>TaskType.SEQ_2_SEQ_LM,
+    r
+    <span class="num">=</span>
+    <span class="num">8</span>,                        
+    <span class="cm"># rank</span>
+    lora_alpha
+    <span class="num">=</span>
+    <span class="num">16</span>,               
+    <span class="cm"># scaling: alpha/r = 2</span>
+    lora_dropout
+    <span class="num">=</span>
+    <span class="num">0.05</span>,
+    target_modules
+    <span class="num">=</span>[
+    <span class="str">"q"</span>, 
+    <span class="str">"v"</span>],     
+    <span class="cm"># which projections get a LoRA adapter</span>
+)
+model = get_peft_model(model, config)
+model.print_trainable_parameters()
+    <span class="cm"># → trainable params: 344,064 || all params: 77,285,760 || trainable%: 0.445%</span>
+  </div>
+  <p>Three lines of actual change: load the base model as normal, wrap it in 
+    <code>get_peft_model</code> with a config, then train with the ordinary HuggingFace 
+    <code>Trainer</code> exactly as if it were full fine-tuning — PEFT handles freezing everything except the injected adapters automatically. The companion notebook uses exactly this pattern.
+  </p>
+</section>
+<!-- ═══════════════════════════════════════════════════
+     SECTION 7 — FINE-TUNING WORKFLOW
+═══════════════════════════════════════════════════ -->
+<section class="section" id="s7">
+  <div class="section-eyebrow">Section 07</div>
+  <h2>The Fine-Tuning Workflow — Applied to the Lab</h2>
+  <p>The lab task is: 
+    <strong>fine-tune a small LLM as a QA system.</strong> Here's the end-to-end workflow the companion notebook implements, and the decisions at each step.
+  </p>
+  <div class="steps">
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <h4>Choose a base model</h4>
+      <p>Small enough to fine-tune on CPU in reasonable time: Flan-T5-small/base (already instruction-tuned for QA-style tasks), or a 4-bit-quantized Phi/Gemma for a decoder-only alternative.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <h4>Prepare QA data</h4>
+      <p>(context, question, answer) triples — e.g. a SQuAD-style subset — formatted as the model's expected input/output text pairs.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <h4>Apply LoRA</h4>
+      <p>Wrap the base model with a 
+        <code>LoraConfig</code> targeting attention projection layers, freezing everything else (§§05–06).
+      </p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">4</div>
+      <h4>Train</h4>
+      <p>Standard supervised fine-tuning loop — cross-entropy loss on the target answer tokens, small batch size and learning rate given limited hardware.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">5</div>
+      <h4>Evaluate</h4>
+      <p>Exact-match / F1 against held-out QA pairs, plus qualitative spot-checks on questions outside the training distribution.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">6</div>
+      <h4>Merge &amp; export (optional)</h4>
+      <p>
+        <code>W' = W + BA</code> merged into a single deployable model — or keep the adapter separate to swap between tasks cheaply.
+      </p>
+    </div>
+  </div>
+  <h3>Key hyperparameters and what they actually control</h3>
+  <table>
+    <tbody>
+      <tr>
+        <th>Hyperparameter</th>
+        <th>What it controls</th>
+        <th>Typical starting point</th>
+      </tr>
+      <tr>
+        <td>
+          <code>r</code> (rank)
+        </td>
+        <td>Capacity of the LoRA update — higher r can fit more complex changes, at more trainable params</td>
+        <td>4–16 for small models/tasks</td>
+      </tr>
+      <tr>
+        <td>
+          <code>lora_alpha</code>
+        </td>
+        <td>Scaling of the LoRA contribution (effective strength = alpha/r)</td>
+        <td>Often set to 2× rank</td>
+      </tr>
+      <tr>
+        <td>
+          <code>target_modules</code>
+        </td>
+        <td>Which weight matrices get an adapter (commonly Q and V projections; sometimes all linear layers)</td>
+        <td>Start with attention projections only</td>
+      </tr>
+      <tr>
+        <td>Learning rate</td>
+        <td>Step size for the (small) set of trainable parameters</td>
+        <td>Higher than full fine-tuning — often 1e-4 to 3e-4, since so few params are updated</td>
+      </tr>
+      <tr>
+        <td>Batch size</td>
+        <td>Examples per gradient step</td>
+        <td>Small (1–8) on CPU; larger with gradient accumulation to simulate bigger batches</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-purple">
+    <strong>CPU vs. GPU, honestly:</strong> LoRA fine-tuning a small model (Flan-T5-small, ~80M params) on CPU is genuinely feasible — slow (minutes per epoch on a small dataset, vs. seconds on GPU) but it completes. The companion notebook is written to run either way: it detects CUDA automatically and falls back to CPU with a smaller batch size and fewer steps, so the lab is completable without a GPU, while still being correct code that scales up immediately if a GPU becomes available.
+  </div>
+</section>
+<!-- ═══════════════════════════════════════════════════
+     SECTION 8 — TAKEAWAYS
+═══════════════════════════════════════════════════ -->
+<section class="section" id="s8">
+  <div class="section-eyebrow">Section 08</div>
+  <h2>Key Takeaways &amp; Exam Prep</h2>
+  <div class="steps">
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Adaptation is a spectrum</h4>
+      <p>Prompting → PEFT → full fine-tuning → pretraining. Pick the cheapest method that meets the reliability bar.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>ICL learns nothing permanent</h4>
+      <p>Few-shot examples steer one forward pass; they must be resupplied every call.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Full fine-tuning's cost is dominated by optimizer state</h4>
+      <p>Adam's extra buffers, not just the weights, are why a 7B model needs ~84GB to fully fine-tune.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Quantization trades precision for memory</h4>
+      <p>INT4 gets a 7B model under 4GB via a scale + zero-point mapping, at a small, usually-acceptable accuracy cost.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>LoRA freezes W, trains BA</h4>
+      <p>A low-rank update (~0.06% of params) is often enough to adapt behavior — merges back with zero inference cost.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>QLoRA = quantize + LoRA together</h4>
+      <p>4-bit frozen base + full-precision LoRA adapter is what makes single-GPU (or CPU) fine-tuning of billion-parameter models realistic.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>PEFT is a 3-line wrap, not a rewrite</h4>
+      <p>HuggingFace's 
+        <code>peft</code> library wraps any model; training code is otherwise unchanged.
+      </p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>CPU fine-tuning is slow, not impossible</h4>
+      <p>Small models + LoRA make the lab completable without a GPU — the companion notebook auto-detects and adapts.</p>
+    </div>
+  </div>
+  <h3>Common exam questions</h3>
+  <table>
+    <tbody>
+      <tr>
+        <th>Question</th>
+        <th>Short answer</th>
+      </tr>
+      <tr>
+        <td>Why does full fine-tuning need much more memory than just storing the model weights?</td>
+        <td>The optimizer (e.g. Adam) keeps extra per-parameter state (momentum + variance), and gradients must also be stored — together often 5–6× the raw weight memory</td>
+      </tr>
+      <tr>
+        <td>What does LoRA actually train?</td>
+        <td>Two small low-rank matrices, B (d×r) and A (r×d), added to a frozen pretrained weight matrix W as W + BA</td>
+      </tr>
+      <tr>
+        <td>Why initialize B to zero in LoRA?</td>
+        <td>So the LoRA path contributes exactly zero at the start of training — the model is identical to the base model before any adaptation happens</td>
+      </tr>
+      <tr>
+        <td>What is QLoRA?</td>
+        <td>Quantizing the frozen base model to 4-bit while keeping the LoRA adapter in full precision — combines both techniques' memory savings</td>
+      </tr>
+      <tr>
+        <td>Why can a LoRA adapter be merged into the base model with zero inference cost?</td>
+        <td>BA has the exact same shape as W, so W' = W + BA is computed once, offline, after training — no extra layers at inference time</td>
+      </tr>
+      <tr>
+        <td>What's the practical difference between few-shot prompting and fine-tuning?</td>
+        <td>Prompting steers behavior temporarily, per-call, with no weight changes; fine-tuning permanently changes (some of) the model's weights, persisting across all future calls</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout" style="margin-top:2rem">
+    <strong>References:</strong>
+    <br>
+    Brown et al. (2020) — Language Models are Few-Shot Learners (GPT-3, in-context learning).
+    <br>
+    Wei et al. (2022) — Chain-of-Thought Prompting Elicits Reasoning in Large Language Models.
+    <br>
+    Hu et al. (2021) — LoRA: Low-Rank Adaptation of Large Language Models.
+    <br>
+    Dettmers et al. (2023) — QLoRA: Efficient Finetuning of Quantized LLMs.
+    <br>
+    Frantar et al. (2022) — GPTQ: Accurate Post-Training Quantization for Generative Pretrained Transformers.
+    <br>
+    Li &amp; Liang (2021) — Prefix-Tuning: Optimizing Continuous Prompts for Generation.
+    <br>
+    Lester, Al-Rfou &amp; Constant (2021) — The Power of Scale for Parameter-Efficient Prompt Tuning.
+    <br>
+    Houlsby et al. (2019) — Parameter-Efficient Transfer Learning for NLP (Adapters).
+  </div>
+  <div class="callout callout-blue" style="margin-top:1.5rem">
+    <strong>Companion notebook:</strong> 
+    <code>6_Fine_Tuning_Lab.ipynb</code> implements the full workflow in §07 end-to-end — fine-tuning a small QA model with LoRA, runnable on CPU, with a GPU code path that activates automatically if CUDA is available.
+  </div>
+</section>
+<footer style="text-align:center;padding:2rem;font-family:var(--mono);font-size:0.75rem;color:#aaa;border-top:1px solid var(--rule)">Module 1 · Part 8 · Part 5 — Fine-Tuning LLMs · Companion to Module 5 (LLM Architecture) and 6_Fine_Tuning_Lab.ipynb</footer>

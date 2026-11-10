@@ -1,0 +1,1336 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RNN with Attention — Visual Study Guide (v2)</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Fraunces:ital,wght@0,300;0,700;1,300&family=Inter:wght@400;500;600&display=swap');
+  :root{
+    --ink:#0f1117; --paper:#f7f6f2; --mid:#e8e5dd; --rule:#c9c4b8;
+    --accent:#1a3a5c; --highlight:#e8a020; --green:#2a7a4b; --red:#b83232;
+    --blue:#2255aa; --purple:#6b3fa0; --teal:#0d7a7a;
+    --mono:'IBM Plex Mono',monospace; --display:'Fraunces',Georgia,serif; --body:'Inter',system-ui,sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--body);background:var(--paper);color:var(--ink);line-height:1.7;font-size:16px}
+  .hero{background:var(--accent);color:#fff;padding:4rem 2rem 3rem;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(-45deg,transparent,transparent 30px,rgba(255,255,255,.03) 30px,rgba(255,255,255,.03) 31px)}
+  .hero-label{font-family:var(--mono);font-size:.75rem;letter-spacing:.2em;text-transform:uppercase;color:var(--highlight);margin-bottom:1rem;position:relative}
+  .hero h1{font-family:var(--display);font-size:clamp(2rem,5vw,3.5rem);font-weight:700;line-height:1.1;margin-bottom:1rem;position:relative}
+  .hero p{font-size:1.1rem;opacity:.8;max-width:640px;margin:0 auto;position:relative}
+  .toc{background:var(--ink);color:#fff;padding:1.2rem 2rem;display:flex;gap:1.3rem;flex-wrap:wrap;justify-content:center;position:sticky;top:0;z-index:100}
+  .toc a{color:rgba(255,255,255,.7);text-decoration:none;font-family:var(--mono);font-size:.75rem;letter-spacing:.04em;transition:color .2s}
+  .toc a:hover{color:var(--highlight)}
+  .section{max-width:900px;margin:0 auto;padding:4rem 2rem;border-bottom:1px solid var(--rule)}
+  .section-eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:.5rem}
+  .section h2{font-family:var(--display);font-size:clamp(1.5rem,3vw,2.2rem);font-weight:700;margin-bottom:1.5rem}
+  .section h3{font-family:var(--display);font-size:1.28rem;font-weight:700;margin:2.2rem 0 .8rem;color:var(--accent)}
+  .section h4{font-family:var(--mono);font-size:.85rem;font-weight:600;margin:1.6rem 0 .5rem;color:var(--teal);letter-spacing:.05em;text-transform:uppercase}
+  .section p{margin-bottom:1rem;color:#333}
+  .callout{border-left:4px solid var(--highlight);background:#fff8ee;padding:1rem 1.25rem;border-radius:0 6px 6px 0;margin:1.5rem 0;font-size:.95rem}
+  .callout strong{color:var(--accent)}
+  .callout-blue{border-left-color:var(--blue);background:#eef3ff}
+  .callout-green{border-left-color:var(--green);background:#edfaf3}
+  .callout-red{border-left-color:var(--red);background:#fff0f0}
+  .callout-purple{border-left-color:var(--purple);background:#f5f0ff}
+  .math-box{background:var(--ink);color:#e8e8e8;font-family:var(--mono);font-size:.85rem;line-height:1.85;padding:1.4rem;border-radius:8px;margin:1.5rem 0;overflow-x:auto;white-space:pre}
+  .math-box .comment{color:#6a9f6a}
+  .math-box .var{color:#f0b060}
+  .math-box .eq{color:#7ab8f5}
+  .math-box .hi{color:#ff9090}
+  .math-box .ok{color:#8ee08e}
+  table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:.87rem}
+  th{background:var(--accent);color:#fff;padding:.55rem .85rem;text-align:left;font-family:var(--mono);font-size:.74rem;letter-spacing:.03em}
+  td{padding:.55rem .85rem;border-bottom:1px solid var(--mid);vertical-align:top}
+  tr:nth-child(even) td{background:#fafaf7}
+  .tag{display:inline-block;background:var(--mid);padding:.1rem .4rem;border-radius:3px;font-family:var(--mono);font-size:.78rem}
+  .diagram-wrap{background:#fff;border:1px solid var(--rule);border-radius:10px;padding:1.4rem;margin:2rem 0;overflow-x:auto}
+  .diagram-caption{text-align:center;font-family:var(--mono);font-size:.73rem;color:#777;margin-top:.7rem;letter-spacing:.03em;line-height:1.6}
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1rem;margin:1.5rem 0}
+  .step-card{background:#fff;border:1px solid var(--rule);border-radius:8px;padding:1.1rem}
+  .step-num{font-family:var(--mono);font-size:1.9rem;font-weight:600;color:var(--mid);line-height:1;margin-bottom:.4rem}
+  .step-card h4{font-size:.88rem;font-weight:600;color:var(--accent);margin:0 0 .35rem;text-transform:none;letter-spacing:0;font-family:var(--body)}
+  .step-card p{font-size:.83rem;margin:0;color:#444}
+  .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0}
+  .compare-card{border:1px solid var(--rule);border-radius:8px;overflow:hidden;background:#fff}
+  .compare-card-header{padding:.6rem 1rem;font-family:var(--mono);font-size:.76rem;font-weight:600;letter-spacing:.04em}
+  .compare-card-body{padding:1rem;font-size:.86rem}
+  .compare-card-body ul{list-style:none}
+  .compare-card-body li{margin-bottom:.4rem;padding-left:1.1rem;position:relative}
+  .compare-card-body li::before{content:'→';position:absolute;left:0;color:var(--highlight)}
+  /* numbered walkthrough */
+  .walk{counter-reset:wk;margin:1.5rem 0}
+  .walk-item{position:relative;padding:1.1rem 1.2rem 1.1rem 3.6rem;background:#fff;border:1px solid var(--rule);border-radius:8px;margin-bottom:.9rem}
+  .walk-item::before{counter-increment:wk;content:counter(wk);position:absolute;left:1.1rem;top:1.05rem;width:1.7rem;height:1.7rem;background:var(--accent);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.85rem;font-weight:600}
+  .walk-item h4{margin:0 0 .35rem;font-family:var(--body);font-size:.95rem;font-weight:600;color:var(--accent);text-transform:none;letter-spacing:0}
+  .walk-item p{margin:0;font-size:.9rem;color:#444}
+  .walk-item code{font-family:var(--mono);font-size:.85rem;background:var(--mid);padding:.05rem .35rem;border-radius:3px}
+  @media(max-width:620px){.compare-grid{grid-template-columns:1fr}.steps{grid-template-columns:1fr 1fr}.section{padding:2.5rem 1.2rem}}</style>
+<div class="hero">
+  <div class="hero-label">Module 1 · Part 6B · Part 2 — Study Guide (v2, rewritten)</div>
+  <h1>RNN with Attention
+    <br>&amp; Attention Models
+  </h1>
+  <p>Explained destination-first: what attention produces, then how each piece is built — with every symbol, shape, and number spelled out.</p>
+</div>
+<nav class="toc">
+  <a href="#s1">01 The Problem</a>
+  <a href="#s2">02 What H Is</a>
+  <a href="#s3">03 Destination First</a>
+  <a href="#s4">04 Two Weights</a>
+  <a href="#s5">05 Step by Step</a>
+  <a href="#s6">06 Full Loop</a>
+  <a href="#s7">07 Encoder</a>
+  <a href="#s8">08 Decoder</a>
+  <a href="#s9">09 Variants</a>
+  <a href="#s10">10 To Transformers</a>
+</nav>
+<!-- ══════════ 01 ══════════ -->
+<section class="section" id="s1">
+  <div class="section-eyebrow">Section 01</div>
+  <h2>The Problem Attention Solves</h2>
+  <p>Classic Seq2Seq compresses the whole source sentence into 
+    <em>one</em> fixed vector. The decoder then generates every output word from that single vector. For long sentences, information is lost before decoding even starts.
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 780 250" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:780px;display:block;margin:0 auto">
+      <defs>
+        <marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#555"></polygon>
+        </marker>
+        <marker id="ar" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#b83232"></polygon>
+        </marker>
+        <marker id="ag" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#2a7a4b"></polygon>
+        </marker>
+        <marker id="ab" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#2255aa"></polygon>
+        </marker>
+        <marker id="ao" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#e8a020"></polygon>
+        </marker>
+      </defs>
+      <!-- LEFT -->
+      <rect x="15" y="15" width="365" height="220" rx="10" fill="#fff5f5" stroke="#e0b0b0" stroke-width="1.5"></rect>
+      <text x="197" y="38" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#b83232" letter-spacing="1.5" font-weight="700">WITHOUT ATTENTION</text>
+      <rect x="35" y="58" width="44" height="30" rx="5" fill="#ffd0d0" stroke="#b83232"></rect>
+      <text x="57" y="78" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#7a0000">x₁</text>
+      <rect x="88" y="58" width="44" height="30" rx="5" fill="#ffd0d0" stroke="#b83232"></rect>
+      <text x="110" y="78" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#7a0000">x₂</text>
+      <rect x="141" y="58" width="44" height="30" rx="5" fill="#ffd0d0" stroke="#b83232"></rect>
+      <text x="163" y="78" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#7a0000">x₃</text>
+      <rect x="194" y="58" width="44" height="30" rx="5" fill="#b83232"></rect>
+      <text x="216" y="78" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="600">h₄</text>
+      <line x1="79" y1="73" x2="86" y2="73" stroke="#b83232" stroke-width="1.5" marker-end="url(#ar)"></line>
+      <line x1="132" y1="73" x2="139" y2="73" stroke="#b83232" stroke-width="1.5" marker-end="url(#ar)"></line>
+      <line x1="185" y1="73" x2="192" y2="73" stroke="#b83232" stroke-width="1.5" marker-end="url(#ar)"></line>
+      <text x="270" y="78" font-family="IBM Plex Mono,monospace" font-size="9" fill="#b83232">only h₄ survives</text>
+      <path d="M216 88 L216 118 L165 150 L165 165 L267 165 L267 150 L216 118" fill="#ffd0d0" stroke="#b83232" stroke-width="1.5"></path>
+      <text x="216" y="138" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#b83232" font-weight="700">BOTTLENECK</text>
+      <rect x="120" y="192" width="180" height="30" rx="6" fill="#ffd0d0" stroke="#b83232"></rect>
+      <text x="210" y="212" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#7a0000">Decoder generates ALL words from h₄</text>
+      <line x1="216" y1="166" x2="216" y2="190" stroke="#b83232" stroke-width="1.5" marker-end="url(#ar)"></line>
+      <!-- RIGHT -->
+      <rect x="400" y="15" width="365" height="220" rx="10" fill="#f0fff6" stroke="#80c8a0" stroke-width="1.5"></rect>
+      <text x="582" y="38" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#2a7a4b" letter-spacing="1.5" font-weight="700">WITH ATTENTION</text>
+      <rect x="425" y="58" width="44" height="30" rx="5" fill="#c8ead6" stroke="#2a7a4b"></rect>
+      <text x="447" y="78" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a5c38">h₁</text>
+      <rect x="478" y="58" width="44" height="30" rx="5" fill="#c8ead6" stroke="#2a7a4b"></rect>
+      <text x="500" y="78" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a5c38">h₂</text>
+      <rect x="531" y="58" width="44" height="30" rx="5" fill="#2a7a4b"></rect>
+      <text x="553" y="78" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="600">h₃</text>
+      <rect x="584" y="58" width="44" height="30" rx="5" fill="#c8ead6" stroke="#2a7a4b"></rect>
+      <text x="606" y="78" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a5c38">h₄</text>
+      <text x="660" y="78" font-family="IBM Plex Mono,monospace" font-size="9" fill="#2a7a4b">ALL kept</text>
+      <line x1="447" y1="88" x2="545" y2="140" stroke="#c8ead6" stroke-width="2" stroke-dasharray="4,3"></line>
+      <line x1="500" y1="88" x2="548" y2="140" stroke="#80c8a0" stroke-width="2.5" stroke-dasharray="4,3"></line>
+      <line x1="553" y1="88" x2="553" y2="140" stroke="#2a7a4b" stroke-width="5"></line>
+      <line x1="606" y1="88" x2="560" y2="140" stroke="#c8ead6" stroke-width="1.5" stroke-dasharray="4,3"></line>
+      <text x="452" y="115" font-family="IBM Plex Mono,monospace" font-size="8" fill="#999">.25</text>
+      <text x="497" y="122" font-family="IBM Plex Mono,monospace" font-size="8" fill="#80c8a0">.11</text>
+      <text x="566" y="118" font-family="IBM Plex Mono,monospace" font-size="8" fill="#2a7a4b" font-weight="700">.61</text>
+      <text x="612" y="115" font-family="IBM Plex Mono,monospace" font-size="8" fill="#999">.05</text>
+      <rect x="510" y="142" width="90" height="30" rx="6" fill="#2a7a4b"></rect>
+      <text x="555" y="162" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">c_t</text>
+      <rect x="470" y="192" width="180" height="30" rx="6" fill="#c8ead6" stroke="#2a7a4b"></rect>
+      <text x="560" y="212" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a5c38">Fresh c_t for EVERY output word</text>
+      <line x1="555" y1="173" x2="555" y2="190" stroke="#2a7a4b" stroke-width="1.5" marker-end="url(#ag)"></line>
+    </svg>
+    <div class="diagram-caption">FIG 1 — Left: one vector must carry everything. Right: all encoder states are kept, and the decoder builds a 
+      <em>new</em> summary at each output step.
+    </div>
+  </div>
+  <div class="callout">
+    <strong>One-line summary:</strong> Attention lets the decoder build a 
+    <em>fresh, custom summary of the source</em> before generating each output word — instead of reusing one frozen summary for the whole sentence.
+  </div>
+</section>
+<!-- ══════════ 02 WHAT IS H ══════════ -->
+<section class="section" id="s2">
+  <div class="section-eyebrow">Section 02</div>
+  <h2>First: What Exactly Is H?</h2>
+  <p>Before any attention math makes sense, you need to be completely solid on what 
+    <strong>H</strong> is. Almost all confusion starts here.
+  </p>
+  <div class="callout callout-blue">
+    <strong>H is a stack of vectors — one per source word.</strong> If your sentence has 4 words, H has 4 rows. Each row hᵢ is a vector describing word i 
+    <em>in the context of the whole sentence</em>. H is produced once by the encoder, then never changes while the decoder runs.
+  </div>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 760 330" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;display:block;margin:0 auto">
+      <text x="380" y="26" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700" letter-spacing="1.5">H IS A MATRIX — ONE ROW PER SOURCE WORD</text>
+      <!-- words -->
+      <text x="95" y="62" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#333" font-weight="600">"I"</text>
+      <text x="95" y="112" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#333" font-weight="600">"love"</text>
+      <text x="95" y="162" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#333" font-weight="600">"India"</text>
+      <text x="95" y="212" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#333" font-weight="600">"&lt;eos&gt;"</text>
+      <text x="150" y="62" text-anchor="middle" font-family="monospace" font-size="14" fill="#888">→</text>
+      <text x="150" y="112" text-anchor="middle" font-family="monospace" font-size="14" fill="#888">→</text>
+      <text x="150" y="162" text-anchor="middle" font-family="monospace" font-size="14" fill="#888">→</text>
+      <text x="150" y="212" text-anchor="middle" font-family="monospace" font-size="14" fill="#888">→</text>
+      <!-- row labels -->
+      <text x="196" y="62" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="12" fill="#2255aa" font-weight="700">h₁</text>
+      <text x="196" y="112" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="12" fill="#2255aa" font-weight="700">h₂</text>
+      <text x="196" y="162" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="12" fill="#2255aa" font-weight="700">h₃</text>
+      <text x="196" y="212" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="12" fill="#2255aa" font-weight="700">h₄</text>
+      <!-- matrix bracket -->
+      <path d="M232 38 L222 38 L222 232 L232 232" stroke="#1a3a5c" stroke-width="2.5" fill="none"></path>
+      <path d="M568 38 L578 38 L578 232 L568 232" stroke="#1a3a5c" stroke-width="2.5" fill="none"></path>
+      <!-- row 1 cells -->
+      <g font-family="IBM Plex Mono,monospace" font-size="10" text-anchor="middle">
+        <rect x="240" y="45" width="60" height="30" rx="4" fill="#ddeeff" stroke="#88aacc"></rect>
+        <text x="270" y="65" fill="#1a3a5c">0.21</text>
+        <rect x="305" y="45" width="60" height="30" rx="4" fill="#ddeeff" stroke="#88aacc"></rect>
+        <text x="335" y="65" fill="#1a3a5c">-0.43</text>
+        <rect x="370" y="45" width="60" height="30" rx="4" fill="#ddeeff" stroke="#88aacc"></rect>
+        <text x="400" y="65" fill="#1a3a5c">0.88</text>
+        <text x="450" y="65" fill="#888">···</text>
+        <rect x="470" y="45" width="60" height="30" rx="4" fill="#ddeeff" stroke="#88aacc"></rect>
+        <text x="500" y="65" fill="#1a3a5c">0.05</text>
+        <rect x="240" y="95" width="60" height="30" rx="4" fill="#ddeeff" stroke="#88aacc"></rect>
+        <text x="270" y="115" fill="#1a3a5c">-0.11</text>
+        <rect x="305" y="95" width="60" height="30" rx="4" fill="#ddeeff" stroke="#88aacc"></rect>
+        <text x="335" y="115" fill="#1a3a5c">0.62</text>
+        <rect x="370" y="95" width="60" height="30" rx="4" fill="#ddeeff" stroke="#88aacc"></rect>
+        <text x="400" y="115" fill="#1a3a5c">0.17</text>
+        <text x="450" y="115" fill="#888">···</text>
+        <rect x="470" y="95" width="60" height="30" rx="4" fill="#ddeeff" stroke="#88aacc"></rect>
+        <text x="500" y="115" fill="#1a3a5c">-0.34</text>
+        <rect x="240" y="145" width="60" height="30" rx="4" fill="#c8ddf5" stroke="#2255aa" stroke-width="1.5"></rect>
+        <text x="270" y="165" fill="#1a3a5c">0.74</text>
+        <rect x="305" y="145" width="60" height="30" rx="4" fill="#c8ddf5" stroke="#2255aa" stroke-width="1.5"></rect>
+        <text x="335" y="165" fill="#1a3a5c">0.29</text>
+        <rect x="370" y="145" width="60" height="30" rx="4" fill="#c8ddf5" stroke="#2255aa" stroke-width="1.5"></rect>
+        <text x="400" y="165" fill="#1a3a5c">-0.55</text>
+        <text x="450" y="165" fill="#888">···</text>
+        <rect x="470" y="145" width="60" height="30" rx="4" fill="#c8ddf5" stroke="#2255aa" stroke-width="1.5"></rect>
+        <text x="500" y="165" fill="#1a3a5c">0.91</text>
+        <rect x="240" y="195" width="60" height="30" rx="4" fill="#ddeeff" stroke="#88aacc"></rect>
+        <text x="270" y="215" fill="#1a3a5c">0.03</text>
+        <rect x="305" y="195" width="60" height="30" rx="4" fill="#ddeeff" stroke="#88aacc"></rect>
+        <text x="335" y="215" fill="#1a3a5c">-0.08</text>
+        <rect x="370" y="195" width="60" height="30" rx="4" fill="#ddeeff" stroke="#88aacc"></rect>
+        <text x="400" y="215" fill="#1a3a5c">0.12</text>
+        <text x="450" y="215" fill="#888">···</text>
+        <rect x="470" y="195" width="60" height="30" rx="4" fill="#ddeeff" stroke="#88aacc"></rect>
+        <text x="500" y="215" fill="#1a3a5c">0.40</text>
+      </g>
+      <!-- H label -->
+      <text x="608" y="140" font-family="IBM Plex Mono,monospace" font-size="20" fill="#1a3a5c" font-weight="700">H</text>
+      <text x="640" y="128" font-family="IBM Plex Mono,monospace" font-size="9" fill="#666">shape:</text>
+      <text x="640" y="142" font-family="IBM Plex Mono,monospace" font-size="9" fill="#666">4 × 512</text>
+      <text x="640" y="158" font-family="IBM Plex Mono,monospace" font-size="8" fill="#999">(T_x × d_h)</text>
+      <!-- dimension arrows -->
+      <line x1="240" y1="252" x2="530" y2="252" stroke="#e8a020" stroke-width="1.5"></line>
+      <line x1="240" y1="248" x2="240" y2="256" stroke="#e8a020" stroke-width="1.5"></line>
+      <line x1="530" y1="248" x2="530" y2="256" stroke="#e8a020" stroke-width="1.5"></line>
+      <text x="385" y="268" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#e8a020" font-weight="600">d_h = 512 numbers per word (the vector length)</text>
+      <line x1="208" y1="45" x2="208" y2="225" stroke="#2a7a4b" stroke-width="1.5"></line>
+      <line x1="204" y1="45" x2="212" y2="45" stroke="#2a7a4b" stroke-width="1.5"></line>
+      <line x1="204" y1="225" x2="212" y2="225" stroke="#2a7a4b" stroke-width="1.5"></line>
+      <text x="120" y="255" font-family="IBM Plex Mono,monospace" font-size="9" fill="#2a7a4b" font-weight="600">T_x = 4 rows</text>
+      <text x="120" y="268" font-family="IBM Plex Mono,monospace" font-size="9" fill="#2a7a4b">(one per word)</text>
+      <!-- key point -->
+      <rect x="30" y="285" width="700" height="38" rx="8" fill="#eef3ff" stroke="#c0cce8"></rect>
+      <text x="380" y="300" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a3a5c" font-weight="700">H IS COMPUTED ONCE BY THE ENCODER AND THEN FROZEN</text>
+      <text x="380" y="315" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#555">The decoder reads H over and over — at every output step — but never modifies it.</text>
+    </svg>
+    <div class="diagram-caption">FIG 2 — H made concrete. Four source words → four rows. Each row is a 512-number vector. The highlighted row h₃ is what "India" looks like to the model.</div>
+  </div>
+  <h4>The complete symbol glossary — read this once, refer back often</h4>
+  <table>
+    <tbody>
+      <tr>
+        <th>Symbol</th>
+        <th>Say it as</th>
+        <th>What it is</th>
+        <th>Shape</th>
+        <th>Changes when?</th>
+      </tr>
+      <tr>
+        <td>
+          <span class="tag">x_i</span>
+        </td>
+        <td>"x sub i"</td>
+        <td>The i-th source word</td>
+        <td>—</td>
+        <td>Fixed input</td>
+      </tr>
+      <tr>
+        <td>
+          <span class="tag">h_i</span>
+        </td>
+        <td>"h sub i"</td>
+        <td>Vector for source word i, aware of full sentence context</td>
+        <td>512 numbers</td>
+        <td>Once, by encoder</td>
+      </tr>
+      <tr>
+        <td>
+          <span class="tag">H</span>
+        </td>
+        <td>"big H"</td>
+        <td>All the h_i stacked into a matrix</td>
+        <td>4 × 512</td>
+        <td>Once, by encoder</td>
+      </tr>
+      <tr>
+        <td>
+          <span class="tag">T_x</span>
+        </td>
+        <td>"T sub x"</td>
+        <td>Number of source words (= 4 here)</td>
+        <td>a number</td>
+        <td>Per sentence</td>
+      </tr>
+      <tr>
+        <td>
+          <span class="tag">s_{t−1}</span>
+        </td>
+        <td>"s sub t minus 1"</td>
+        <td>Decoder's state 
+          <em>before</em> producing word t. "What I've said so far"
+        </td>
+        <td>512 numbers</td>
+        <td>
+          <strong>Every decoder step</strong>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <span class="tag">e_{t,i}</span>
+        </td>
+        <td>"e sub t comma i"</td>
+        <td>Raw relevance score of source word i for output step t</td>
+        <td>one number</td>
+        <td>
+          <strong>Every decoder step</strong>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <span class="tag">α_{t,i}</span>
+        </td>
+        <td>"alpha sub t comma i"</td>
+        <td>Attention weight — how much focus word i gets at step t</td>
+        <td>one number, 0–1</td>
+        <td>
+          <strong>Every decoder step</strong>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <span class="tag">c_t</span>
+        </td>
+        <td>"c sub t"</td>
+        <td>Context vector — the custom source summary for step t</td>
+        <td>512 numbers</td>
+        <td>
+          <strong>Every decoder step</strong>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <span class="tag">y_t</span>
+        </td>
+        <td>"y sub t"</td>
+        <td>The output word produced at step t</td>
+        <td>—</td>
+        <td>Every decoder step</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-green">
+    <strong>Read the last column.</strong> H and its rows h_i are computed once and stay fixed. Everything with a 
+    <em>t</em> in it — s, e, α, c — is recomputed from scratch for every single output word. That difference is the entire mechanism.
+  </div>
+</section>
+<!-- ══════════ 03 DESTINATION FIRST ══════════ -->
+<section class="section" id="s3">
+  <div class="section-eyebrow">Section 03</div>
+  <h2>Destination First: What Are We Actually Building?</h2>
+  <p>Instead of starting with formulas, start with the finish line. The decoder is about to generate one word. Before it can, it needs one thing:</p>
+  <div class="math-box">
+    <span class="comment">// THE GOAL — this is the only thing attention produces</span>
+    <span class="var">c_t</span> = 
+    <span class="eq">α₁·h₁ + α₂·h₂ + α₃·h₃ + α₄·h₄</span>
+    <span class="comment">// In words: "a blend of the source word vectors,</span>
+    <span class="comment">//            where the α values decide the recipe."</span>
+  </div>
+  <p>That's it. 
+    <strong>c_t is a weighted average of the source word vectors.</strong> If α₃ = 0.6, then 60% of the blend comes from "India". Nothing more mysterious than that.
+  </p>
+  <div class="callout callout-purple">
+    <strong>The smoothie analogy.</strong> H is your fruit — four fruits sitting on the counter, always available. The α values are the recipe: how much of each fruit goes in. c_t is the smoothie you actually drink. Different output word → different recipe → different smoothie. The fruit never changes; only the proportions do.
+  </div>
+  <h3>Now unwrap it backwards</h3>
+  <p>To get c_t, we need α. To get α, we need e. To get e, we need s_{t−1} and H. That chain — read right to left — is the whole algorithm.</p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 760 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;display:block;margin:0 auto">
+      <text x="380" y="26" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700" letter-spacing="1.5">WORKING BACKWARDS FROM THE GOAL</text>
+      <!-- level 1: GOAL -->
+      <rect x="270" y="45" width="220" height="52" rx="10" fill="#2a7a4b"></rect>
+      <text x="380" y="68" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="12" fill="#fff" font-weight="700">GOAL:  c_t</text>
+      <text x="380" y="85" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#c8ead6">the custom source summary</text>
+      <text x="530" y="76" font-family="Inter,sans-serif" font-size="10" fill="#2a7a4b" font-style="italic">← what we want</text>
+      <!-- arrow down: "needs" -->
+      <line x1="380" y1="97" x2="380" y2="120" stroke="#b83232" stroke-width="2" marker-end="url(#ar)"></line>
+      <text x="400" y="113" font-family="IBM Plex Mono,monospace" font-size="9" fill="#b83232" font-weight="600">needs</text>
+      <!-- level 2: alpha -->
+      <rect x="270" y="123" width="220" height="52" rx="10" fill="#e8a020"></rect>
+      <text x="380" y="146" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="12" fill="#fff" font-weight="700">α₁ α₂ α₃ α₄</text>
+      <text x="380" y="163" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff8ee">the recipe — must sum to 1</text>
+      <text x="530" y="154" font-family="Inter,sans-serif" font-size="10" fill="#e8a020" font-style="italic">← softmax gives us this</text>
+      <line x1="380" y1="175" x2="380" y2="198" stroke="#b83232" stroke-width="2" marker-end="url(#ar)"></line>
+      <text x="400" y="191" font-family="IBM Plex Mono,monospace" font-size="9" fill="#b83232" font-weight="600">needs</text>
+      <!-- level 3: e -->
+      <rect x="270" y="201" width="220" height="52" rx="10" fill="#6b3fa0"></rect>
+      <text x="380" y="224" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="12" fill="#fff" font-weight="700">e₁ e₂ e₃ e₄</text>
+      <text x="380" y="241" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#e0d0ff">raw scores — any real number</text>
+      <text x="530" y="232" font-family="Inter,sans-serif" font-size="10" fill="#6b3fa0" font-style="italic">← the scoring network</text>
+      <line x1="380" y1="253" x2="380" y2="276" stroke="#b83232" stroke-width="2" marker-end="url(#ar)"></line>
+      <text x="400" y="269" font-family="IBM Plex Mono,monospace" font-size="9" fill="#b83232" font-weight="600">needs</text>
+      <!-- level 4: inputs -->
+      <rect x="130" y="279" width="200" height="58" rx="10" fill="#1a3a5c"></rect>
+      <text x="230" y="302" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#fff" font-weight="700">s_{t−1}</text>
+      <text x="230" y="318" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#88aacc">decoder state</text>
+      <text x="230" y="331" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#88aacc">"what I've said so far"</text>
+      <rect x="430" y="279" width="200" height="58" rx="10" fill="#2255aa"></rect>
+      <text x="530" y="302" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#fff" font-weight="700">H = {h₁ h₂ h₃ h₄}</text>
+      <text x="530" y="318" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#cce0ff">encoder states</text>
+      <text x="530" y="331" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#cce0ff">"what the source says"</text>
+      <line x1="270" y1="279" x2="355" y2="256" stroke="#555" stroke-width="1.5" marker-end="url(#a1)"></line>
+      <line x1="490" y1="279" x2="405" y2="256" stroke="#555" stroke-width="1.5" marker-end="url(#a1)"></line>
+      <!-- forward flow arrow on left -->
+      <path d="M85 320 L85 71 L262 71" stroke="#2a7a4b" stroke-width="2.5" fill="none" marker-end="url(#ag)" stroke-dasharray="7,4"></path>
+      <text x="60" y="200" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#2a7a4b" font-weight="700" transform="rotate(-90 60 200)">ACTUAL COMPUTATION ORDER (bottom → top)</text>
+    </svg>
+    <div class="diagram-caption">FIG 3 — Red arrows show the dependency chain (top-down: what needs what). The green dashed arrow shows the order you actually compute in (bottom-up). Understanding runs one way; computation runs the other.</div>
+  </div>
+  <div class="callout callout-blue">
+    <strong>Why this ordering helps:</strong> textbooks present e → α → c because that's the computation order. But you can't understand why we'd want e until you know it's serving α, which is serving c. Learn it top-down, then compute it bottom-up.
+  </div>
+</section>
+<!-- ══════════ 04 TWO KINDS OF WEIGHT ══════════ -->
+<section class="section" id="s4">
+  <div class="section-eyebrow">Section 04</div>
+  <h2>The Word "Weight" Means Two Different Things</h2>
+  <p>This is, in my experience, the single biggest source of confusion in attention. The word "weight" appears everywhere and refers to two completely unrelated objects.</p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;display:block;margin:0 auto"><!-- LEFT: learned params -->
+      <rect x="15" y="20" width="360" height="285" rx="12" fill="#f5f0ff" stroke="#6b3fa0" stroke-width="2"></rect>
+      <text x="195" y="46" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#4a1a80" font-weight="700" letter-spacing="1">TYPE 1 · LEARNED PARAMETERS</text>
+      <text x="195" y="64" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#6b3fa0" font-weight="700">W_a , U_a , v_a , b_a</text>
+      <rect x="40" y="82" width="310" height="34" rx="6" fill="#fff" stroke="#c0a8dd"></rect>
+      <text x="55" y="103" font-family="Inter,sans-serif" font-size="10" fill="#444">Learned during</text>
+    </svg>
+    <strong>training</strong> by gradient descent
+    <rect x="40" y="122" width="310" height="34" rx="6" fill="#fff" stroke="#c0a8dd">
+      <text x="55" y="143" font-family="Inter,sans-serif" font-size="10" fill="#444">
+        <strong>Frozen</strong> once training finishes
+      </text>
+      <rect x="40" y="162" width="310" height="34" rx="6" fill="#fff" stroke="#c0a8dd">
+        <text x="55" y="183" font-family="Inter,sans-serif" font-size="10" fill="#444">Same values for 
+          <strong>every</strong> sentence, every step
+        </text>
+        <rect x="40" y="202" width="310" height="34" rx="6" fill="#fff" stroke="#c0a8dd">
+          <text x="55" y="223" font-family="Inter,sans-serif" font-size="10" fill="#444">Matrices — thousands of numbers</text>
+          <rect x="40" y="242" width="310" height="46" rx="6" fill="#ede8ff" stroke="#6b3fa0">
+            <text x="195" y="261" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#4a1a80" font-weight="700">THEIR JOB</text>
+            <text x="195" y="278" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#444">Define 
+              <em>how to score</em> relevance
+            </text>
+      <!-- RIGHT: attention weights -->
+            <rect x="395" y="20" width="360" height="285" rx="12" fill="#fff8ee" stroke="#e8a020" stroke-width="2">
+              <text x="575" y="46" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#7a5000" font-weight="700" letter-spacing="1">TYPE 2 · ATTENTION WEIGHTS</text>
+              <text x="575" y="64" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#e8a020" font-weight="700">α₁ , α₂ , α₃ , α₄</text>
+              <rect x="420" y="82" width="310" height="34" rx="6" fill="#fff" stroke="#e8c890">
+                <text x="435" y="103" font-family="Inter,sans-serif" font-size="10" fill="#444">
+                  <strong>Computed fresh</strong> at every decoder step
+                </text>
+                <rect x="420" y="122" width="310" height="34" rx="6" fill="#fff" stroke="#e8c890">
+                  <text x="435" y="143" font-family="Inter,sans-serif" font-size="10" fill="#444">
+                    <strong>Never</strong> stored or learned
+                  </text>
+                  <rect x="420" y="162" width="310" height="34" rx="6" fill="#fff" stroke="#e8c890">
+                    <text x="435" y="183" font-family="Inter,sans-serif" font-size="10" fill="#444">Different for every sentence AND every step</text>
+                    <rect x="420" y="202" width="310" height="34" rx="6" fill="#fff" stroke="#e8c890">
+                      <text x="435" y="223" font-family="Inter,sans-serif" font-size="10" fill="#444">Just T_x numbers, each 0–1, summing to 1</text>
+                      <rect x="420" y="242" width="310" height="46" rx="6" fill="#fff3cc" stroke="#e8a020">
+                        <text x="575" y="261" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#7a5000" font-weight="700">THEIR JOB</text>
+                        <text x="575" y="278" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#444">Say 
+                          <em>where to look</em> right now
+                        </text>
+                        <div class="diagram-caption">FIG 4 — Two unrelated things both called "weights". W_a is a fixed rulebook learned once. α is a fresh decision made every single step.</div>
+                      </rect>
+                    </rect>
+                  </rect>
+                </rect>
+              </rect>
+            </rect>
+          </rect>
+        </rect>
+      </rect>
+    </rect>
+  </div>
+  <div class="callout callout-red">
+    <strong>The distinction in one sentence:</strong> W_a, U_a, v_a are the 
+    <em>learned rules for judging relevance</em> — like a trained recruiter's instincts. α is 
+    <em>this specific judgement, right now</em> — like the score that recruiter gives one particular candidate today. The instincts are permanent; the score changes with every candidate.
+  </div>
+  <div class="callout callout-green">
+    <strong>Consequence worth noticing:</strong> because α is never stored, attention adds almost nothing to the model's parameter count. The alignment network W_a/U_a/v_a is small. Yet those few parameters generate a completely different focus pattern for every word of every sentence.
+  </div>
+</section>
+<!-- ══════════ 05 STEP BY STEP ══════════ -->
+<section class="section" id="s5">
+  <div class="section-eyebrow">Section 05</div>
+  <h2>The Four Steps, Slowly</h2>
+  <p>We're at decoder step t = 2. The decoder has already said "J'aime" and now needs to produce the next French word. We expect it should be looking at "India".</p>
+  <div class="callout callout-blue">
+    <strong>Setup:</strong> Source = "I love India &lt;eos&gt;", so T_x = 4 and H has 4 rows. The decoder's current state s_{t−1} encodes "I have said J'aime; I need an object next."
+  </div>
+  <div class="walk">
+    <div class="walk-item">
+      <h4>Score each source word against the decoder's current need</h4>
+      <p>Compare 
+        <code>s_{t−1}</code> with 
+        <strong>each</strong> h_i, one at a time. Four comparisons → four numbers. These are the raw scores e. Bigger means "more relevant right now". They can be negative; they're unbounded.
+      </p>
+    </div>
+    <div class="walk-item">
+      <h4>Turn the scores into a recipe with softmax</h4>
+      <p>Raw scores can't be a recipe — they might be −3 or +47. Softmax squashes them so every value lands between 0 and 1 and they all sum to exactly 1. Now they're proportions.</p>
+    </div>
+    <div class="walk-item">
+      <h4>Blend the h vectors using that recipe</h4>
+      <p>Multiply each h_i by its α_i and add them all up. Result: 
+        <code>c_t</code>, one vector, same size as a single h. This is the custom source summary for this exact moment.
+      </p>
+    </div>
+    <div class="walk-item">
+      <h4>Hand c_t to the decoder and generate the word</h4>
+      <p>The decoder combines its own state with c_t, updates to s_t, and produces the output word. Then t increases and we return to step 1 with a 
+        <em>new</em> s, which will produce 
+        <em>new</em> α values.
+      </p>
+    </div>
+  </div>
+  <h3>Step 1 in detail — where do the scores come from?</h3>
+  <p>We need a function that takes (decoder state, one source vector) and returns a single number saying "how relevant". Bahdanau's answer is a tiny neural network:</p>
+  <div class="math-box">
+    <span class="var">e_{t,i}</span> = 
+    <span class="eq">v_aᵀ · tanh( W_a·s_{t−1}  +  U_a·h_i  +  b_a )</span>
+  </div>
+  <p>Read that right to left as a sequence of three simple moves:</p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;display:block;margin:0 auto">
+      <text x="380" y="24" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700" letter-spacing="1.5">SCORING ONE PAIR:  (s_{t−1} , h₃)  →  e₃</text>
+      <!-- inputs -->
+      <rect x="30" y="60" width="110" height="42" rx="8" fill="#1a3a5c"></rect>
+      <text x="85" y="80" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#fff" font-weight="700">s_{t−1}</text>
+      <text x="85" y="94" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#88aacc">512 numbers</text>
+      <rect x="30" y="175" width="110" height="42" rx="8" fill="#2255aa"></rect>
+      <text x="85" y="195" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#fff" font-weight="700">h₃</text>
+      <text x="85" y="209" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#cce0ff">512 numbers</text>
+      <!-- MOVE A: project -->
+      <rect x="175" y="55" width="120" height="52" rx="8" fill="#eef3ff" stroke="#2255aa" stroke-width="1.8"></rect>
+      <text x="235" y="76" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a3a5c" font-weight="700">W_a · s_{t−1}</text>
+      <text x="235" y="92" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666">reshape to 256-d</text>
+      <rect x="175" y="170" width="120" height="52" rx="8" fill="#eef3ff" stroke="#2255aa" stroke-width="1.8"></rect>
+      <text x="235" y="191" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a3a5c" font-weight="700">U_a · h₃</text>
+      <text x="235" y="207" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666">reshape to 256-d</text>
+      <line x1="140" y1="81" x2="172" y2="81" stroke="#555" stroke-width="1.8" marker-end="url(#a1)"></line>
+      <line x1="140" y1="196" x2="172" y2="196" stroke="#555" stroke-width="1.8" marker-end="url(#a1)"></line>
+      <text x="235" y="130" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#e8a020" font-weight="700">MOVE A</text>
+      <text x="235" y="145" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#888">put both into the</text>
+      <text x="235" y="157" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#888">same space so they</text>
+      <text x="235" y="169" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#888">can be compared</text>
+      <!-- MOVE B: add + tanh -->
+      <circle cx="355" cy="138" r="22" fill="#e8a020"></circle>
+      <text x="355" y="145" text-anchor="middle" font-family="monospace" font-size="18" fill="#fff" font-weight="700">+</text>
+      <line x1="295" y1="81" x2="340" y2="122" stroke="#555" stroke-width="1.6" marker-end="url(#a1)"></line>
+      <line x1="295" y1="196" x2="340" y2="155" stroke="#555" stroke-width="1.6" marker-end="url(#a1)"></line>
+      <rect x="405" y="112" width="85" height="52" rx="8" fill="#555"></rect>
+      <text x="447" y="134" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="12" fill="#fff" font-weight="700">tanh</text>
+      <text x="447" y="151" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#bbb">squash to (−1,1)</text>
+      <line x1="377" y1="138" x2="402" y2="138" stroke="#555" stroke-width="1.8" marker-end="url(#a1)"></line>
+      <text x="410" y="192" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#e8a020" font-weight="700">MOVE B</text>
+      <text x="410" y="207" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#888">merge them into one</text>
+      <text x="410" y="219" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#888">"compatibility vector"</text>
+      <text x="410" y="231" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#888">— still 256 numbers</text>
+      <!-- MOVE C: v_a -->
+      <rect x="535" y="112" width="85" height="52" rx="8" fill="#6b3fa0"></rect>
+      <text x="577" y="134" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="12" fill="#fff" font-weight="700">v_aᵀ ·</text>
+      <text x="577" y="151" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#ddd">collapse to 1 number</text>
+      <line x1="490" y1="138" x2="532" y2="138" stroke="#555" stroke-width="1.8" marker-end="url(#a1)"></line>
+      <text x="577" y="192" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#e8a020" font-weight="700">MOVE C</text>
+      <text x="577" y="207" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#888">squeeze 256 numbers</text>
+      <text x="577" y="219" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#888">down to ONE score</text>
+      <!-- output -->
+      <rect x="665" y="118" width="70" height="40" rx="8" fill="#2a7a4b"></rect>
+      <text x="700" y="136" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="12" fill="#fff" font-weight="700">e₃</text>
+      <text x="700" y="150" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#c8ead6">= 2.1</text>
+      <line x1="620" y1="138" x2="662" y2="138" stroke="#2a7a4b" stroke-width="2" marker-end="url(#ag)"></line>
+      <!-- repeat note -->
+      <rect x="30" y="252" width="705" height="36" rx="8" fill="#fff8ee" stroke="#e8c890"></rect>
+      <text x="382" y="268" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#7a5000" font-weight="700">NOW REPEAT THIS ENTIRE PROCESS FOR h₁, h₂, AND h₄</text>
+      <text x="382" y="282" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666">Same s_{t−1}, same W_a/U_a/v_a — only h_i changes. Four passes → four scores: e₁, e₂, e₃, e₄.</text>
+    </svg>
+    <div class="diagram-caption">FIG 5 — Scoring one (state, source-word) pair. Three moves: project both into a shared space, merge them, collapse to a single number. Repeat for every source word.</div>
+  </div>
+  <table>
+    <tbody>
+      <tr>
+        <th>Piece</th>
+        <th>Shape</th>
+        <th>Plain-English job</th>
+      </tr>
+      <tr>
+        <td>
+          <span class="tag">W_a</span>
+        </td>
+        <td>256 × 512</td>
+        <td>Reshapes the decoder state into the comparison space</td>
+      </tr>
+      <tr>
+        <td>
+          <span class="tag">U_a</span>
+        </td>
+        <td>256 × 512</td>
+        <td>Reshapes a source vector into the same comparison space</td>
+      </tr>
+      <tr>
+        <td>
+          <span class="tag">b_a</span>
+        </td>
+        <td>256</td>
+        <td>Bias — lets the network shift its baseline</td>
+      </tr>
+      <tr>
+        <td>
+          <span class="tag">tanh</span>
+        </td>
+        <td>—</td>
+        <td>Non-linearity; lets the model learn complex compatibility, not just a linear match</td>
+      </tr>
+      <tr>
+        <td>
+          <span class="tag">v_a</span>
+        </td>
+        <td>256</td>
+        <td>Collapses the 256-number compatibility vector into one score</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    <strong>Why is it called "additive" attention?</strong> Because of the 
+    <code>+</code> in Move B — the two projected vectors are 
+    <em>added</em> before tanh. Luong's alternative multiplies them instead (a dot product), which is why his is called multiplicative attention. That single operator is the entire difference between the two families.
+  </div>
+  <h3>Step 2 in detail — why softmax and not just "divide by the total"?</h3>
+  <div class="math-box">
+    <span class="comment">// Our four raw scores</span>
+e₁ = 1.2   e₂ = 0.4   e₃ = 2.1   e₄ = −0.3
+    <span class="hi">↑ negative!</span>
+    <span class="comment">// Naive approach: divide each by the sum. Sum = 3.4</span>
+α₄ = −0.3 / 3.4 = 
+    <span class="hi">−0.088</span>   ✗ a negative proportion is meaningless
+    <span class="comment">// Softmax first exponentiates, which forces everything positive</span>
+exp(1.2) = 3.320
+exp(0.4) = 1.492
+exp(2.1) = 8.166
+exp(−0.3) = 0.741   
+    <span class="ok">← still positive!</span>
+sum = 3.320 + 1.492 + 8.166 + 0.741 = 
+    <span class="var">13.719</span>
+    <span class="comment">// Now divide — all values are valid proportions</span>
+α₁ = 3.320 / 13.719 = 
+    <span class="ok">0.246</span>
+α₂ = 1.492 / 13.719 = 
+    <span class="ok">0.109</span>
+α₃ = 8.166 / 13.719 = 
+    <span class="ok">0.595</span>   ← "India" wins
+α₄ = 0.741 / 13.719 = 
+    <span class="ok">0.054</span>
+                       ─────────────
+                       sum = 
+    <span class="ok">1.000</span> ✓
+  </div>
+  <div class="callout callout-green">
+    <strong>Softmax does two jobs at once:</strong> (1) exponentiating makes every value positive, so negative scores are handled gracefully; (2) dividing by the sum makes them add to 1, so they're valid proportions. It also amplifies differences — e₃ was only 1.75× e₁ as a raw score, but α₃ ends up 2.4× α₁. Softmax makes the winner win more decisively.
+  </div>
+  <h3>Step 3 in detail — the actual blending</h3>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 720 290" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;display:block;margin:0 auto">
+      <text x="360" y="24" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700" letter-spacing="1.5">BUILDING c_t — DIMENSION BY DIMENSION</text>
+      <!-- header row -->
+      <text x="70" y="55" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#666" font-weight="600">α</text>
+      <text x="150" y="55" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#666" font-weight="600">word</text>
+      <text x="290" y="55" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#666" font-weight="600">h vector (first 3 dims shown)</text>
+      <text x="510" y="55" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#666" font-weight="600">α × h</text>
+      <!-- row 1 -->
+      <rect x="40" y="65" width="58" height="28" rx="4" fill="#e8a020" opacity="0.35"></rect>
+      <text x="69" y="84" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333">0.246</text>
+      <text x="150" y="84" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333">"I"</text>
+      <text x="290" y="84" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#2255aa">[0.21, −0.43, 0.88]</text>
+      <text x="510" y="84" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#555">[0.052, −0.106, 0.216]</text>
+      <!-- row 2 -->
+      <rect x="40" y="100" width="58" height="28" rx="4" fill="#e8a020" opacity="0.2"></rect>
+      <text x="69" y="119" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333">0.109</text>
+      <text x="150" y="119" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333">"love"</text>
+      <text x="290" y="119" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#2255aa">[−0.11, 0.62, 0.17]</text>
+      <text x="510" y="119" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#555">[−0.012, 0.068, 0.019]</text>
+      <!-- row 3 - winner -->
+      <rect x="40" y="135" width="58" height="28" rx="4" fill="#e8a020"></rect>
+      <text x="69" y="154" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">0.595</text>
+      <text x="150" y="154" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#7a5000" font-weight="700">"India"</text>
+      <text x="290" y="154" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a3a5c" font-weight="600">[0.74, 0.29, −0.55]</text>
+      <text x="510" y="154" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#7a5000" font-weight="600">[0.440, 0.173, −0.327]</text>
+      <!-- row 4 -->
+      <rect x="40" y="170" width="58" height="28" rx="4" fill="#e8a020" opacity="0.1"></rect>
+      <text x="69" y="189" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333">0.054</text>
+      <text x="150" y="189" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333">"&lt;eos&gt;"</text>
+      <text x="290" y="189" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#2255aa">[0.03, −0.08, 0.12]</text>
+      <text x="510" y="189" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#555">[0.002, −0.004, 0.006]</text>
+      <!-- sum line -->
+      <line x1="400" y1="208" x2="640" y2="208" stroke="#2a7a4b" stroke-width="2"></line>
+      <text x="380" y="213" text-anchor="end" font-family="monospace" font-size="14" fill="#2a7a4b" font-weight="700">Σ</text>
+      <!-- result -->
+      <rect x="400" y="218" width="240" height="34" rx="6" fill="#2a7a4b"></rect>
+      <text x="520" y="240" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#fff" font-weight="700">c_t = [0.482, 0.131, −0.086]</text>
+      <text x="200" y="240" font-family="Inter,sans-serif" font-size="9.5" fill="#666" font-style="italic">Add straight down each column.</text>
+      <text x="200" y="254" font-family="Inter,sans-serif" font-size="9.5" fill="#666" font-style="italic">c_t is the SAME size as one h.</text>
+      <text x="360" y="278" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#888">Because α₃ dominates, c_t leans heavily toward h₃ — it "mostly means India", with traces of the others.</text>
+    </svg>
+    <div class="diagram-caption">FIG 6 — The blend done arithmetically. Scale each h by its α, then add column-wise. Real vectors have 512 dimensions; the logic is identical for all of them.</div>
+  </div>
+  <div class="callout callout-purple">
+    <strong>The most important shape fact:</strong> c_t has the 
+    <em>same dimension as a single h_i</em> (512 here), not the sum of all of them. You are averaging four vectors, not concatenating them. That's why c_t can slot straight into the decoder wherever a source representation is expected.
+  </div>
+</section>
+<!-- ══════════ 06 FULL LOOP ══════════ -->
+<section class="section" id="s6">
+  <div class="section-eyebrow">Section 06</div>
+  <h2>Watch the Loop Run — Three Decoder Steps</h2>
+  <p>Everything above was 
+    <em>one</em> step. Here's what makes attention powerful: the same H, scored against three different decoder states, produces three completely different recipes.
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 760 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;display:block;margin:0 auto"><!-- H stays constant on the left -->
+      <rect x="20" y="55" width="90" height="290" rx="10" fill="#eef3ff" stroke="#2255aa" stroke-width="2"></rect>
+      <text x="65" y="78" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="12" fill="#1a3a5c" font-weight="700">H</text>
+      <text x="65" y="93" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">FROZEN</text>
+      <rect x="35" y="110" width="60" height="46" rx="5" fill="#ddeeff" stroke="#88aacc"></rect>
+      <text x="65" y="130" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a3a5c">h₁</text>
+      <text x="65" y="145" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">"I"</text>
+      <rect x="35" y="165" width="60" height="46" rx="5" fill="#ddeeff" stroke="#88aacc"></rect>
+      <text x="65" y="185" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a3a5c">h₂</text>
+      <text x="65" y="200" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">"love"</text>
+      <rect x="35" y="220" width="60" height="46" rx="5" fill="#ddeeff" stroke="#88aacc"></rect>
+      <text x="65" y="240" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a3a5c">h₃</text>
+      <text x="65" y="255" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">"India"</text>
+      <rect x="35" y="275" width="60" height="46" rx="5" fill="#ddeeff" stroke="#88aacc"></rect>
+      <text x="65" y="295" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a3a5c">h₄</text>
+      <text x="65" y="310" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">&lt;eos&gt;</text>
+      <text x="65" y="365" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#2255aa" font-style="italic">same every step</text>
+      <!-- STEP 1 -->
+      <rect x="140" y="40" width="190" height="330" rx="10" fill="#fafaf7" stroke="#ddd" stroke-width="1.5"></rect>
+      <text x="235" y="62" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700">STEP t = 1</text>
+      <rect x="158" y="72" width="154" height="34" rx="6" fill="#1a3a5c"></rect>
+      <text x="235" y="86" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff">s₀ = "nothing said"</text>
+      <text x="235" y="99" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#88aacc">need: the subject</text>
+      <!-- alpha bars -->
+      <text x="168" y="130" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">α₁</text>
+      <rect x="185" y="121" width="105" height="12" rx="2" fill="#f0f0ec"></rect>
+      <rect x="185" y="121" width="58" height="12" rx="2" fill="#e8a020"></rect>
+      <text x="296" y="131" font-family="IBM Plex Mono,monospace" font-size="8" fill="#7a5000" font-weight="700">.55</text>
+      <text x="168" y="150" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">α₂</text>
+      <rect x="185" y="141" width="105" height="12" rx="2" fill="#f0f0ec"></rect>
+      <rect x="185" y="141" width="34" height="12" rx="2" fill="#e8a020" opacity=".6"></rect>
+      <text x="296" y="151" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">.32</text>
+      <text x="168" y="170" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">α₃</text>
+      <rect x="185" y="161" width="105" height="12" rx="2" fill="#f0f0ec"></rect>
+      <rect x="185" y="161" width="8" height="12" rx="2" fill="#e8a020" opacity=".3"></rect>
+      <text x="296" y="171" font-family="IBM Plex Mono,monospace" font-size="8" fill="#aaa">.08</text>
+      <text x="168" y="190" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">α₄</text>
+      <rect x="185" y="181" width="105" height="12" rx="2" fill="#f0f0ec"></rect>
+      <rect x="185" y="181" width="5" height="12" rx="2" fill="#e8a020" opacity=".2"></rect>
+      <text x="296" y="191" font-family="IBM Plex Mono,monospace" font-size="8" fill="#aaa">.05</text>
+      <rect x="158" y="215" width="154" height="30" rx="6" fill="#2a7a4b"></rect>
+      <text x="235" y="235" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff" font-weight="600">c₁ ≈ mostly h₁</text>
+      <line x1="235" y1="248" x2="235" y2="266" stroke="#555" stroke-width="1.8" marker-end="url(#a1)"></line>
+      <rect x="158" y="270" width="154" height="34" rx="6" fill="#e8a020"></rect>
+      <text x="235" y="292" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#fff" font-weight="700">outputs "J'aime"</text>
+      <text x="235" y="330" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666" font-style="italic">looked at "I" + "love"</text>
+      <text x="235" y="345" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666" font-style="italic">(French merges them)</text>
+      <!-- STEP 2 -->
+      <rect x="345" y="40" width="190" height="330" rx="10" fill="#fafaf7" stroke="#ddd" stroke-width="1.5"></rect>
+      <text x="440" y="62" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700">STEP t = 2</text>
+      <rect x="363" y="72" width="154" height="34" rx="6" fill="#1a3a5c"></rect>
+      <text x="440" y="86" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff">s₁ = "said J'aime"</text>
+      <text x="440" y="99" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#88aacc">need: the object</text>
+      <text x="373" y="130" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">α₁</text>
+      <rect x="390" y="121" width="105" height="12" rx="2" fill="#f0f0ec"></rect>
+      <rect x="390" y="121" width="8" height="12" rx="2" fill="#e8a020" opacity=".3"></rect>
+      <text x="501" y="131" font-family="IBM Plex Mono,monospace" font-size="8" fill="#aaa">.08</text>
+      <text x="373" y="150" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">α₂</text>
+      <rect x="390" y="141" width="105" height="12" rx="2" fill="#f0f0ec"></rect>
+      <rect x="390" y="141" width="17" height="12" rx="2" fill="#e8a020" opacity=".4"></rect>
+      <text x="501" y="151" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">.16</text>
+      <text x="373" y="170" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">α₃</text>
+      <rect x="390" y="161" width="105" height="12" rx="2" fill="#f0f0ec"></rect>
+      <rect x="390" y="161" width="74" height="12" rx="2" fill="#e8a020"></rect>
+      <text x="501" y="171" font-family="IBM Plex Mono,monospace" font-size="8" fill="#7a5000" font-weight="700">.70</text>
+      <text x="373" y="190" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">α₄</text>
+      <rect x="390" y="181" width="105" height="12" rx="2" fill="#f0f0ec"></rect>
+      <rect x="390" y="181" width="6" height="12" rx="2" fill="#e8a020" opacity=".2"></rect>
+      <text x="501" y="191" font-family="IBM Plex Mono,monospace" font-size="8" fill="#aaa">.06</text>
+      <rect x="363" y="215" width="154" height="30" rx="6" fill="#2a7a4b"></rect>
+      <text x="440" y="235" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff" font-weight="600">c₂ ≈ mostly h₃</text>
+      <line x1="440" y1="248" x2="440" y2="266" stroke="#555" stroke-width="1.8" marker-end="url(#a1)"></line>
+      <rect x="363" y="270" width="154" height="34" rx="6" fill="#e8a020"></rect>
+      <text x="440" y="292" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#fff" font-weight="700">outputs "l'Inde"</text>
+      <text x="440" y="330" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666" font-style="italic">focus JUMPED to "India"</text>
+      <text x="440" y="345" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666" font-style="italic">same H, different s</text>
+      <!-- STEP 3 -->
+      <rect x="550" y="40" width="190" height="330" rx="10" fill="#fafaf7" stroke="#ddd" stroke-width="1.5"></rect>
+      <text x="645" y="62" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700">STEP t = 3</text>
+      <rect x="568" y="72" width="154" height="34" rx="6" fill="#1a3a5c"></rect>
+      <text x="645" y="86" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff">s₂ = "said J'aime l'Inde"</text>
+      <text x="645" y="99" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#88aacc">need: am I done?</text>
+      <text x="578" y="130" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">α₁</text>
+      <rect x="595" y="121" width="105" height="12" rx="2" fill="#f0f0ec"></rect>
+      <rect x="595" y="121" width="5" height="12" rx="2" fill="#e8a020" opacity=".2"></rect>
+      <text x="706" y="131" font-family="IBM Plex Mono,monospace" font-size="8" fill="#aaa">.05</text>
+      <text x="578" y="150" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">α₂</text>
+      <rect x="595" y="141" width="105" height="12" rx="2" fill="#f0f0ec"></rect>
+      <rect x="595" y="141" width="5" height="12" rx="2" fill="#e8a020" opacity=".2"></rect>
+      <text x="706" y="151" font-family="IBM Plex Mono,monospace" font-size="8" fill="#aaa">.05</text>
+      <text x="578" y="170" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">α₃</text>
+      <rect x="595" y="161" width="105" height="12" rx="2" fill="#f0f0ec"></rect>
+      <rect x="595" y="161" width="11" height="12" rx="2" fill="#e8a020" opacity=".3"></rect>
+      <text x="706" y="171" font-family="IBM Plex Mono,monospace" font-size="8" fill="#aaa">.10</text>
+      <text x="578" y="190" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">α₄</text>
+      <rect x="595" y="181" width="105" height="12" rx="2" fill="#f0f0ec"></rect>
+      <rect x="595" y="181" width="84" height="12" rx="2" fill="#e8a020"></rect>
+      <text x="706" y="191" font-family="IBM Plex Mono,monospace" font-size="8" fill="#7a5000" font-weight="700">.80</text>
+      <rect x="568" y="215" width="154" height="30" rx="6" fill="#2a7a4b"></rect>
+      <text x="645" y="235" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff" font-weight="600">c₃ ≈ mostly h₄</text>
+      <line x1="645" y1="248" x2="645" y2="266" stroke="#555" stroke-width="1.8" marker-end="url(#a1)"></line>
+      <rect x="568" y="270" width="154" height="34" rx="6" fill="#e8a020"></rect>
+      <text x="645" y="292" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#fff" font-weight="700">outputs &lt;eos&gt;</text>
+      <text x="645" y="330" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666" font-style="italic">focus on end-of-sentence</text>
+      <text x="645" y="345" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666" font-style="italic">→ time to stop</text>
+      <!-- arrows from H to each step -->
+      <line x1="110" y1="150" x2="138" y2="150" stroke="#2255aa" stroke-width="1.5" marker-end="url(#ab)"></line>
+      <path d="M110 200 Q125 200 138 200" stroke="#2255aa" stroke-width="1.5" fill="none" marker-end="url(#ab)"></path>
+      <!-- bottom summary -->
+      <rect x="140" y="382" width="600" height="30" rx="8" fill="#eef3ff" stroke="#c0cce8"></rect>
+      <text x="440" y="401" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a3a5c" font-weight="700">SAME H EVERY TIME · DIFFERENT s EVERY TIME · THEREFORE DIFFERENT α AND c EVERY TIME</text>
+    </svg>
+    <div class="diagram-caption">FIG 7 — Three decoder steps. H never changes. The decoder state does — and that alone shifts the attention from "I", to "India", to "&lt;eos&gt;".</div>
+  </div>
+  <div class="callout callout-green">
+    <strong>This is the payoff.</strong> Notice how the focus 
+    <em>moves</em>: step 1 looks at the start of the sentence, step 2 jumps to the middle, step 3 lands on the end. A fixed context vector physically cannot do this — it's the same vector at every step. Attention is what makes the focus mobile.
+  </div>
+  <h4>The loop written as pseudocode</h4>
+  <div class="math-box">
+    <span class="comment">// ONCE, before decoding starts</span>
+    <span class="var">H</span> = encoder(source_sentence)      
+    <span class="comment">// shape (T_x, 512) — then frozen</span>
+    <span class="var">s</span> = initial_state
+    <span class="comment">// THEN, repeat for each output word</span>
+    <span class="eq">while</span> not done:
+    <span class="comment">// STEP 1 — score every source word against current state</span>
+    <span class="eq">for</span> i 
+    <span class="eq">in</span> 1…T_x:
+        e[i] = v_aᵀ · tanh(W_a·s + U_a·H[i] + b_a)
+    <span class="comment">// STEP 2 — normalize into a recipe</span>
+    α = softmax(e)                  
+    <span class="comment">// T_x numbers, summing to 1</span>
+    <span class="comment">// STEP 3 — blend</span>
+    c = Σᵢ α[i] · H[i]              
+    <span class="comment">// one 512-vector</span>
+    <span class="comment">// STEP 4 — decode and advance</span>
+    s = RNN(s, embed(prev_word), c)
+    word = softmax(W_o · s + b_o)
+    emit(word)
+    <span class="comment">// Note: H[i] is read but never written. s is overwritten every pass.</span>
+  </div>
+</section>
+<!-- ══════════ 07 ENCODER ══════════ -->
+<section class="section" id="s7">
+  <div class="section-eyebrow">Section 07</div>
+  <h2>Where H Comes From — The BiRNN Encoder</h2>
+  <p>Now that you know what H is 
+    <em>for</em>, here's how it's built. Bahdanau uses a bidirectional RNN so that each h_i sees the whole sentence, not just the words before it.
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 740 240" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:740px;display:block;margin:0 auto">
+      <text x="95" y="30" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#333" font-weight="600">"I"</text>
+      <text x="235" y="30" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#333" font-weight="600">"love"</text>
+      <text x="375" y="30" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#333" font-weight="600">"India"</text>
+      <text x="515" y="30" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#333" font-weight="600">"&lt;eos&gt;"</text>
+      <!-- forward -->
+      <text x="35" y="72" font-family="IBM Plex Mono,monospace" font-size="9" fill="#2255aa" font-weight="700">FWD →</text>
+      <rect x="67" y="55" width="56" height="32" rx="6" fill="#ddeeff" stroke="#2255aa" stroke-width="1.5"></rect>
+      <text x="95" y="76" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a3a5c">→h₁</text>
+      <rect x="207" y="55" width="56" height="32" rx="6" fill="#ddeeff" stroke="#2255aa" stroke-width="1.5"></rect>
+      <text x="235" y="76" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a3a5c">→h₂</text>
+      <rect x="347" y="55" width="56" height="32" rx="6" fill="#ddeeff" stroke="#2255aa" stroke-width="1.5"></rect>
+      <text x="375" y="76" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a3a5c">→h₃</text>
+      <rect x="487" y="55" width="56" height="32" rx="6" fill="#ddeeff" stroke="#2255aa" stroke-width="1.5"></rect>
+      <text x="515" y="76" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a3a5c">→h₄</text>
+      <line x1="123" y1="71" x2="205" y2="71" stroke="#2255aa" stroke-width="2" marker-end="url(#ab)"></line>
+      <line x1="263" y1="71" x2="345" y2="71" stroke="#2255aa" stroke-width="2" marker-end="url(#ab)"></line>
+      <line x1="403" y1="71" x2="485" y2="71" stroke="#2255aa" stroke-width="2" marker-end="url(#ab)"></line>
+      <text x="580" y="76" font-family="Inter,sans-serif" font-size="9" fill="#2255aa">reads left→right</text>
+      <!-- backward -->
+      <text x="35" y="132" font-family="IBM Plex Mono,monospace" font-size="9" fill="#6b3fa0" font-weight="700">BWD ←</text>
+      <rect x="67" y="115" width="56" height="32" rx="6" fill="#ede8ff" stroke="#6b3fa0" stroke-width="1.5"></rect>
+      <text x="95" y="136" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#4a1a80">←h₁</text>
+      <rect x="207" y="115" width="56" height="32" rx="6" fill="#ede8ff" stroke="#6b3fa0" stroke-width="1.5"></rect>
+      <text x="235" y="136" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#4a1a80">←h₂</text>
+      <rect x="347" y="115" width="56" height="32" rx="6" fill="#ede8ff" stroke="#6b3fa0" stroke-width="1.5"></rect>
+      <text x="375" y="136" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#4a1a80">←h₃</text>
+      <rect x="487" y="115" width="56" height="32" rx="6" fill="#ede8ff" stroke="#6b3fa0" stroke-width="1.5"></rect>
+      <text x="515" y="136" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#4a1a80">←h₄</text>
+      <line x1="487" y1="131" x2="405" y2="131" stroke="#6b3fa0" stroke-width="2" marker-end="url(#a1)"></line>
+      <line x1="347" y1="131" x2="265" y2="131" stroke="#6b3fa0" stroke-width="2" marker-end="url(#a1)"></line>
+      <line x1="207" y1="131" x2="125" y2="131" stroke="#6b3fa0" stroke-width="2" marker-end="url(#a1)"></line>
+      <text x="580" y="136" font-family="Inter,sans-serif" font-size="9" fill="#6b3fa0">reads right→left</text>
+      <!-- concat -->
+      <text x="35" y="192" font-family="IBM Plex Mono,monospace" font-size="9" fill="#333" font-weight="700">JOIN</text>
+      <rect x="63" y="175" width="64" height="32" rx="6" fill="#1a3a5c"></rect>
+      <text x="95" y="196" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">h₁</text>
+      <rect x="203" y="175" width="64" height="32" rx="6" fill="#1a3a5c"></rect>
+      <text x="235" y="196" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">h₂</text>
+      <rect x="343" y="175" width="64" height="32" rx="6" fill="#1a3a5c"></rect>
+      <text x="375" y="196" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">h₃</text>
+      <rect x="483" y="175" width="64" height="32" rx="6" fill="#1a3a5c"></rect>
+      <text x="515" y="196" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">h₄</text>
+      <g stroke="#999" stroke-width="1" stroke-dasharray="3,3">
+        <line x1="95" y1="87" x2="95" y2="175"></line>
+        <line x1="95" y1="147" x2="95" y2="175"></line>
+        <line x1="235" y1="87" x2="235" y2="175"></line>
+        <line x1="235" y1="147" x2="235" y2="175"></line>
+        <line x1="375" y1="87" x2="375" y2="175"></line>
+        <line x1="375" y1="147" x2="375" y2="175"></line>
+        <line x1="515" y1="87" x2="515" y2="175"></line>
+        <line x1="515" y1="147" x2="515" y2="175"></line>
+      </g>
+      <text x="580" y="190" font-family="IBM Plex Mono,monospace" font-size="9" fill="#333">hᵢ = [→hᵢ ; ←hᵢ]</text>
+      <text x="580" y="204" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">these rows form H</text>
+      <text x="300" y="230" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#666" font-style="italic">Why bidirectional? So h₁ ("I") already knows the sentence ends with "India" — context flows both ways.</text>
+    </svg>
+    <div class="diagram-caption">FIG 8 — Building H. Two RNN passes in opposite directions, concatenated per position. The bottom row 
+      <em>is</em> H.
+    </div>
+  </div>
+  <div class="math-box">
+    <span class="comment">// Forward pass — sees x₁ … xᵢ</span>
+    <span class="var">→hᵢ</span> = 
+    <span class="eq">RNN_fwd(xᵢ, →hᵢ₋₁)</span>
+    <span class="comment">// Backward pass — sees x_Tx … xᵢ</span>
+    <span class="var">←hᵢ</span> = 
+    <span class="eq">RNN_bwd(xᵢ, ←hᵢ₊₁)</span>
+    <span class="comment">// Join them — this row goes into H</span>
+    <span class="var">hᵢ</span> = 
+    <span class="eq">[ →hᵢ ; ←hᵢ ]</span>     
+    <span class="comment">// 256 + 256 = 512 numbers</span>
+  </div>
+  <div class="callout callout-blue">
+    <strong>Why bidirectional matters for attention:</strong> in a one-directional RNN, h₁ only knows about "I" — it has no idea the sentence is about India. That makes it a poor thing to score against. Bidirectionality means every row of H is a genuinely complete description of its word in context, which is what makes the scoring meaningful.
+  </div>
+</section>
+<!-- ══════════ 08 DECODER ══════════ -->
+<section class="section" id="s8">
+  <div class="section-eyebrow">Section 08</div>
+  <h2>What the Decoder Does With c_t</h2>
+  <p>The context vector isn't the final answer — it's an ingredient. The decoder combines it with its own state and the previous word to update itself and produce output.</p>
+  <div class="math-box">
+    <span class="comment">// Update the decoder state using three inputs</span>
+    <span class="var">s_t</span> = 
+    <span class="eq">RNN( s_{t−1},  [ E(y_{t−1}) ; c_t ] )</span>
+    <span class="comment">↑ my state    ↑ last word   ↑ what I just</span>
+    <span class="comment">looked at</span>
+    <span class="comment">// Produce the word distribution over the vocabulary</span>
+    <span class="var">P(y_t | y_&lt;t, X)</span> = 
+    <span class="eq">softmax( W_o · tanh(W_c·[s_t ; c_t]) + b_o )</span>
+    <span class="comment">// Training loss — plain cross-entropy over the target sequence</span>
+    <span class="var">L</span> = 
+    <span class="eq">− Σ_t log P(y_t* | y*_&lt;t, X)</span>
+  </div>
+  <div class="callout callout-green">
+    <strong>How does attention learn without alignment labels?</strong> Nobody tells the model that "India" should align with "l'Inde". The gradient does it. If putting weight on h₃ produces a better prediction, the loss goes down, and gradient descent nudges W_a/U_a/v_a to score h₃ higher next time in that situation. Alignment is a 
+    <em>by-product</em> of minimizing translation error.
+  </div>
+  <div class="math-box">
+    <span class="comment">// The gradient path — how the alignment network gets trained</span>
+Loss  →  output softmax  →  s_t and c_t  →  α_{t,i}  →  e_{t,i}  →  W_a, U_a, v_a, b_a
+    <span class="hi">↑</span>
+    <span class="comment">the α values are differentiable because</span>
+    <span class="comment">softmax and weighted-sum are both smooth</span>
+  </div>
+  <div class="callout callout-red">
+    <strong>Why this only works with 
+      <em>soft</em> attention:
+    </strong> if attention picked exactly one source word (hard attention), the selection would be a discrete choice — not differentiable, so no gradient could flow back to the alignment network. The soft weighted average is what makes end-to-end training possible.
+  </div>
+  <h4>Attention heatmap — reading a trained model</h4>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 440 270" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:440px;display:block;margin:0 auto">
+      <text x="220" y="22" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700" letter-spacing="1">ALIGNMENT MATRIX  α ∈ ℝ^(T_y × T_x)</text>
+      <text x="120" y="48" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#333">I</text>
+      <text x="185" y="48" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#333">love</text>
+      <text x="255" y="48" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#333">India</text>
+      <text x="325" y="48" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#333">&lt;eos&gt;</text>
+      <text x="68" y="85" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="9" fill="#333">J'aime</text>
+      <text x="68" y="145" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="9" fill="#333">l'Inde</text>
+      <text x="68" y="205" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="9" fill="#333">&lt;eos&gt;</text>
+      <rect x="90" y="58" width="60" height="48" rx="3" fill="#1a3a5c" opacity=".75"></rect>
+      <text x="120" y="87" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff">0.55</text>
+      <rect x="155" y="58" width="60" height="48" rx="3" fill="#1a3a5c" opacity=".45"></rect>
+      <text x="185" y="87" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff">0.32</text>
+      <rect x="220" y="58" width="60" height="48" rx="3" fill="#1a3a5c" opacity=".15"></rect>
+      <text x="250" y="87" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333">0.08</text>
+      <rect x="285" y="58" width="60" height="48" rx="3" fill="#1a3a5c" opacity=".08"></rect>
+      <text x="315" y="87" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333">0.05</text>
+      <rect x="90" y="118" width="60" height="48" rx="3" fill="#1a3a5c" opacity=".12"></rect>
+      <text x="120" y="147" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333">0.08</text>
+      <rect x="155" y="118" width="60" height="48" rx="3" fill="#1a3a5c" opacity=".22"></rect>
+      <text x="185" y="147" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333">0.16</text>
+      <rect x="220" y="118" width="60" height="48" rx="3" fill="#1a3a5c" opacity=".95"></rect>
+      <text x="250" y="147" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">0.70</text>
+      <rect x="285" y="118" width="60" height="48" rx="3" fill="#1a3a5c" opacity=".08"></rect>
+      <text x="315" y="147" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333">0.06</text>
+      <rect x="90" y="178" width="60" height="48" rx="3" fill="#1a3a5c" opacity=".07"></rect>
+      <text x="120" y="207" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333">0.05</text>
+      <rect x="155" y="178" width="60" height="48" rx="3" fill="#1a3a5c" opacity=".07"></rect>
+      <text x="185" y="207" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333">0.05</text>
+      <rect x="220" y="178" width="60" height="48" rx="3" fill="#1a3a5c" opacity=".14"></rect>
+      <text x="250" y="207" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333">0.10</text>
+      <rect x="285" y="178" width="60" height="48" rx="3" fill="#1a3a5c" opacity=".95"></rect>
+      <text x="315" y="207" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">0.80</text>
+      <text x="220" y="248" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">SOURCE →</text>
+      <text x="24" y="145" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888" transform="rotate(-90 24 145)">TARGET</text>
+      <text x="220" y="264" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" fill="#888" font-style="italic">Each row is one decoder step — and each row sums to 1.</text>
+    </svg>
+    <div class="diagram-caption">FIG 9 — Stack the α vectors from every decoder step and you get this matrix. Row 2 is exactly the recipe we computed in Section 05.</div>
+  </div>
+</section>
+<!-- ══════════ 09 VARIANTS ══════════ -->
+<section class="section" id="s9">
+  <div class="section-eyebrow">Section 09</div>
+  <h2>Attention Variants</h2>
+  <p>Every variant keeps the same three-part skeleton — 
+    <strong>score, normalize, blend</strong>. They differ only in the scoring function and in which positions are allowed to be scored.
+  </p>
+  <table>
+    <tbody>
+      <tr>
+        <th>Variant</th>
+        <th>Score formula</th>
+        <th>What changed</th>
+        <th>Use when</th>
+      </tr>
+      <tr>
+        <td>
+          <strong>Bahdanau (additive)</strong>
+        </td>
+        <td>v_aᵀ tanh(W_a s_{t−1} + U_a h_i + b_a)</td>
+        <td>The baseline; uses 
+          <em>previous</em> state s_{t−1}
+        </td>
+        <td>Encoder and decoder sizes differ</td>
+      </tr>
+      <tr>
+        <td>Luong dot</td>
+        <td>s_tᵀ h_i</td>
+        <td>No learned parameters at all — just a dot product</td>
+        <td>Fast; dimensions must match</td>
+      </tr>
+      <tr>
+        <td>Luong general</td>
+        <td>s_tᵀ W_a h_i</td>
+        <td>One matrix instead of three</td>
+        <td>Flexible, cheaper than additive</td>
+      </tr>
+      <tr>
+        <td>Luong concat</td>
+        <td>v_aᵀ tanh(W_a[s_t ; h_i])</td>
+        <td>Concatenates instead of adding</td>
+        <td>Similar power to additive</td>
+      </tr>
+      <tr>
+        <td>Scaled dot-product</td>
+        <td>qᵀk / √d_k</td>
+        <td>Adds the √d_k division</td>
+        <td>Foundation of the Transformer</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-purple">
+    <strong>Bahdanau vs Luong — the timing difference students miss:</strong> Bahdanau computes attention using s_{t−1}, the state 
+    <em>before</em> the RNN update, then feeds c_t 
+    <em>into</em> the update. Luong updates the RNN first to get s_t, then computes attention and combines afterwards. Same components, different order in the loop.
+  </div>
+  <div class="compare-grid">
+    <div class="compare-card">
+      <div class="compare-card-header" style="background:#1a3a5c;color:#fff">Global attention</div>
+      <div class="compare-card-body">
+        <ul>
+          <li>Scores 
+            <em>every</em> source position
+          </li>
+          <li>Any word can be reached</li>
+          <li>Cost O(T_x · T_y)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="compare-card">
+      <div class="compare-card-header" style="background:#2a7a4b;color:#fff">Local attention</div>
+      <div class="compare-card-body">
+        <ul>
+          <li>Scores only a window around a predicted position</li>
+          <li>Cheaper and more focused</li>
+          <li>May miss distant dependencies</li>
+        </ul>
+      </div>
+    </div>
+    <div class="compare-card">
+      <div class="compare-card-header" style="background:#555;color:#fff">Soft attention</div>
+      <div class="compare-card-body">
+        <ul>
+          <li>Weighted average over all positions</li>
+          <li>Differentiable → trains with plain backprop</li>
+          <li>Never fully ignores anything</li>
+        </ul>
+      </div>
+    </div>
+    <div class="compare-card">
+      <div class="compare-card-header" style="background:#6b3fa0;color:#fff">Hard attention</div>
+      <div class="compare-card-body">
+        <ul>
+          <li>Picks exactly one position</li>
+          <li>Sparse and interpretable</li>
+          <li>Not differentiable — needs REINFORCE</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ══════════ 10 TO TRANSFORMERS ══════════ -->
+<section class="section" id="s10">
+  <div class="section-eyebrow">Section 10</div>
+  <h2>The Bridge to Self-Attention</h2>
+  <p>Once you see attention as 
+    <strong>query · keys → weights → blend values</strong>, the Transformer stops looking like a new idea and starts looking like the same idea with the sources renamed.
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 740 250" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:740px;display:block;margin:0 auto">
+      <text x="370" y="26" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700" letter-spacing="1.5">SAME MECHANISM, DIFFERENT SOURCES</text>
+      <!-- headers -->
+      <text x="185" y="58" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#2255aa" font-weight="700">RNN ATTENTION (Part 2)</text>
+      <text x="555" y="58" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#2a7a4b" font-weight="700">SELF-ATTENTION (Part 3)</text>
+      <!-- QUERY row -->
+      <rect x="20" y="70" width="80" height="46" rx="7" fill="#e8a020"></rect>
+      <text x="60" y="90" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#fff" font-weight="700">QUERY</text>
+      <text x="60" y="105" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#fff8ee">"what I need"</text>
+      <rect x="110" y="70" width="150" height="46" rx="7" fill="#eef3ff" stroke="#2255aa" stroke-width="1.5"></rect>
+      <text x="185" y="90" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a3a5c" font-weight="600">s_{t−1}</text>
+      <text x="185" y="105" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">decoder state</text>
+      <rect x="480" y="70" width="150" height="46" rx="7" fill="#edfaf3" stroke="#2a7a4b" stroke-width="1.5"></rect>
+      <text x="555" y="90" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a5c38" font-weight="600">Q = X·W_Q</text>
+      <text x="555" y="105" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">from the same sequence</text>
+      <!-- KEY row -->
+      <rect x="20" y="126" width="80" height="46" rx="7" fill="#2255aa"></rect>
+      <text x="60" y="146" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#fff" font-weight="700">KEYS</text>
+      <text x="60" y="161" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#cce0ff">"what's on offer"</text>
+      <rect x="110" y="126" width="150" height="46" rx="7" fill="#eef3ff" stroke="#2255aa" stroke-width="1.5"></rect>
+      <text x="185" y="146" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a3a5c" font-weight="600">H (encoder states)</text>
+      <text x="185" y="161" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">a different sequence</text>
+      <rect x="480" y="126" width="150" height="46" rx="7" fill="#edfaf3" stroke="#2a7a4b" stroke-width="1.5"></rect>
+      <text x="555" y="146" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a5c38" font-weight="600">K = X·W_K</text>
+      <text x="555" y="161" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">from the same sequence</text>
+      <!-- VALUES row -->
+      <rect x="20" y="182" width="80" height="46" rx="7" fill="#2a7a4b"></rect>
+      <text x="60" y="202" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#fff" font-weight="700">VALUES</text>
+      <text x="60" y="217" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#c8ead6">"what I take"</text>
+      <rect x="110" y="182" width="150" height="46" rx="7" fill="#eef3ff" stroke="#2255aa" stroke-width="1.5"></rect>
+      <text x="185" y="202" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a3a5c" font-weight="600">H (again!)</text>
+      <text x="185" y="217" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">keys and values are the same</text>
+      <rect x="480" y="182" width="150" height="46" rx="7" fill="#edfaf3" stroke="#2a7a4b" stroke-width="1.5"></rect>
+      <text x="555" y="202" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a5c38" font-weight="600">V = X·W_V</text>
+      <text x="555" y="217" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">separate projection</text>
+      <!-- middle connector -->
+      <text x="370" y="95" text-anchor="middle" font-family="monospace" font-size="16" fill="#888">→</text>
+      <text x="370" y="151" text-anchor="middle" font-family="monospace" font-size="16" fill="#888">→</text>
+      <text x="370" y="207" text-anchor="middle" font-family="monospace" font-size="16" fill="#888">→</text>
+      <text x="370" y="120" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#999">becomes</text>
+      <text x="370" y="176" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#999">becomes</text>
+      <text x="370" y="232" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#999">becomes</text>
+    </svg>
+    <div class="diagram-caption">FIG 10 — RNN attention in Q/K/V language. In Part 2, H serves as both keys and values. In Part 3, all three come from the same input via separate learned projections.</div>
+  </div>
+  <table>
+    <tbody>
+      <tr>
+        <th></th>
+        <th>RNN with attention</th>
+        <th>Self-attention</th>
+      </tr>
+      <tr>
+        <td>Query comes from</td>
+        <td>Decoder state s_{t−1}</td>
+        <td>A token in the same sequence</td>
+      </tr>
+      <tr>
+        <td>Keys/values come from</td>
+        <td>Encoder states H</td>
+        <td>The same sequence</td>
+      </tr>
+      <tr>
+        <td>Scoring</td>
+        <td>Additive network (tanh)</td>
+        <td>Scaled dot product</td>
+      </tr>
+      <tr>
+        <td>Recurrence?</td>
+        <td>Yes — decoder is still sequential</td>
+        <td>No — fully parallel</td>
+      </tr>
+      <tr>
+        <td>Visualization</td>
+        <td>Target–source alignment</td>
+        <td>Token–token attention map</td>
+      </tr>
+      <tr>
+        <td>Used in</td>
+        <td>Early neural machine translation</td>
+        <td>Transformers, GPT, BERT, LLMs</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3>Complexity</h3>
+  <table>
+    <tbody>
+      <tr>
+        <th>Component</th>
+        <th>Time</th>
+        <th>Space</th>
+        <th>Driver</th>
+      </tr>
+      <tr>
+        <td>BiRNN encoder</td>
+        <td>O(T_x · h(d_x + h))</td>
+        <td>O(T_x · h)</td>
+        <td>Source length × hidden size</td>
+      </tr>
+      <tr>
+        <td>Scoring, one decoder step</td>
+        <td>O(T_x · d_a(d_s + d_h))</td>
+        <td>O(T_x)</td>
+        <td>Attention hidden size</td>
+      </tr>
+      <tr>
+        <td>Attention over all steps</td>
+        <td>O(T_y · T_x · d_a)</td>
+        <td>O(T_y · T_x)</td>
+        <td>Source × target product</td>
+      </tr>
+      <tr>
+        <td>Context vector per step</td>
+        <td>O(T_x · d_h)</td>
+        <td>O(d_h)</td>
+        <td>The weighted sum</td>
+      </tr>
+      <tr>
+        <td>Self-attention layer</td>
+        <td>O(T² · d)</td>
+        <td>O(T²)</td>
+        <td>Sequence length squared</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3>Checklist — can you answer these?</h3>
+  <table>
+    <tbody>
+      <tr>
+        <th>Question</th>
+        <th>Answer</th>
+      </tr>
+      <tr>
+        <td>What is H?</td>
+        <td>The encoder's output — one context-aware vector per source word, stacked into a matrix. Computed once, then frozen.</td>
+      </tr>
+      <tr>
+        <td>What is c_t?</td>
+        <td>A weighted average of the rows of H, using the α values as proportions. Same size as one h_i.</td>
+      </tr>
+      <tr>
+        <td>What is α?</td>
+        <td>The attention weights — computed fresh each decoder step, all in [0,1], summing to 1.</td>
+      </tr>
+      <tr>
+        <td>Which "weights" are learned?</td>
+        <td>W_a, U_a, v_a, b_a only. α is computed, never stored or learned.</td>
+      </tr>
+      <tr>
+        <td>Why softmax and not simple division?</td>
+        <td>Raw scores can be negative; exponentiating forces positivity, and dividing by the sum makes them proportions.</td>
+      </tr>
+      <tr>
+        <td>Why does α change each step?</td>
+        <td>Because s_{t−1} changes each step. H is constant, so the decoder state is the only thing driving the difference.</td>
+      </tr>
+      <tr>
+        <td>Why "additive"?</td>
+        <td>The projected query and key are added before tanh. Luong multiplies instead.</td>
+      </tr>
+      <tr>
+        <td>Who labels the alignments?</td>
+        <td>Nobody. They emerge from minimizing translation loss via backprop.</td>
+      </tr>
+      <tr>
+        <td>Why must attention be soft?</td>
+        <td>Hard selection isn't differentiable, so no gradient could reach the alignment network.</td>
+      </tr>
+      <tr>
+        <td>How does this become a Transformer?</td>
+        <td>Rename s_{t−1} → Q and H → K, V; swap the additive score for a scaled dot product; drop recurrence.</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout" style="margin-top:2rem">
+    <strong>References:</strong>
+    <br>
+    Bahdanau, Cho &amp; Bengio (2014) — Neural Machine Translation by Jointly Learning to Align and Translate.
+    <br>
+    Luong, Pham &amp; Manning (2015) — Effective Approaches to Attention-based Neural Machine Translation.
+    <br>
+    Vaswani et al. (2017) — Attention Is All You Need.
+  </div>
+</section>
+<footer style="text-align:center;padding:2rem;font-family:var(--mono);font-size:.75rem;color:#aaa;border-top:1px solid var(--rule)">Module 1 · Part 6B · Part 2 (v2) — RNN with Attention &amp; Attention Models</footer>

@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agentic Systems &amp; the Agent Harness — Study Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Fraunces:ital,wght@0,300;0,700;1,300&family=Inter:wght@400;500;600&display=swap');
+  :root {
+    --ink: #0f1117; --paper: #f7f6f2; --mid: #e8e5dd; --rule: #c9c4b8; --accent: #1a3a5c;
+    --highlight: #e8a020; --green: #2a7a4b; --red: #b83232; --blue: #2255aa; --purple: #6b3fa0; --teal: #0d7a7a;
+    --mono: 'IBM Plex Mono', monospace; --display: 'Fraunces', Georgia, serif; --body: 'Inter', system-ui, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--body); background: var(--paper); color: var(--ink); line-height: 1.7; font-size: 16px; }
+  .hero { background: linear-gradient(160deg, #0f1117 0%, #1a3a5c 100%); color: #fff; padding: 4rem 2rem 3rem; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 20% 30%, rgba(232,160,32,0.10), transparent 40%), radial-gradient(circle at 80% 70%, rgba(42,122,75,0.12), transparent 40%); }
+  .hero-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--highlight); margin-bottom: 1rem; position: relative; }
+  .hero h1 { font-family: var(--display); font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; line-height: 1.1; margin-bottom: 1rem; position: relative; }
+  .hero p { font-size: 1.1rem; opacity: 0.82; max-width: 680px; margin: 0 auto; position: relative; }
+  .toc { background: var(--ink); color: #fff; padding: 1.2rem 2rem; display: flex; gap: 1.2rem; flex-wrap: wrap; justify-content: center; position: sticky; top: 0; z-index: 100; }
+  .toc a { color: rgba(255,255,255,0.7); text-decoration: none; font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.03em; transition: color 0.2s; }
+  .toc a:hover { color: var(--highlight); }
+  .section { max-width: 900px; margin: 0 auto; padding: 4rem 2rem; border-bottom: 1px solid var(--rule); }
+  .section-eyebrow { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.5rem; }
+  .section h2 { font-family: var(--display); font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 700; margin-bottom: 1.5rem; color: var(--ink); }
+  .section h3 { font-family: var(--display); font-size: 1.25rem; font-weight: 700; margin: 2rem 0 0.8rem; color: var(--accent); }
+  .section p { margin-bottom: 1rem; color: #333; }
+  .callout { border-left: 4px solid var(--highlight); background: #fff8ee; padding: 1rem 1.25rem; border-radius: 0 6px 6px 0; margin: 1.5rem 0; font-size: 0.95rem; }
+  .callout strong { color: var(--accent); }
+  .callout-blue  { border-left-color: var(--blue);   background: #eef3ff; }
+  .callout-green { border-left-color: var(--green);  background: #edfaf3; }
+  .callout-red   { border-left-color: var(--red);    background: #fff0f0; }
+  .callout-purple{ border-left-color: var(--purple); background: #f5f0ff; }
+  .callout-teal  { border-left-color: var(--teal);   background: #e9fafa; }
+  .math-box { background: var(--ink); color: #e8e8e8; font-family: var(--mono); font-size: 0.86rem; line-height: 1.9; padding: 1.5rem; border-radius: 8px; margin: 1.5rem 0; overflow-x: auto; white-space: pre; }
+  .math-box .comment { color: #6a9f6a; } .math-box .var { color: #f0b060; } .math-box .eq { color: #7ab8f5; } .math-box .hi { color: #ff9090; }
+  .codebox { background: #1c2333; color: #d8dee9; font-family: var(--mono); font-size: 0.8rem; line-height: 1.75; padding: 1.25rem 1.5rem; border-radius: 8px; margin: 1.5rem 0; overflow-x: auto; white-space: pre; }
+  .codebox .kw { color: #c792ea; } .codebox .str { color: #c3e88d; } .codebox .cm { color: #6a80a4; } .codebox .fn { color: #82aaff; } .codebox .num { color: #f78c6c; }
+  table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.88rem; }
+  th { background: var(--accent); color: #fff; padding: 0.6rem 0.9rem; text-align: left; font-family: var(--mono); font-size: 0.76rem; letter-spacing: 0.04em; }
+  td { padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--mid); vertical-align: top; }
+  tr:nth-child(even) td { background: #fafaf7; }
+  code { font-family: var(--mono); font-size: 0.85em; }
+  .diagram-wrap { background: #fff; border: 1px solid var(--rule); border-radius: 10px; padding: 1.5rem; margin: 2rem 0; overflow-x: auto; }
+  .diagram-caption { text-align: center; font-family: var(--mono); font-size: 0.74rem; color: #777; margin-top: 0.75rem; letter-spacing: 0.04em; line-height: 1.6; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+  .step-card { background: #fff; border: 1px solid var(--rule); border-radius: 8px; padding: 1.1rem; }
+  .step-num { font-family: var(--mono); font-size: 1.9rem; font-weight: 600; color: var(--mid); line-height: 1; margin-bottom: 0.4rem; }
+  .step-card h4 { font-size: 0.88rem; font-weight: 600; color: var(--accent); margin-bottom: 0.35rem; }
+  .step-card p { font-size: 0.82rem; margin: 0; color: #444; }
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+  .compare-card { border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; background: #fff; }
+  .compare-card-header { padding: 0.6rem 1rem; font-family: var(--mono); font-size: 0.76rem; font-weight: 600; letter-spacing: 0.04em; }
+  .compare-card-body { padding: 1rem; font-size: 0.86rem; }
+  .compare-card-body ul { list-style: none; }
+  .compare-card-body li { margin-bottom: 0.4rem; padding-left: 1.1rem; position: relative; }
+  .compare-card-body li::before { content: '→'; position: absolute; left: 0; color: var(--highlight); }
+  .section ul:not(.compare-card-body ul), .section ol { margin: 0 0 1rem 1.4rem; }
+  .family-banner { background: linear-gradient(160deg, #0f1117 0%, #1a3a5c 100%); color: #fff; text-align: center; padding: 2.2rem 1.5rem; }
+  .family-tag { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--highlight); margin-bottom: 0.4rem; }
+  .family-title { font-family: var(--display); font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 700; }
+  .family-sub { font-family: var(--mono); font-size: 0.76rem; opacity: 0.75; margin-top: 0.4rem; }
+  footer { text-align: center; padding: 2rem; font-family: var(--mono); font-size: 0.75rem; color: #aaa; border-top: 1px solid var(--rule); }
+  @media (max-width: 620px) { .compare-grid { grid-template-columns: 1fr; } .steps { grid-template-columns: 1fr 1fr; } .section { padding: 2.5rem 1.2rem; } }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-label">Module 4 · Part 4 — Study Guide</div>
+  <h1>Agentic Systems &amp; the Agent Harness</h1>
+  <p>Parts 1–3 gave us the pieces: agent types, planning strategies and tools. This Part assembles them. First the <strong>types of agentic system</strong>: workflows, single agents and multi-agent systems. Then the <strong>agent harness</strong>, the software around the model that makes any of them run: the loop, tools, memory, state, safety and observability.</p>
+</div>
+
+<nav class="toc">
+  <a href="#s1">01 Types of Agentic Systems</a>
+  <a href="#s2">02 Workflows</a>
+  <a href="#s3">03 Single-Agent Systems</a>
+  <a href="#s4">04 Multi-Agent Systems</a>
+  <a href="#s5">05 Routing &amp; Handoffs</a>
+  <a href="#s6">06 The Agent Harness</a>
+  <a href="#s7">07 Harness: Memory &amp; Context</a>
+  <a href="#s8">08 Harness: State, Control &amp; Safety</a>
+  <a href="#s9">09 Frameworks</a>
+  <a href="#s10">10 End to End</a>
+  <a href="#s11">11 Takeaways</a>
+</nav>
+
+<section class="section" id="s1">
+  <div class="section-eyebrow">Section 01</div>
+  <h2>Types of Agentic Systems</h2>
+
+  <p>"Agentic system" covers a range. The useful question is: <strong>who decides the control flow, your code or the model?</strong></p>
+
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 740 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:740px;display:block;margin:0 auto">
+      <defs><marker id="q1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#888"/></marker></defs>
+      <text x="370" y="22" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="600" letter-spacing="1.5">MORE CONTROL FLOW DECIDED BY THE MODEL →</text>
+      <line x1="40" y1="120" x2="710" y2="120" stroke="#ccc" stroke-width="2" marker-end="url(#q1)"/>
+      <g font-family="IBM Plex Mono,monospace" text-anchor="middle">
+        <rect x="30" y="45" width="150" height="50" rx="8" fill="#f4f4f0" stroke="#999"/><text x="105" y="67" font-size="10" font-weight="700" fill="#333">Single LLM call</text><text x="105" y="83" font-size="8" fill="#666">prompt in, answer out</text>
+        <rect x="200" y="45" width="150" height="50" rx="8" fill="#edfaf3" stroke="#2a7a4b"/><text x="275" y="67" font-size="10" font-weight="700" fill="#1a5c38">Workflow</text><text x="275" y="83" font-size="8" fill="#1a5c38">code decides the path</text>
+        <rect x="370" y="45" width="150" height="50" rx="8" fill="#eef3ff" stroke="#2255aa"/><text x="445" y="67" font-size="10" font-weight="700" fill="#1a3a5c">Single agent</text><text x="445" y="83" font-size="8" fill="#1a3a5c">model decides its tools</text>
+        <rect x="540" y="45" width="170" height="50" rx="8" fill="#f5f0ff" stroke="#6b3fa0"/><text x="625" y="67" font-size="10" font-weight="700" fill="#4a1a80">Multi-agent system</text><text x="625" y="83" font-size="8" fill="#4a1a80">agents decide who works</text>
+      </g>
+      <text x="370" y="150" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#555">Left: predictable, cheap, easy to test.   Right: flexible, handles open-ended tasks, costs more and is harder to debug.</text>
+      <text x="370" y="172" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#555">All of them run inside a harness (Sections 06–08).</text>
+    </svg>
+    <div class="diagram-caption">FIG 1 — The spectrum of agentic systems. Start at the left and move right only when the task needs it.</div>
+  </div>
+
+  <table>
+    <tr><th>Type</th><th>Who decides the steps</th><th>Use when</th><th>Example</th></tr>
+    <tr><td><strong>Workflow</strong></td><td>Your code, with LLM calls at fixed points</td><td>The steps are known in advance</td><td>Extract fields from an invoice → validate → write to a database</td></tr>
+    <tr><td><strong>Single agent</strong></td><td>One model, choosing tools in a loop</td><td>The steps depend on what the tools return</td><td>A support assistant that searches docs and checks order status as needed</td></tr>
+    <tr><td><strong>Multi-agent</strong></td><td>Several agents, coordinated by a supervisor or by handoffs</td><td>The task splits into distinct specialities, or needs parallel work</td><td>A research system: one lead agent and several sub-agents searching in parallel</td></tr>
+  </table>
+
+  <div class="callout callout-green">
+    <strong>Rule of thumb (Anthropic, "Building Effective Agents", 2024):</strong> find the simplest thing that works. A single well-prompted LLM call with retrieval beats an agent for many tasks; a workflow beats an agent when the path is predictable. Add autonomy only when it pays for its cost and unpredictability.
+  </div>
+</section>
+
+<section class="section" id="s2">
+  <div class="section-eyebrow">Section 02</div>
+  <h2>Workflows: Fixed Paths With LLM Steps</h2>
+
+  <p>Five patterns cover most workflows. Each is a small graph you can draw before writing any code.</p>
+
+  <table>
+    <tr><th>Pattern</th><th>Shape</th><th>Example</th></tr>
+    <tr><td><strong>Prompt chaining</strong></td><td>A → B → C, each step's output feeds the next, with checks in between</td><td>Outline → draft → translate a report</td></tr>
+    <tr><td><strong>Routing</strong></td><td>Classify the input, then send it down one specialised branch</td><td>Refund questions to one prompt, technical issues to another</td></tr>
+    <tr><td><strong>Parallelisation</strong></td><td>Run several LLM calls at once and combine them (split the work, or vote)</td><td>Check one contract against five clauses in parallel</td></tr>
+    <tr><td><strong>Orchestrator–workers</strong></td><td>One LLM breaks the task into sub-tasks at runtime and hands them to workers</td><td>Edit every file a code change touches</td></tr>
+    <tr><td><strong>Evaluator–optimizer</strong></td><td>One LLM produces, another critiques, repeat until good enough (Part 2's reflection as a workflow)</td><td>Draft → review against a style guide → revise</td></tr>
+  </table>
+
+  <div class="callout callout-blue">
+    <strong>The boundary with agents:</strong> orchestrator–workers already lets the model decide the sub-tasks, so it sits at the edge of the spectrum. Once a model also decides <em>which tools to call and when to stop</em>, it is an agent.
+  </div>
+</section>
+
+<section class="section" id="s3">
+  <div class="section-eyebrow">Section 03</div>
+  <h2>Single-Agent Systems</h2>
+
+  <p>A <strong>single agent</strong> is one model, a set of tools and a loop: reason, call a tool, observe, repeat until done. It uses one of Part 2's planning strategies (usually ReAct) and Part 3's tool-calling loop. Most production "agents" are this.</p>
+
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;display:block;margin:0 auto">
+      <defs><marker id="q3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#555"/></marker></defs>
+      <rect x="30" y="80" width="110" height="40" rx="7" fill="#edfaf3" stroke="#2a7a4b"/><text x="85" y="104" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10">User request</text>
+      <line x1="140" y1="100" x2="235" y2="100" stroke="#555" stroke-width="2" marker-end="url(#q3)"/>
+      <rect x="240" y="70" width="160" height="60" rx="8" fill="#1a3a5c"/><text x="320" y="96" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#fff" font-weight="700">Agent (LLM)</text><text x="320" y="113" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#cce">reason → choose tool</text>
+      <path d="M400 85 C470 40 520 40 560 70" stroke="#6b3fa0" stroke-width="2" fill="none" marker-end="url(#q3)"/><text x="480" y="45" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#4a1a80">tool call</text>
+      <rect x="560" y="60" width="120" height="80" rx="7" fill="#fff3cc" stroke="#e8a020"/><text x="620" y="85" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9">lookup_fact</text><text x="620" y="102" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9">calculator</text><text x="620" y="119" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9">search_docs</text>
+      <path d="M560 130 C520 165 470 165 400 118" stroke="#e8a020" stroke-width="2" fill="none" marker-end="url(#q3)"/><text x="480" y="170" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#7a5000">observation</text>
+      <line x1="320" y1="130" x2="320" y2="180" stroke="#2a7a4b" stroke-width="2" marker-end="url(#q3)"/><text x="330" y="196" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a5c38">final answer when done</text>
+    </svg>
+    <div class="diagram-caption">FIG 2 — A single agent: one model loops over its tools until it can answer.</div>
+  </div>
+
+  <div class="codebox"><span class="cm"># A complete single agent with LangChain's helper (built on LangGraph); the lab builds the same graph by hand</span>
+<span class="kw">from</span> langchain.agents <span class="kw">import</span> create_agent
+
+agent = create_agent(model=llm, tools=[lookup_fact, run_python],
+                     system_prompt=<span class="str">"You answer questions about the course knowledge base."</span>)
+agent.invoke({<span class="str">"messages"</span>: [(<span class="str">"user"</span>, <span class="str">"How many days of fuel does the relay station have?"</span>)]})</div>
+
+  <h3>When one agent stops being enough</h3>
+  <table>
+    <tr><th>Symptom</th><th>Why it happens</th></tr>
+    <tr><td>It picks the wrong tool more often as you add tools</td><td>Too many similar tool descriptions to choose between (Part 3, Section 05)</td></tr>
+    <tr><td>Its prompt has grown into several jobs at once</td><td>Instructions for different specialities conflict</td></tr>
+    <tr><td>Long tasks run out of context</td><td>Every tool result piles up in one conversation</td></tr>
+    <tr><td>Independent sub-tasks run one after another</td><td>A single loop can't work on two things in parallel</td></tr>
+  </table>
+</section>
+
+<section class="section" id="s4">
+  <div class="section-eyebrow">Section 04</div>
+  <h2>Multi-Agent Systems</h2>
+
+  <p>A <strong>multi-agent system (MAS)</strong> is a set of agents, each with its own instructions, tools and goal, that coordinate to complete a task. The idea is classical (Part 1's timeline: FIPA in the 1990s, warehouse robot fleets); LLMs just changed what is inside each agent.</p>
+
+  <h3>How agents relate: the classical vocabulary</h3>
+  <table>
+    <tr><th>Relationship</th><th>Meaning</th><th>Example</th></tr>
+    <tr><td><strong>Cooperative</strong></td><td>Shared goal, divided labour</td><td>Research, maths and writing agents answering one question</td></tr>
+    <tr><td><strong>Competitive</strong></td><td>Conflicting goals</td><td>A negotiation between a buyer agent and a seller agent; debate between agents</td></tr>
+    <tr><td><strong>Hierarchical</strong></td><td>A coordinator delegates to specialists and combines their results</td><td>Amazon's warehouse robots under a central task assigner; the supervisor pattern below</td></tr>
+  </table>
+
+  <h3>Modern architectures</h3>
+  <table>
+    <tr><th>Architecture</th><th>How control flows</th><th>Strength</th><th>Weakness</th></tr>
+    <tr><td><strong>Supervisor</strong></td><td>One agent routes each step to a specialist; specialists report back only to it</td><td>Easy to reason about and debug</td><td>The supervisor is a bottleneck and costs an extra call per step</td></tr>
+    <tr><td><strong>Hierarchical teams</strong></td><td>Supervisors of supervisors (a research team, a writing team)</td><td>Scales to many agents</td><td>More layers, more latency</td></tr>
+    <tr><td><strong>Network / swarm</strong></td><td>Any agent can hand off directly to any other</td><td>Flexible, no central bottleneck</td><td>Hard to predict and debug</td></tr>
+    <tr><td><strong>Pipeline</strong></td><td>Fixed order: A's output is always B's input</td><td>Predictable (really a workflow)</td><td>No dynamic routing</td></tr>
+  </table>
+
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 700 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;display:block;margin:0 auto">
+      <defs><marker id="a2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#555"/></marker></defs>
+      <rect x="270" y="20" width="160" height="50" rx="8" fill="#1a3a5c"/>
+      <text x="350" y="41" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#fff" font-weight="700">Supervisor</text>
+      <text x="350" y="57" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#cce">routes + integrates</text>
+
+      <line x1="300" y1="70" x2="150" y2="120" stroke="#555" stroke-width="1.6" marker-end="url(#a2)"/>
+      <line x1="350" y1="70" x2="350" y2="120" stroke="#555" stroke-width="1.6" marker-end="url(#a2)"/>
+      <line x1="400" y1="70" x2="550" y2="120" stroke="#555" stroke-width="1.6" marker-end="url(#a2)"/>
+
+      <rect x="70" y="125" width="160" height="55" rx="7" fill="#fff3cc" stroke="#e8a020" stroke-width="1.5"/>
+      <text x="150" y="148" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#7a5000" font-weight="700">Research Agent</text>
+      <text x="150" y="165" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#7a5000">tools: search, RAG (Mod. 3)</text>
+
+      <rect x="270" y="125" width="160" height="55" rx="7" fill="#edfaf3" stroke="#2a7a4b" stroke-width="1.5"/>
+      <text x="350" y="148" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a5c38" font-weight="700">Math Agent</text>
+      <text x="350" y="165" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#1a5c38">tools: code exec (PAL, Mod. 2)</text>
+
+      <rect x="470" y="125" width="160" height="55" rx="7" fill="#f5f0ff" stroke="#6b3fa0" stroke-width="1.5"/>
+      <text x="550" y="148" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#4a1a80" font-weight="700">Writer Agent</text>
+      <text x="550" y="165" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#4a1a80">synthesizes final response</text>
+
+      <line x1="150" y1="180" x2="300" y2="220" stroke="#888" stroke-width="1.4" stroke-dasharray="3,2" marker-end="url(#a2)"/>
+      <line x1="350" y1="180" x2="350" y2="220" stroke="#888" stroke-width="1.4" stroke-dasharray="3,2" marker-end="url(#a2)"/>
+      <line x1="550" y1="180" x2="400" y2="220" stroke="#888" stroke-width="1.4" stroke-dasharray="3,2" marker-end="url(#a2)"/>
+      <text x="350" y="245" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#666">results flow back to Supervisor for integration</text>
+    </svg>
+    <div class="diagram-caption">FIG 3 — A hierarchical MAS: the Supervisor never does the work itself, only decides who does and combines what comes back. This is exactly the structure this module's lab notebook implements in LangGraph.</div>
+  </div>
+
+  <h3>The supervisor pattern, as LangGraph code</h3>
+  <p>LangGraph models the system as a graph: a shared <strong>state</strong> object passed between <strong>nodes</strong> (each an agent or function), with <strong>conditional edges</strong> deciding what runs next. The supervisor's routing decision <em>is</em> a conditional edge.</p>
+
+  <div class="codebox"><span class="kw">from</span> langgraph.graph <span class="kw">import</span> StateGraph, END
+<span class="kw">from</span> typing <span class="kw">import</span> TypedDict, Literal
+
+<span class="kw">class</span> <span class="fn">AgentState</span>(TypedDict):
+    messages: list                         <span class="cm"># shared conversation so far</span>
+    next: Literal[<span class="str">"research"</span>, <span class="str">"math"</span>, <span class="str">"writer"</span>, <span class="str">"FINISH"</span>]
+
+<span class="kw">def</span> <span class="fn">supervisor_node</span>(state: AgentState) -&gt; AgentState:
+    <span class="cm"># LLM-as-router (Section 05) — decides who handles this, or whether we're done</span>
+    decision = router_llm.invoke(state[<span class="str">"messages"</span>])
+    <span class="kw">return</span> {<span class="str">"next"</span>: decision}
+
+<span class="kw">def</span> <span class="fn">research_node</span>(state: AgentState) -&gt; AgentState:
+    result = research_agent.invoke(state[<span class="str">"messages"</span>])   <span class="cm"># tools: search, RAG (Mod. 3)</span>
+    <span class="kw">return</span> {<span class="str">"messages"</span>: state[<span class="str">"messages"</span>] + [result]}
+
+<span class="cm"># math_node, writer_node follow the same shape — omitted for brevity</span>
+
+graph = StateGraph(AgentState)
+graph.add_node(<span class="str">"supervisor"</span>, supervisor_node)
+graph.add_node(<span class="str">"research"</span>, research_node)
+graph.add_node(<span class="str">"math"</span>, math_node)
+graph.add_node(<span class="str">"writer"</span>, writer_node)
+
+graph.set_entry_point(<span class="str">"supervisor"</span>)
+
+<span class="cm"># the conditional edge IS the routing decision — Section 05's choice, wired into the graph</span>
+graph.add_conditional_edges(
+    <span class="str">"supervisor"</span>,
+    <span class="kw">lambda</span> state: state[<span class="str">"next"</span>],
+    {<span class="str">"research"</span>: <span class="str">"research"</span>, <span class="str">"math"</span>: <span class="str">"math"</span>, <span class="str">"writer"</span>: <span class="str">"writer"</span>, <span class="str">"FINISH"</span>: END},
+)
+
+<span class="cm"># every specialist reports back to the supervisor — never to each other (hierarchical, not peer-to-peer)</span>
+<span class="kw">for</span> node <span class="kw">in</span> [<span class="str">"research"</span>, <span class="str">"math"</span>, <span class="str">"writer"</span>]:
+    graph.add_edge(node, <span class="str">"supervisor"</span>)
+
+app = graph.compile()</div>
+
+  <div class="callout callout-teal">
+    <strong>Real-world example:</strong> Anthropic's Research feature (2025) uses a lead agent that plans and spawns several sub-agents to search in parallel, each with its own context. Anthropic reported it beat a single agent by about 90% on its internal research evaluation, while using roughly 15 times more tokens than a normal chat. That is the multi-agent trade-off in one sentence.
+  </div>
+
+  <div class="callout callout-red">
+    <strong>When <em>not</em> to go multi-agent:</strong> when sub-tasks depend tightly on each other's details. Agents only see what is passed to them, so decisions made in one context can conflict with another's (Cognition, "Don't Build Multi-Agents", 2025). Multi-agent pays off for parallel, separable work; a single agent with good context is often better for tightly coupled tasks like editing one codebase.
+  </div>
+</section>
+
+<section class="section" id="s5">
+  <div class="section-eyebrow">Section 05</div>
+  <h2>Routing &amp; Handoffs: How Agents Pass Work</h2>
+
+  <p>Every multi-agent system needs a rule for <em>who works next</em>. There are two mechanisms.</p>
+
+  <h3>Routing: a coordinator picks the agent</h3>
+  <table>
+    <tr><th>Approach</th><th>How it decides</th><th>Trade-off</th></tr>
+    <tr><td><strong>LLM-as-router</strong></td><td>Give an LLM the request and the agents' descriptions; force the answer into a schema such as <code>Literal["research","math"]</code></td><td>Handles new phrasing well; costs a model call; can be inconsistent</td></tr>
+    <tr><td><strong>Classifier</strong></td><td>A small model trained on request → agent labels</td><td>Fast, cheap, consistent; needs labelled data and retraining</td></tr>
+    <tr><td><strong>Rules</strong></td><td>Keywords, regexes or explicit conditions</td><td>Fully predictable; brittle to unexpected phrasing</td></tr>
+  </table>
+
+  <h3>Handoffs: an agent passes control itself</h3>
+  <p>In a handoff the current agent decides to transfer the conversation, usually by calling a special tool such as <code>transfer_to_billing_agent</code>. The OpenAI Agents SDK is built around handoffs; in LangGraph a node returns <code>Command(goto="billing", update={...})</code> to jump to another agent and update the shared state at once.</p>
+
+  <div class="callout callout-purple">
+    <strong>Routing vs. handoff:</strong> routing keeps one agent in charge (supervisor); handoffs let control move between peers (network). Many systems mix them: a supervisor routes, and specialists can hand back when they are done or stuck.
+  </div>
+</section>
+
+<section class="section" id="s6">
+  <div class="section-eyebrow">Section 06</div>
+  <h2>The Agent Harness</h2>
+
+  <p>None of the above happens inside the model. An LLM is stateless: tokens in, tokens out, once. The <strong>agent harness</strong> is the software around it that turns that single call into a running agent. A finished product such as Claude Code, Cursor or the OpenAI Codex CLI is a model plus a harness.</p>
+
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;display:block;margin:0 auto">
+      <rect x="20" y="20" width="680" height="270" rx="12" fill="#f7f6f2" stroke="#1a3a5c" stroke-width="2"/>
+      <text x="360" y="44" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a3a5c" font-weight="700" letter-spacing="1.5">THE AGENT HARNESS</text>
+      <rect x="280" y="120" width="160" height="60" rx="10" fill="#6b3fa0"/><text x="360" y="146" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="12" fill="#fff" font-weight="700">LLM</text><text x="360" y="163" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#e0d0ff">stateless reasoning</text>
+      <g font-family="IBM Plex Mono,monospace" font-size="9" text-anchor="middle">
+        <rect x="40" y="60" width="190" height="44" rx="6" fill="#fff" stroke="#2255aa"/><text x="135" y="79" font-weight="700" fill="#1a3a5c">1 Instructions</text><text x="135" y="94" fill="#555">system prompt, role, rules</text>
+        <rect x="265" y="60" width="190" height="44" rx="6" fill="#fff" stroke="#e8a020"/><text x="360" y="79" font-weight="700" fill="#7a5000">2 Tools</text><text x="360" y="94" fill="#555">registry + executor, MCP</text>
+        <rect x="490" y="60" width="190" height="44" rx="6" fill="#fff" stroke="#2a7a4b"/><text x="585" y="79" font-weight="700" fill="#1a5c38">3 The loop</text><text x="585" y="94" fill="#555">call → act → observe → stop</text>
+        <rect x="40" y="128" width="190" height="44" rx="6" fill="#fff" stroke="#0d7a7a"/><text x="135" y="147" font-weight="700" fill="#0d5a5a">4 Memory &amp; context</text><text x="135" y="162" fill="#555">short / long term, compaction</text>
+        <rect x="490" y="128" width="190" height="44" rx="6" fill="#fff" stroke="#6b3fa0"/><text x="585" y="147" font-weight="700" fill="#4a1a80">5 State &amp; checkpoints</text><text x="585" y="162" fill="#555">resume, replay, threads</text>
+        <rect x="40" y="196" width="190" height="44" rx="6" fill="#fff" stroke="#b83232"/><text x="135" y="215" font-weight="700" fill="#7a0000">6 Permissions &amp; HITL</text><text x="135" y="230" fill="#555">approve risky tool calls</text>
+        <rect x="265" y="196" width="190" height="44" rx="6" fill="#fff" stroke="#1a3a5c"/><text x="360" y="215" font-weight="700" fill="#1a3a5c">7 Sub-agents</text><text x="360" y="230" fill="#555">spawn, route, hand off</text>
+        <rect x="490" y="196" width="190" height="44" rx="6" fill="#fff" stroke="#888"/><text x="585" y="215" font-weight="700" fill="#333">8 Observability</text><text x="585" y="230" fill="#555">traces, limits, errors, evals</text>
+      </g>
+      <text x="360" y="272" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#555">Same model + different harness = a different agent.</text>
+    </svg>
+    <div class="diagram-caption">FIG 4 — The eight responsibilities of an agent harness. Sections 06–08 cover each; the lab builds every one in LangGraph.</div>
+  </div>
+
+  <table>
+    <tr><th>#</th><th>Component</th><th>What it does</th><th>In LangGraph</th></tr>
+    <tr><td>1</td><td>Instructions</td><td>Decides exactly which tokens the model sees: system prompt, role, rules</td><td>The prompt you pass to each agent node</td></tr>
+    <tr><td>2</td><td>Tools</td><td>Holds the tool schemas, runs the calls the model requests, returns results (Part 3)</td><td><code>@tool</code>, <code>bind_tools</code>, <code>ToolNode</code>, MCP adapters</td></tr>
+    <tr><td>3</td><td>The loop</td><td>Calls the model, runs tools, decides when to stop; caps the number of steps</td><td>Graph edges; <code>recursion_limit</code></td></tr>
+    <tr><td>4</td><td>Memory &amp; context</td><td>What is remembered, and how to keep long runs within the context window (Section 07)</td><td>Checkpointer (short-term), Store (long-term)</td></tr>
+    <tr><td>5</td><td>State &amp; checkpoints</td><td>Saves state after every step so runs can pause, resume or be replayed</td><td><code>MemorySaver</code>, SQLite/Postgres savers, <code>thread_id</code></td></tr>
+    <tr><td>6</td><td>Permissions &amp; HITL</td><td>Enforces Part 3's tool permissions; pauses for human approval</td><td><code>interrupt()</code> and <code>Command(resume=...)</code></td></tr>
+    <tr><td>7</td><td>Sub-agents</td><td>Starts specialists and returns only their result to the parent (Section 04)</td><td>Sub-graphs as nodes; <code>Command(goto=...)</code></td></tr>
+    <tr><td>8</td><td>Observability</td><td>Logs every model and tool call; handles errors, retries and timeouts; supports evaluation</td><td>Streaming, LangSmith tracing</td></tr>
+  </table>
+
+  <h3>A harness in 20 lines</h3>
+  <p>Stripped of any framework, a harness is a loop. Every framework in Section 09 is a richer version of this:</p>
+
+  <div class="codebox"><span class="kw">def</span> <span class="fn">run_agent</span>(user_msg, tools, system_prompt, max_steps=<span class="num">8</span>, needs_approval=()):
+    messages = [{<span class="str">"role"</span>: <span class="str">"system"</span>, <span class="str">"content"</span>: system_prompt},       <span class="cm"># 1 instructions</span>
+                {<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: user_msg}]
+    <span class="kw">for</span> step <span class="kw">in</span> range(max_steps):                                      <span class="cm"># 3 loop with a hard cap</span>
+        reply = llm(messages, tool_schemas=[t.schema <span class="kw">for</span> t <span class="kw">in</span> tools])     <span class="cm"># the only model call</span>
+        messages.append(reply)
+        <span class="kw">if not</span> reply.tool_calls:
+            <span class="kw">return</span> reply.content                                           <span class="cm"># done</span>
+        <span class="kw">for</span> call <span class="kw">in</span> reply.tool_calls:                                    <span class="cm"># 2 tools: the harness executes</span>
+            <span class="kw">if</span> call.name <span class="kw">in</span> needs_approval <span class="kw">and not</span> ask_human(call):      <span class="cm"># 6 permissions</span>
+                result = <span class="str">"Denied by user."</span>
+            <span class="kw">else</span>:
+                <span class="kw">try</span>:    result = TOOLS[call.name](**call.args)
+                <span class="kw">except</span> Exception <span class="kw">as</span> e: result = <span class="str">f"Error: {e}"</span>               <span class="cm"># errors become observations</span>
+            messages.append({<span class="str">"role"</span>: <span class="str">"tool"</span>, <span class="str">"tool_call_id"</span>: call.id, <span class="str">"content"</span>: str(result)})
+            log(step, call, result)                                       <span class="cm"># 8 observability</span>
+        messages = compact_if_too_long(messages)                          <span class="cm"># 4 context management</span>
+        save_checkpoint(messages)                                         <span class="cm"># 5 state</span>
+    <span class="kw">return</span> <span class="str">"Stopped: step limit reached."</span></div>
+
+  <div class="callout callout-red">
+    <strong>Exam favourite:</strong> "Two products use the same LLM. Why can their agents behave completely differently?" Because almost everything that makes an agent useful or safe (which tools exist, what runs without approval, how context is managed, whether sub-agents are used) lives in the harness, not the model.
+  </div>
+</section>
+
+<section class="section" id="s7">
+  <div class="section-eyebrow">Section 07</div>
+  <h2>Harness: Memory &amp; Context</h2>
+
+  <p>The context window is finite and resets between sessions unless the harness persists something. Memory decides <em>what</em> is kept; context management decides <em>how much it costs</em> to keep it.</p>
+
+  <table>
+    <tr><th>Memory type</th><th>Scope</th><th>Typical implementation</th><th>In LangGraph</th></tr>
+    <tr><td><strong>Short-term (working)</strong></td><td>One conversation or task</td><td>The message list in the context window</td><td>State + a <strong>checkpointer</strong>, keyed by <code>thread_id</code></td></tr>
+    <tr><td><strong>Episodic</strong></td><td>Specific past attempts</td><td>Stored reflections (Part 2, Section 10), logs of past runs</td><td>Items saved in the <strong>Store</strong></td></tr>
+    <tr><td><strong>Long-term (semantic)</strong></td><td>Across sessions, indefinitely</td><td>Facts about the user or domain in a database or vector store (Module 3)</td><td>The <strong>Store</strong>, namespaced per user, optionally with embedding search</td></tr>
+  </table>
+
+  <div class="callout callout-blue">
+    <strong>Memory and RAG are the same mechanism with a different corpus.</strong> Module 3's RAG retrieves from documents prepared in advance. Agent memory retrieves from a corpus the agent writes itself: past conversations, decisions and outcomes. Same chunking, embedding and retrieval.
+  </div>
+
+  <h3>Keeping long runs affordable</h3>
+  <table>
+    <tr><th>Technique</th><th>What it does</th><th>Where you meet it</th></tr>
+    <tr><td><strong>KV-cache reuse (prompt caching)</strong></td><td>If the start of the prompt (system prompt, tool schemas) is byte-identical to the last call, the model reuses its cached attention state instead of recomputing it, cutting cost and latency</td><td>Provider prompt caching (e.g. Anthropic's <code>cache_control</code>)</td></tr>
+    <tr><td><strong>Compaction (rolling summary)</strong></td><td>When the transcript nears the limit, older turns are summarised instead of dropped</td><td>Claude Code's automatic compaction; a LangGraph summarisation node</td></tr>
+    <tr><td><strong>Sliding window</strong></td><td>Keep only the last N turns; discard the rest</td><td>Simplest option; loses information</td></tr>
+    <tr><td><strong>External scratchpad</strong></td><td>Write notes, plans and large results to files or a store, and read back only what is needed</td><td>Agent "todo" and notes files; the LangGraph Store</td></tr>
+    <tr><td><strong>Sub-agent isolation</strong></td><td>A sub-agent works in its own context and returns only a summary</td><td>Section 04's research example</td></tr>
+  </table>
+
+  <div class="callout callout-green">
+    <strong>Why harnesses put stable content first:</strong> the KV cache only helps for an unchanged <em>prefix</em>. Change anything early in the prompt and everything after it must be recomputed. So harnesses keep the system prompt and tool definitions fixed at the start, and put the changing conversation at the end.
+  </div>
+</section>
+
+<section class="section" id="s8">
+  <div class="section-eyebrow">Section 08</div>
+  <h2>Harness: State, Control &amp; Safety</h2>
+
+  <table>
+    <tr><th>Concern</th><th>What the harness does</th><th>LangGraph mechanism</th></tr>
+    <tr><td><strong>Checkpointing</strong></td><td>Saves the full state after every node, so a run can resume after a crash or a pause</td><td><code>graph.compile(checkpointer=MemorySaver())</code> and a <code>thread_id</code></td></tr>
+    <tr><td><strong>Human-in-the-loop</strong></td><td>Pauses before a risky action, shows it to a person, continues with their decision</td><td><code>interrupt({...})</code> inside a node; resume with <code>Command(resume="approve")</code></td></tr>
+    <tr><td><strong>Step limits</strong></td><td>Stops runaway loops</td><td><code>config={"recursion_limit": 25}</code> (25 is the default)</td></tr>
+    <tr><td><strong>Error handling</strong></td><td>Returns tool errors as observations; retries flaky calls; falls back to another agent</td><td>Try/except in tool nodes; conditional fallback edges</td></tr>
+    <tr><td><strong>Guardrails</strong></td><td>Validates inputs and outputs: schemas, content filters, allow-lists</td><td>Pydantic models; a validation node before risky tools</td></tr>
+    <tr><td><strong>Observability</strong></td><td>Records every model call, tool call and state change for debugging and evaluation</td><td><code>graph.stream(...)</code>; LangSmith tracing</td></tr>
+  </table>
+
+  <div class="codebox"><span class="cm"># Human approval before a risky tool — the harness pauses, a person decides, the graph resumes</span>
+<span class="kw">from</span> langgraph.types <span class="kw">import</span> interrupt, Command
+
+<span class="kw">def</span> <span class="fn">send_report_node</span>(state):
+    decision = interrupt({<span class="str">"action"</span>: <span class="str">"send_email"</span>, <span class="str">"to"</span>: state[<span class="str">"recipient"</span>], <span class="str">"body"</span>: state[<span class="str">"draft"</span>]})
+    <span class="kw">if</span> decision != <span class="str">"approve"</span>:
+        <span class="kw">return</span> {<span class="str">"status"</span>: <span class="str">"cancelled by human"</span>}
+    send_email(state[<span class="str">"recipient"</span>], state[<span class="str">"draft"</span>])
+    <span class="kw">return</span> {<span class="str">"status"</span>: <span class="str">"sent"</span>}
+
+app.invoke(inputs, config)                          <span class="cm"># runs until interrupt(), then pauses</span>
+app.invoke(Command(resume=<span class="str">"approve"</span>), config)     <span class="cm"># same thread_id → continues from the pause</span></div>
+</section>
+
+<section class="section" id="s9">
+  <div class="section-eyebrow">Section 09</div>
+  <h2>Frameworks for Building Harnesses</h2>
+
+  <p>Each framework below is a different set of ready-made harness parts. Underneath, almost all do the same thing: describe tools as schemas, let the model emit tool calls, run them, and feed results back. They differ in <em>who controls the loop</em> and <em>what the main abstraction is</em>.</p>
+
+  <table>
+    <tr><th>Framework</th><th>Core abstraction</th><th>Best fit</th></tr>
+    <tr><td><strong>LangChain</strong></td><td>Chains (fixed pipelines) and Tools (Part 3) — compose prompt → model → parser, with tools as callable objects a model can be pointed at</td><td>Straightforward pipelines; a large ecosystem of pre-built integrations</td></tr>
+    <tr><td><strong>LangGraph</strong></td><td>An explicit state graph — nodes are steps (including agents), edges define control flow, state is a typed object passed between nodes (Module 3's lab)</td><td>Multi-step or multi-agent workflows with branches, loops, and conditional routing — this module's lab</td></tr>
+    <tr><td><strong>DSPy</strong></td><td>Signatures + Modules (Module 2) — declare the transformation, let an optimizer compile the actual prompt/tool-selection logic</td><td>When tool-selection quality itself should be measured and optimized against a metric, not hand-prompted</td></tr>
+    <tr><td><strong>Google ADK (Agent Development Kit)</strong></td><td>A framework for building, evaluating, and deploying agents with built-in support for multi-agent orchestration and tool/function schemas, integrated with Google's model ecosystem</td><td>Production deployment on Google Cloud infrastructure, native multi-agent orchestration primitives</td></tr>
+    <tr><td><strong>CrewAI</strong></td><td>Role-based multi-agent teams — each Agent has a <code>role</code>, <code>goal</code>, and <code>backstory</code> plus a list of tools; Tasks are assigned to agents and a Crew runs them sequentially or under a manager agent. Flows add event-driven, deterministic control around crews</td><td>Quickly prototyping "a team of specialists" (researcher → writer → reviewer) where the roles map naturally to the problem</td></tr>
+    <tr><td><strong>AutoGen / Microsoft Agent Framework</strong></td><td>Conversable agents that solve tasks by exchanging messages — tool calls and code execution happen inside a multi-agent conversation (group chat, two-agent chat). Microsoft has since merged AutoGen and Semantic Kernel into the Microsoft Agent Framework</td><td>Research and enterprise multi-agent systems, especially on Azure / .NET + Python stacks; agents that write and run code</td></tr>
+    <tr><td><strong>OpenAI Agents SDK</strong></td><td>A minimal set of primitives — Agents (instructions + tools), <strong>handoffs</strong> (one agent delegating to another, itself exposed as a tool call), guardrails on input/output, and built-in tracing; successor to the experimental Swarm library</td><td>Lightweight agents and handoff-style multi-agent apps on OpenAI models, with little framework overhead</td></tr>
+    <tr><td><strong>Claude Agent SDK</strong></td><td>Anthropic's agent harness (the loop behind Claude Code) — the SDK runs the tool loop for you, ships built-in tools (file read/edit, shell, web search), connects external tools via the Model Context Protocol (MCP), and supports subagents, hooks, and permission modes</td><td>Long-running, tool-heavy agents (coding, research, ops) where file system / shell access and fine-grained permission control matter</td></tr>
+    <tr><td><strong>LlamaIndex</strong></td><td>Data-centric agents — any index or query engine can be wrapped as a tool (<code>QueryEngineTool</code>, <code>FunctionTool</code>); <code>AgentWorkflow</code> and event-driven Workflows orchestrate one or many agents over that data</td><td>Agents whose main job is reasoning over your documents and databases — agentic RAG (Module 3) with many retrieval tools</td></tr>
+    <tr><td><strong>smolagents (Hugging Face)</strong></td><td>A deliberately small library whose signature <code>CodeAgent</code> writes its actions as Python code that calls tools as functions, instead of emitting one JSON tool call per step; also has a classic <code>ToolCallingAgent</code></td><td>Teaching and experimenting with open-weight models; tasks where composing several tool calls in one code step (loops, variables) beats one-call-per-turn JSON</td></tr>
+  </table>
+
+  <h3>Choosing among them</h3>
+  <table>
+    <tr><th>If your main need is…</th><th>Reach for</th></tr>
+    <tr><td>Explicit control flow — branches, loops, checkpoints, human-in-the-loop</td><td>LangGraph</td></tr>
+    <tr><td>Pre-built integrations and simple pipelines</td><td>LangChain</td></tr>
+    <tr><td>Optimizing prompts / tool selection against a metric</td><td>DSPy</td></tr>
+    <tr><td>Role-based teams of agents with little setup</td><td>CrewAI</td></tr>
+    <tr><td>Conversational multi-agent systems, Microsoft / Azure ecosystem</td><td>AutoGen / Microsoft Agent Framework</td></tr>
+    <tr><td>A thin agent loop with handoffs on OpenAI models</td><td>OpenAI Agents SDK</td></tr>
+    <tr><td>A full-featured harness with file/shell tools, MCP, and permissions on Claude models</td><td>Claude Agent SDK</td></tr>
+    <tr><td>Production deployment on Google Cloud / Gemini</td><td>Google ADK</td></tr>
+    <tr><td>Agents over your own documents and data</td><td>LlamaIndex</td></tr>
+    <tr><td>Code-as-action agents, open-weight models, minimal abstraction</td><td>smolagents</td></tr>
+  </table>
+
+  <div class="callout callout-purple">
+    <strong>They combine, and MCP connects them:</strong> a common stack is DSPy to optimise a prompt, LangGraph to orchestrate agents, LangChain integrations and MCP servers for tools, served behind an API. Because most frameworks can now consume MCP servers (Part 3), a tool written once works across all of them.
+  </div>
+</section>
+
+<section class="section" id="s10">
+  <div class="section-eyebrow">Section 10</div>
+  <h2>End to End: One Request Through the Whole Module</h2>
+
+  <p>A worked example ties every Part together. Request to a company assistant: <em>"What is the battery capacity of the Zylarian Communicator? Email the summary to the ops lead."</em></p>
+
+  <table>
+    <tr><th>Step</th><th>What happens</th><th>Concept</th></tr>
+    <tr><td>1</td><td>The harness loads the system prompts, the tool schemas and this user's long-term preferences (who "the ops lead" is, how to sign reports)</td><td>Harness: instructions, memory (Sections 06–07)</td></tr>
+    <tr><td>2</td><td>The supervisor makes one structured decision: route = <code>research</code>, wants_email = <code>true</code></td><td>Routing with structured output (Section 05)</td></tr>
+    <tr><td>3</td><td>The research agent calls <code>lookup_fact</code>, served by an MCP server: "3,200 mAh battery"</td><td>Goal-based ReAct agent (Part 2), tools and MCP (Part 3)</td></tr>
+    <tr><td>4</td><td>The writer turns the findings into the final answer, with the user's sign-off, and reports back to the supervisor</td><td>Specialist pipeline: specialist → writer → supervisor (Section 04)</td></tr>
+    <tr><td>5</td><td>The supervisor sees an email was requested. <code>send_report</code> is a high-risk tool, so the harness pauses for approval</td><td>Tool permissions (Part 3 Section 06), human-in-the-loop (Section 08)</td></tr>
+    <tr><td>6</td><td>A person approves; the email is sent; every step was checkpointed and can be replayed</td><td>State and observability (Section 08)</td></tr>
+  </table>
+
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 720 150" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;display:block;margin:0 auto">
+      <defs><marker id="q10" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#555"/></marker></defs>
+      <g font-family="IBM Plex Mono,monospace" font-size="10" text-anchor="middle">
+        <rect x="20" y="55" width="110" height="40" rx="7" fill="#1a3a5c"/><text x="75" y="79" fill="#fff" font-weight="700">Supervisor</text>
+        <rect x="190" y="15" width="110" height="36" rx="7" fill="#fff3cc" stroke="#e8a020"/><text x="245" y="37">Research</text>
+        <rect x="190" y="99" width="110" height="36" rx="7" fill="#edfaf3" stroke="#2a7a4b"/><text x="245" y="121">Math</text>
+        <rect x="360" y="55" width="110" height="40" rx="7" fill="#f5f0ff" stroke="#6b3fa0"/><text x="415" y="79">Writer</text>
+        <rect x="530" y="15" width="170" height="36" rx="7" fill="#fff0f0" stroke="#b83232"/><text x="615" y="37">Approval → send_report</text>
+        <rect x="560" y="99" width="110" height="36" rx="7" fill="#f4f4f0" stroke="#999"/><text x="615" y="121">END</text>
+      </g>
+      <g stroke="#555" stroke-width="1.6" fill="none">
+        <path d="M130 68 L188 36" marker-end="url(#q10)"/><path d="M130 82 L188 114" marker-end="url(#q10)"/>
+        <path d="M300 34 L358 66" marker-end="url(#q10)"/><path d="M300 116 L358 86" marker-end="url(#q10)"/>
+        <path d="M415 95 C415 145 75 145 75 97" stroke-dasharray="4,3" marker-end="url(#q10)"/>
+        <path d="M130 75 C330 -5 470 0 528 30" stroke="#b83232" stroke-dasharray="3,3" marker-end="url(#q10)"/>
+        <path d="M130 80 C300 160 480 150 558 120" stroke="#888" stroke-dasharray="3,3" marker-end="url(#q10)"/>
+      </g>
+    </svg>
+    <div class="diagram-caption">FIG 5 — The lab's system: the supervisor routes to research or math; the specialist hands its findings to the writer; the writer reports back to the supervisor, which ends the run or sends the email after approval.</div>
+  </div>
+
+  <div class="callout callout-blue">
+    <strong>This is exactly what the lab builds.</strong> <code>Lab/1_Multi_Agent_System_End_to_End.ipynb</code> constructs this system part by part in LangGraph: tools, a single agent, memory, a supervisor with specialists, human approval, and MCP tools. <code>Lab/2_MCP_Server_and_Tools_Lab.ipynb</code> goes deeper on MCP alone.
+  </div>
+</section>
+
+<section class="section" id="s11">
+  <div class="section-eyebrow">Section 11</div>
+  <h2>Key Takeaways &amp; Exam Prep</h2>
+
+  <div class="steps">
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Workflow → single agent → multi-agent</h4><p>Move right only when the task needs the model to decide the control flow.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Supervisor is the default MAS</h4><p>One router, specialists report back; handoffs for peer-to-peer.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Multi-agent costs tokens</h4><p>Worth it for parallel, separable work; not for tightly coupled tasks.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>The harness makes the agent</h4><p>Instructions, tools, loop, memory, state, permissions, sub-agents, observability.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Memory = RAG over your own history</h4><p>Checkpointer for the thread; Store for the long term.</p></div>
+  </div>
+
+  <h3>Common exam questions</h3>
+  <table>
+    <tr><th>Question</th><th>Short answer</th></tr>
+    <tr><td>What distinguishes a workflow from an agent?</td><td>In a workflow, code decides the sequence of steps; in an agent, the model decides which tools to call and when to stop</td></tr>
+    <tr><td>Name four multi-agent architectures.</td><td>Supervisor, hierarchical teams, network/swarm (handoffs), pipeline</td></tr>
+    <tr><td>Routing vs. handoff?</td><td>Routing: a coordinator chooses the next agent. Handoff: the current agent transfers control itself, usually via a transfer tool</td></tr>
+    <tr><td>When does a multi-agent system beat a single agent, and at what cost?</td><td>When work splits into parallel, separable parts or needs isolated contexts; it costs many more tokens and adds coordination failures</td></tr>
+    <tr><td>List the responsibilities of an agent harness.</td><td>Instructions, tool registry and execution, the loop and its limits, memory and context management, state and checkpointing, permissions and human-in-the-loop, sub-agent orchestration, observability</td></tr>
+    <tr><td>Short-term vs. long-term memory in LangGraph?</td><td>Short-term: graph state saved by a checkpointer per <code>thread_id</code>. Long-term: a Store shared across threads, namespaced per user</td></tr>
+    <tr><td>How does KV-cache reuse reduce cost, and what does it require?</td><td>Cached attention state is reused for an unchanged prompt prefix, so only new tokens are computed; it requires stable content (system prompt, tools) at the start</td></tr>
+  </table>
+
+  <div class="callout" style="margin-top:2rem">
+    <strong>References:</strong><br>
+    Anthropic (2024) — Building Effective Agents. Anthropic (2025) — How We Built Our Multi-Agent Research System.<br>
+    Cognition (2025) — Don't Build Multi-Agents.<br>
+    LangGraph documentation — Multi-agent systems, persistence, memory, human-in-the-loop.<br>
+    Wooldridge — An Introduction to MultiAgent Systems.<br>
+    OpenAI — Agents SDK (handoffs). Anthropic — Claude Agent SDK; prompt caching.
+  </div>
+</section>
+
+<footer>Module 4 · Part 4 — Agentic Systems &amp; the Agent Harness · Labs: 1_Multi_Agent_System_End_to_End.ipynb, 2_MCP_Server_and_Tools_Lab.ipynb</footer>
+
+</body>
+</html>

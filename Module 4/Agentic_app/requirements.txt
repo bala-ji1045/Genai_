@@ -1,0 +1,18 @@
+# UI
+streamlit>=1.40
+pandas
+
+# Agents + harness (LangGraph platform)
+langgraph>=0.6
+langchain-core
+langchain-ollama
+langchain-mcp-adapters
+mcp>=1.10
+
+# RAG (same stack as the Module 3 lab)
+langchain-community
+langchain-text-splitters
+langchain-huggingface
+sentence-transformers
+faiss-cpu
+rank-bm25

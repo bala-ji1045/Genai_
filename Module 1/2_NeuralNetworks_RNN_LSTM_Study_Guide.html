@@ -1,0 +1,2264 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neural Networks, RNN &amp; LSTM — Complete Study Guide</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Fraunces:ital,wght@0,300;0,700;1,300&family=Inter:wght@400;500;600&display=swap');
+  :root {
+    --ink:#0f1117; --paper:#f7f6f2; --mid:#e8e5dd; --rule:#c9c4b8;
+    --accent:#1a3a5c; --highlight:#e8a020; --green:#2a7a4b; --red:#b83232;
+    --blue:#2255aa; --purple:#6b3fa0; --teal:#0d7a7a;
+    --mono:'IBM Plex Mono',monospace; --display:'Fraunces',Georgia,serif; --body:'Inter',system-ui,sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--body);background:var(--paper);color:var(--ink);line-height:1.7;font-size:16px}
+  .hero{background:linear-gradient(150deg,#0f1117 0%,#1a3a5c 60%,#0d5a5a 100%);color:#fff;padding:4rem 2rem 3rem;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 15% 25%,rgba(232,160,32,.10),transparent 42%),radial-gradient(circle at 85% 75%,rgba(42,122,75,.12),transparent 42%)}
+  .hero-label{font-family:var(--mono);font-size:.75rem;letter-spacing:.2em;text-transform:uppercase;color:var(--highlight);margin-bottom:1rem;position:relative}
+  .hero h1{font-family:var(--display);font-size:clamp(2rem,5vw,3.4rem);font-weight:700;line-height:1.1;margin-bottom:1rem;position:relative}
+  .hero p{font-size:1.08rem;opacity:.82;max-width:660px;margin:0 auto;position:relative}
+  .toc{background:var(--ink);color:#fff;padding:1.1rem 2rem;display:flex;gap:1.1rem;flex-wrap:wrap;justify-content:center;position:sticky;top:0;z-index:100}
+  .toc a{color:rgba(255,255,255,.7);text-decoration:none;font-family:var(--mono);font-size:.72rem;letter-spacing:.03em;transition:color .2s}
+  .toc a:hover{color:var(--highlight)}
+  .section{max-width:900px;margin:0 auto;padding:4rem 2rem;border-bottom:1px solid var(--rule)}
+  .section-eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:.5rem}
+  .section h2{font-family:var(--display);font-size:clamp(1.5rem,3vw,2.2rem);font-weight:700;margin-bottom:1.5rem}
+  .section h3{font-family:var(--display);font-size:1.25rem;font-weight:700;margin:2rem 0 .8rem;color:var(--accent)}
+  .section h4{font-family:var(--mono);font-size:.85rem;font-weight:600;margin:1.5rem 0 .5rem;color:var(--teal);letter-spacing:.05em;text-transform:uppercase}
+  .section p{margin-bottom:1rem;color:#333}
+  .callout{border-left:4px solid var(--highlight);background:#fff8ee;padding:1rem 1.25rem;border-radius:0 6px 6px 0;margin:1.5rem 0;font-size:.95rem}
+  .callout strong{color:var(--accent)}
+  .callout-blue{border-left-color:var(--blue);background:#eef3ff}
+  .callout-green{border-left-color:var(--green);background:#edfaf3}
+  .callout-red{border-left-color:var(--red);background:#fff0f0}
+  .callout-purple{border-left-color:var(--purple);background:#f5f0ff}
+  .math-box{background:var(--ink);color:#e8e8e8;font-family:var(--mono);font-size:.85rem;line-height:1.85;padding:1.4rem;border-radius:8px;margin:1.5rem 0;overflow-x:auto;white-space:pre}
+  .math-box .comment{color:#6a9f6a}
+  .math-box .var{color:#f0b060}
+  .math-box .eq{color:#7ab8f5}
+  .math-box .hi{color:#ff9090}
+  .math-box .ok{color:#8ee08e}
+  table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:.87rem}
+  th{background:var(--accent);color:#fff;padding:.55rem .85rem;text-align:left;font-family:var(--mono);font-size:.74rem;letter-spacing:.03em}
+  td{padding:.55rem .85rem;border-bottom:1px solid var(--mid);vertical-align:top}
+  tr:nth-child(even) td{background:#fafaf7}
+  .tag{display:inline-block;background:var(--mid);padding:.1rem .4rem;border-radius:3px;font-family:var(--mono);font-size:.78rem}
+  .diagram-wrap{background:#fff;border:1px solid var(--rule);border-radius:10px;padding:1.4rem;margin:2rem 0;overflow-x:auto}
+  .diagram-caption{text-align:center;font-family:var(--mono);font-size:.73rem;color:#777;margin-top:.7rem;letter-spacing:.03em;line-height:1.6}
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:1rem;margin:1.5rem 0}
+  .step-card{background:#fff;border:1px solid var(--rule);border-radius:8px;padding:1.1rem}
+  .step-num{font-family:var(--mono);font-size:1.8rem;font-weight:600;color:var(--mid);line-height:1;margin-bottom:.4rem}
+  .step-card h4{font-size:.86rem;font-weight:600;color:var(--accent);margin:0 0 .35rem;text-transform:none;letter-spacing:0;font-family:var(--body)}
+  .step-card p{font-size:.81rem;margin:0;color:#444}
+  .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0}
+  .compare-card{border:1px solid var(--rule);border-radius:8px;overflow:hidden;background:#fff}
+  .compare-card-header{padding:.55rem 1rem;font-family:var(--mono);font-size:.75rem;font-weight:600;letter-spacing:.03em}
+  .compare-card-body{padding:1rem;font-size:.85rem}
+  .compare-card-body ul{list-style:none}
+  .compare-card-body li{margin-bottom:.4rem;padding-left:1.1rem;position:relative}
+  .compare-card-body li::before{content:'→';position:absolute;left:0;color:var(--highlight)}
+  @media(max-width:620px){.compare-grid{grid-template-columns:1fr}.steps{grid-template-columns:1fr 1fr}.section{padding:2.5rem 1.2rem}}</style>
+<div class="hero">
+  <div class="hero-label">Module 1 · Part 6A · Part 1 — Complete Study Guide</div>
+  <h1>Neural Networks,
+    <br>Encoder–Decoder, RNN &amp; LSTM
+  </h1>
+  <p>Foundations through sequence models — every formula derived, every number worked, every architecture drawn. The groundwork for attention and Transformers.</p>
+</div>
+<nav class="toc">
+  <a href="#s1">01 Foundations</a>
+  <a href="#s2">02 Activations</a>
+  <a href="#s3">03 Forward Pass</a>
+  <a href="#s4">04 Loss</a>
+  <a href="#s5">05 Backprop</a>
+  <a href="#s6">06 Optimization</a>
+  <a href="#s7">07 Families</a>
+  <a href="#s8">08 Autoencoder</a>
+  <a href="#s9">09 Enc–Dec</a>
+  <a href="#s10">10 RNN &amp; BPTT</a>
+  <a href="#s11">11 LSTM</a>
+  <a href="#s12">12 GRU</a>
+  <a href="#s13">13 Complexity</a>
+  <a href="#s14">14 Revision</a>
+</nav>
+<!-- ══════════ 01 FOUNDATIONS ══════════ -->
+<section class="section" id="s1">
+  <div class="section-eyebrow">Section 01</div>
+  <h2>Foundations: Neuron, Layer, Network</h2>
+  <p>Deep learning is machine learning with 
+    <strong>multiple learnable layers of representation</strong>. The defining shift is that features are no longer hand-designed — the network learns the features and the prediction rule together, from the same loss signal.
+  </p>
+  <div class="compare-grid">
+    <div class="compare-card">
+      <div class="compare-card-header" style="background:#b83232;color:#fff">Classical ML</div>
+      <div class="compare-card-body">
+        <ul>
+          <li>Human designs features (SIFT, TF-IDF, hand-crafted ratios)</li>
+          <li>Model learns only the final mapping</li>
+          <li>Feature engineering is where the effort goes</li>
+          <li>Works well when data is small and structured</li>
+        </ul>
+      </div>
+    </div>
+    <div class="compare-card">
+      <div class="compare-card-header" style="background:#2a7a4b;color:#fff">Deep Learning</div>
+      <div class="compare-card-body">
+        <ul>
+          <li>Raw input goes straight in</li>
+          <li>Model learns features AND mapping jointly</li>
+          <li>Architecture design is where the effort goes</li>
+          <li>Needs more data and compute, scales better</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <h3>The single neuron</h3>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 740 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:740px;display:block;margin:0 auto">
+      <defs>
+        <marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#555"></polygon>
+        </marker>
+        <marker id="ag" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#2a7a4b"></polygon>
+        </marker>
+        <marker id="ar" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#b83232"></polygon>
+        </marker>
+        <marker id="ab" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#2255aa"></polygon>
+        </marker>
+      </defs>
+      <!-- inputs -->
+      <circle cx="60" cy="60" r="24" fill="#eef3ff" stroke="#2255aa" stroke-width="2"></circle>
+      <text x="60" y="66" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#1a3a5c">x₁</text>
+      <circle cx="60" cy="130" r="24" fill="#eef3ff" stroke="#2255aa" stroke-width="2"></circle>
+      <text x="60" y="136" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#1a3a5c">x₂</text>
+      <circle cx="60" cy="200" r="24" fill="#eef3ff" stroke="#2255aa" stroke-width="2"></circle>
+      <text x="60" y="206" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#1a3a5c">x₃</text>
+      <!-- weight lines -->
+      <line x1="84" y1="60" x2="215" y2="115" stroke="#2255aa" stroke-width="2.5" marker-end="url(#ab)"></line>
+      <line x1="84" y1="130" x2="215" y2="128" stroke="#2255aa" stroke-width="1.6" marker-end="url(#ab)"></line>
+      <line x1="84" y1="200" x2="215" y2="142" stroke="#2255aa" stroke-width="1" marker-end="url(#ab)"></line>
+      <text x="145" y="80" font-family="IBM Plex Mono,monospace" font-size="10" fill="#2255aa" font-weight="600">w₁ (large)</text>
+      <text x="145" y="122" font-family="IBM Plex Mono,monospace" font-size="10" fill="#2255aa">w₂</text>
+      <text x="145" y="180" font-family="IBM Plex Mono,monospace" font-size="10" fill="#999">w₃ (small)</text>
+      <!-- bias -->
+      <rect x="180" y="30" width="46" height="26" rx="5" fill="#fff3cc" stroke="#e8a020" stroke-width="1.5"></rect>
+      <text x="203" y="48" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#7a5000">b</text>
+      <line x1="215" y1="56" x2="235" y2="105" stroke="#e8a020" stroke-width="1.8" marker-end="url(#a1)"></line>
+      <!-- summation node -->
+      <circle cx="265" cy="130" r="34" fill="#1a3a5c"></circle>
+      <text x="265" y="128" text-anchor="middle" font-family="monospace" font-size="20" fill="#fff">Σ</text>
+      <text x="265" y="145" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#88aacc">w·x + b</text>
+      <text x="265" y="182" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#555" font-weight="600">pre-activation z</text>
+      <!-- activation node -->
+      <line x1="299" y1="130" x2="335" y2="130" stroke="#555" stroke-width="2.5" marker-end="url(#a1)"></line>
+      <rect x="340" y="98" width="100" height="64" rx="10" fill="#e8a020"></rect>
+      <text x="390" y="126" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="14" fill="#fff" font-weight="700">g( · )</text>
+      <text x="390" y="145" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff8ee">non-linearity</text>
+      <text x="390" y="182" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#555" font-weight="600">activation</text>
+      <!-- output -->
+      <line x1="440" y1="130" x2="478" y2="130" stroke="#555" stroke-width="2.5" marker-end="url(#a1)"></line>
+      <circle cx="510" cy="130" r="27" fill="#2a7a4b"></circle>
+      <text x="510" y="136" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#fff" font-weight="700">a</text>
+      <text x="510" y="182" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#555" font-weight="600">output</text>
+      <!-- equations panel -->
+      <rect x="565" y="60" width="165" height="140" rx="8" fill="#fafaf7" stroke="#ddd"></rect>
+      <text x="647" y="82" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#333" font-weight="700">THE TWO EQUATIONS</text>
+      <text x="580" y="108" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a3a5c" font-weight="600">z = Σ wᵢxᵢ + b</text>
+      <text x="580" y="126" font-family="IBM Plex Mono,monospace" font-size="9" fill="#888">= wᵀx + b</text>
+      <text x="580" y="152" font-family="IBM Plex Mono,monospace" font-size="11" fill="#7a5000" font-weight="600">a = g(z)</text>
+      <text x="580" y="176" font-family="Inter,sans-serif" font-size="9" fill="#666">Linear step, then</text>
+      <text x="580" y="190" font-family="Inter,sans-serif" font-size="9" fill="#666">non-linear squash.</text>
+      <!-- bottom note -->
+      <text x="300" y="232" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#777" font-style="italic">Weight magnitude = importance of that input. Bias shifts the activation threshold.</text>
+    </svg>
+    <div class="diagram-caption">FIG 1 — A single neuron. Two operations: a weighted sum (linear) followed by an activation (non-linear). Everything in deep learning is built from repeating this.</div>
+  </div>
+  <h3>Layer form (vectorized)</h3>
+  <div class="math-box">
+    <span class="comment">// Single sample</span>
+    <span class="var">z</span> = 
+    <span class="eq">W·x + b</span>          
+    <span class="comment">// W ∈ ℝ^(d_out × d_in),  x ∈ ℝ^d_in,  b ∈ ℝ^d_out</span>
+    <span class="var">a</span> = 
+    <span class="eq">g(z)</span>              
+    <span class="comment">// elementwise activation</span>
+    <span class="comment">// Batch of N samples (how it's actually implemented)</span>
+    <span class="var">Z</span> = 
+    <span class="eq">X·Wᵀ + b</span>         
+    <span class="comment">// X ∈ ℝ^(N × d_in)  →  Z ∈ ℝ^(N × d_out)</span>
+    <span class="var">A</span> = 
+    <span class="eq">g(Z)</span>
+    <span class="comment">// Full L-layer network</span>
+    <span class="var">a⁰</span> = x
+    <span class="var">aˡ</span> = 
+    <span class="eq">g(Wˡ·aˡ⁻¹ + bˡ)</span>   for l = 1 … L
+    <span class="var">ŷ</span>  = 
+    <span class="eq">aᴸ</span>
+  </div>
+  <div class="callout callout-red">
+    <strong>Why non-linearity is mandatory:</strong> Stack two linear layers and you get W₂(W₁x + b₁) + b₂ = (W₂W₁)x + (W₂b₁ + b₂), which is just another linear layer with weights W′ = W₂W₁. Without g(·), a 100-layer network has exactly the representational power of a 1-layer network. The activation is what buys you depth.
+  </div>
+  <h3>Parameter counting</h3>
+  <table>
+    <tbody>
+      <tr>
+        <th>Layer</th>
+        <th>Weights</th>
+        <th>Biases</th>
+        <th>Total</th>
+      </tr>
+      <tr>
+        <td>Dense: 784 → 128</td>
+        <td>784 × 128 = 100,352</td>
+        <td>128</td>
+        <td>100,480</td>
+      </tr>
+      <tr>
+        <td>Dense: 128 → 64</td>
+        <td>128 × 64 = 8,192</td>
+        <td>64</td>
+        <td>8,256</td>
+      </tr>
+      <tr>
+        <td>Dense: 64 → 10</td>
+        <td>64 × 10 = 640</td>
+        <td>10</td>
+        <td>650</td>
+      </tr>
+      <tr>
+        <td colspan="3">
+          <strong>Network total</strong>
+        </td>
+        <td>
+          <strong>109,386</strong>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="math-box">
+    <span class="comment">// General formula for a dense layer</span>
+    <span class="var">params</span> = 
+    <span class="eq">(d_in × d_out) + d_out</span>  =  
+    <span class="eq">d_out × (d_in + 1)</span>
+  </div>
+</section>
+<!-- ══════════ 02 ACTIVATIONS ══════════ -->
+<section class="section" id="s2">
+  <div class="section-eyebrow">Section 02</div>
+  <h2>Activation Functions</h2>
+  <p>The choice of activation determines what gradients look like during training. The 
+    <strong>derivative</strong> matters more than the function itself, because that's what flows backward.
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 760 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;display:block;margin:0 auto"><!-- SIGMOID -->
+      <text x="110" y="24" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700">SIGMOID</text>
+      <line x1="30" y1="110" x2="195" y2="110" stroke="#ddd" stroke-width="1"></line>
+      <line x1="112" y1="40" x2="112" y2="170" stroke="#ddd" stroke-width="1"></line>
+      <path d="M32 148 C60 148 85 145 100 128 C110 116 114 104 124 92 C139 75 165 72 192 72" stroke="#2255aa" stroke-width="2.5" fill="none"></path>
+      <text x="200" y="76" font-family="IBM Plex Mono,monospace" font-size="8" fill="#2255aa">1</text>
+      <text x="200" y="152" font-family="IBM Plex Mono,monospace" font-size="8" fill="#2255aa">0</text>
+      <!-- derivative -->
+      <path d="M32 168 C70 168 92 166 112 140 C132 166 155 168 192 168" stroke="#b83232" stroke-width="1.8" fill="none" stroke-dasharray="4,3"></path>
+      <text x="112" y="188" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#b83232">σ' max = 0.25 ⚠</text>
+      <text x="110" y="204" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">σ(z)=1/(1+e⁻ᶻ)</text>
+      <!-- TANH -->
+      <text x="300" y="24" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700">TANH</text>
+      <line x1="220" y1="110" x2="385" y2="110" stroke="#ddd" stroke-width="1"></line>
+      <line x1="302" y1="40" x2="302" y2="170" stroke="#ddd" stroke-width="1"></line>
+      <path d="M222 158 C250 158 275 154 290 130 C298 118 306 102 314 90 C329 66 355 62 382 62" stroke="#2a7a4b" stroke-width="2.5" fill="none"></path>
+      <text x="390" y="66" font-family="IBM Plex Mono,monospace" font-size="8" fill="#2a7a4b">+1</text>
+      <text x="390" y="162" font-family="IBM Plex Mono,monospace" font-size="8" fill="#2a7a4b">-1</text>
+      <path d="M222 168 C260 168 282 164 302 128 C322 164 345 168 382 168" stroke="#b83232" stroke-width="1.8" fill="none" stroke-dasharray="4,3"></path>
+      <text x="302" y="188" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#b83232">tanh' max = 1.0 ✓</text>
+      <text x="300" y="204" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">zero-centred output</text>
+      <!-- RELU -->
+      <text x="490" y="24" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700">ReLU</text>
+      <line x1="410" y1="150" x2="575" y2="150" stroke="#ddd" stroke-width="1"></line>
+      <line x1="492" y1="40" x2="492" y2="170" stroke="#ddd" stroke-width="1"></line>
+      <path d="M412 150 L492 150 L572 60" stroke="#e8a020" stroke-width="2.5" fill="none"></path>
+      <path d="M412 168 L490 168 M494 132 L572 132" stroke="#b83232" stroke-width="1.8" fill="none" stroke-dasharray="4,3"></path>
+      <text x="492" y="188" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#b83232">deriv = 0 or 1 ✓</text>
+      <text x="490" y="204" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">max(0, z) — no saturation</text>
+      <!-- GELU -->
+      <text x="672" y="24" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700">GELU</text>
+      <line x1="600" y1="150" x2="745" y2="150" stroke="#ddd" stroke-width="1"></line>
+      <line x1="672" y1="40" x2="672" y2="170" stroke="#ddd" stroke-width="1"></line>
+      <path d="M602 150 C630 150 650 154 668 152 C680 148 692 130 705 110 C720 88 730 74 743 62" stroke="#6b3fa0" stroke-width="2.5" fill="none"></path>
+      <text x="672" y="188" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#6b3fa0">smooth, differentiable</text>
+      <text x="672" y="204" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">Transformer default</text>
+      <!-- Legend -->
+      <line x1="250" y1="228" x2="285" y2="228" stroke="#2255aa" stroke-width="2.5"></line>
+      <text x="292" y="232" font-family="IBM Plex Mono,monospace" font-size="9" fill="#555">function g(z)</text>
+      <line x1="400" y1="228" x2="435" y2="228" stroke="#b83232" stroke-width="1.8" stroke-dasharray="4,3"></line>
+      <text x="442" y="232" font-family="IBM Plex Mono,monospace" font-size="9" fill="#555">derivative g'(z)</text>
+      <!-- VANISHING GRADIENT PANEL -->
+      <rect x="30" y="252" width="700" height="112" rx="10" fill="#fff0f0" stroke="#e0b0b0" stroke-width="1.5"></rect>
+      <text x="380" y="275" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#b83232" font-weight="700" letter-spacing="1">WHY SIGMOID CAUSES VANISHING GRADIENTS</text>
+      <text x="55" y="299" font-family="Inter,sans-serif" font-size="10" fill="#444">Sigmoid's derivative peaks at 0.25 (at z=0) and shrinks toward 0 in both tails. In backprop,</text>
+      <text x="55" y="315" font-family="Inter,sans-serif" font-size="10" fill="#444">gradients multiply layer by layer. Through 10 sigmoid layers, the best case is:</text>
+      <text x="380" y="338" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="12" fill="#b83232" font-weight="700">0.25¹⁰ ≈ 0.00000095  →  gradient essentially zero</text>
+      <text x="380" y="356" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#666">Early layers stop learning. This is exactly the problem ReLU, residuals, and LSTM gates were built to solve.</text>
+    </svg>
+    <div class="diagram-caption">FIG 2 — The four activations and their derivatives (dashed). The derivative curve is what determines whether gradients survive a deep stack.</div>
+  </div>
+  <table>
+    <tbody>
+      <tr>
+        <th>Activation</th>
+        <th>Formula</th>
+        <th>Derivative</th>
+        <th>Range</th>
+        <th>Used where</th>
+      </tr>
+      <tr>
+        <td>Sigmoid</td>
+        <td>σ(z) = 1/(1+e⁻ᶻ)</td>
+        <td>σ(z)·(1−σ(z))</td>
+        <td>(0, 1)</td>
+        <td>Binary output, LSTM/GRU gates</td>
+      </tr>
+      <tr>
+        <td>Tanh</td>
+        <td>tanh(z)</td>
+        <td>1 − tanh²(z)</td>
+        <td>(−1, 1)</td>
+        <td>RNN hidden state, LSTM candidate</td>
+      </tr>
+      <tr>
+        <td>ReLU</td>
+        <td>max(0, z)</td>
+        <td>1 if z&gt;0, else 0</td>
+        <td>[0, ∞)</td>
+        <td>MLP / CNN hidden layers</td>
+      </tr>
+      <tr>
+        <td>Leaky ReLU</td>
+        <td>max(0.01z, z)</td>
+        <td>1 if z&gt;0, else 0.01</td>
+        <td>(−∞, ∞)</td>
+        <td>Fixes "dying ReLU" neurons</td>
+      </tr>
+      <tr>
+        <td>GELU</td>
+        <td>z · Φ(z)</td>
+        <td>smooth</td>
+        <td>≈(−0.17, ∞)</td>
+        <td>Transformers (BERT, GPT)</td>
+      </tr>
+      <tr>
+        <td>Softmax</td>
+        <td>eᶻⁱ / Σⱼ eᶻʲ</td>
+        <td>see note below</td>
+        <td>(0,1), sums to 1</td>
+        <td>Multi-class output layer</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-blue">
+    <strong>Choosing in practice:</strong> ReLU for hidden layers in feed-forward and convolutional nets. Tanh for recurrent hidden states (zero-centred keeps the state from drifting). Sigmoid 
+    <em>only</em> for gates and binary outputs — never as a deep hidden activation. GELU if you're building a Transformer.
+  </div>
+  <div class="callout callout-red">
+    <strong>Dying ReLU:</strong> If a neuron's pre-activation goes strongly negative for all inputs, ReLU outputs 0, its gradient is 0, and it never recovers — the neuron is permanently dead. Leaky ReLU and careful initialization prevent this.
+  </div>
+</section>
+<!-- ══════════ 03 FORWARD PASS ══════════ -->
+<section class="section" id="s3">
+  <div class="section-eyebrow">Section 03</div>
+  <h2>Forward Propagation — Complete Numerical Walkthrough</h2>
+  <p>We'll use a 2-input, 3-hidden, 2-output network. It's small enough to compute by hand but large enough to show hidden-layer backpropagation properly (each hidden node feeds 
+    <em>both</em> outputs, which is where the interesting chain rule appears).
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 740 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:740px;display:block;margin:0 auto"><!-- layer labels -->
+      <text x="90" y="26" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#666" font-weight="600" letter-spacing="1">INPUT</text>
+      <text x="330" y="26" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#666" font-weight="600" letter-spacing="1">HIDDEN (sigmoid)</text>
+      <text x="580" y="26" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#666" font-weight="600" letter-spacing="1">OUTPUT (sigmoid)</text>
+      <!-- connections input->hidden -->
+      <line x1="118" y1="105" x2="298" y2="80" stroke="#bbb" stroke-width="1.4"></line>
+      <line x1="118" y1="105" x2="298" y2="160" stroke="#bbb" stroke-width="1.4"></line>
+      <line x1="118" y1="105" x2="298" y2="240" stroke="#bbb" stroke-width="1.4"></line>
+      <line x1="118" y1="205" x2="298" y2="80" stroke="#bbb" stroke-width="1.4"></line>
+      <line x1="118" y1="205" x2="298" y2="160" stroke="#bbb" stroke-width="1.4"></line>
+      <line x1="118" y1="205" x2="298" y2="240" stroke="#bbb" stroke-width="1.4"></line>
+      <!-- weight labels input->hidden -->
+      <text x="180" y="88" font-family="IBM Plex Mono,monospace" font-size="8" fill="#2255aa">w₁=.1</text>
+      <text x="180" y="128" font-family="IBM Plex Mono,monospace" font-size="8" fill="#2255aa">w₂=.2</text>
+      <text x="180" y="168" font-family="IBM Plex Mono,monospace" font-size="8" fill="#2255aa">w₃=.3</text>
+      <text x="180" y="196" font-family="IBM Plex Mono,monospace" font-size="8" fill="#6b3fa0">w₄=.4</text>
+      <text x="180" y="222" font-family="IBM Plex Mono,monospace" font-size="8" fill="#6b3fa0">w₅=.5</text>
+      <text x="180" y="248" font-family="IBM Plex Mono,monospace" font-size="8" fill="#6b3fa0">w₆=.6</text>
+      <!-- connections hidden->output -->
+      <line x1="362" y1="80" x2="548" y2="115" stroke="#bbb" stroke-width="1.4"></line>
+      <line x1="362" y1="80" x2="548" y2="205" stroke="#bbb" stroke-width="1.4"></line>
+      <line x1="362" y1="160" x2="548" y2="115" stroke="#bbb" stroke-width="1.4"></line>
+      <line x1="362" y1="160" x2="548" y2="205" stroke="#bbb" stroke-width="1.4"></line>
+      <line x1="362" y1="240" x2="548" y2="115" stroke="#bbb" stroke-width="1.4"></line>
+      <line x1="362" y1="240" x2="548" y2="205" stroke="#bbb" stroke-width="1.4"></line>
+      <text x="425" y="88" font-family="IBM Plex Mono,monospace" font-size="8" fill="#e8a020">w₇=.25</text>
+      <text x="425" y="122" font-family="IBM Plex Mono,monospace" font-size="8" fill="#2a7a4b">w₈=.5</text>
+      <text x="425" y="152" font-family="IBM Plex Mono,monospace" font-size="8" fill="#e8a020">w₉=.1</text>
+      <text x="425" y="188" font-family="IBM Plex Mono,monospace" font-size="8" fill="#2a7a4b">w₁₀=.2</text>
+      <text x="425" y="222" font-family="IBM Plex Mono,monospace" font-size="8" fill="#e8a020">w₁₁=.3</text>
+      <text x="425" y="252" font-family="IBM Plex Mono,monospace" font-size="8" fill="#2a7a4b">w₁₂=.4</text>
+      <!-- INPUT nodes -->
+      <circle cx="90" cy="105" r="28" fill="#eef3ff" stroke="#2255aa" stroke-width="2"></circle>
+      <text x="90" y="102" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a3a5c">i₁</text>
+      <text x="90" y="116" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#2255aa" font-weight="700">0.85</text>
+      <circle cx="90" cy="205" r="28" fill="#eef3ff" stroke="#2255aa" stroke-width="2"></circle>
+      <text x="90" y="202" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a3a5c">i₂</text>
+      <text x="90" y="216" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#2255aa" font-weight="700">0.25</text>
+      <!-- HIDDEN nodes -->
+      <circle cx="330" cy="80" r="32" fill="#fff3cc" stroke="#e8a020" stroke-width="2"></circle>
+      <text x="330" y="72" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#7a5000">h₁</text>
+      <text x="330" y="85" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#999">z=0.185</text>
+      <text x="330" y="97" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#7a5000" font-weight="700">0.5461</text>
+      <circle cx="330" cy="160" r="32" fill="#fff3cc" stroke="#e8a020" stroke-width="2"></circle>
+      <text x="330" y="152" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#7a5000">h₂</text>
+      <text x="330" y="165" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#999">z=0.295</text>
+      <text x="330" y="177" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#7a5000" font-weight="700">0.5732</text>
+      <circle cx="330" cy="240" r="32" fill="#fff3cc" stroke="#e8a020" stroke-width="2"></circle>
+      <text x="330" y="232" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#7a5000">h₃</text>
+      <text x="330" y="245" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#999">z=0.405</text>
+      <text x="330" y="257" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#7a5000" font-weight="700">0.5999</text>
+      <!-- OUTPUT nodes -->
+      <circle cx="580" cy="115" r="32" fill="#edfaf3" stroke="#2a7a4b" stroke-width="2"></circle>
+      <text x="580" y="107" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a5c38">o₁</text>
+      <text x="580" y="120" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a5c38" font-weight="700">0.5924</text>
+      <text x="580" y="133" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#b83232">↑ want 1.0</text>
+      <circle cx="580" cy="205" r="32" fill="#edfaf3" stroke="#2a7a4b" stroke-width="2"></circle>
+      <text x="580" y="197" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a5c38">o₂</text>
+      <text x="580" y="210" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a5c38" font-weight="700">0.6520</text>
+      <text x="580" y="223" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#b83232">↓ want 0.0</text>
+      <!-- loss box -->
+      <rect x="645" y="130" width="85" height="60" rx="8" fill="#b83232"></rect>
+      <text x="687" y="152" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">LOSS</text>
+      <text x="687" y="168" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#fff" font-weight="700">0.2956</text>
+      <text x="687" y="182" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#ffcccc">E_total</text>
+      <line x1="612" y1="130" x2="643" y2="150" stroke="#b83232" stroke-width="1.5" marker-end="url(#ar)"></line>
+      <line x1="612" y1="195" x2="643" y2="175" stroke="#b83232" stroke-width="1.5" marker-end="url(#ar)"></line>
+      <!-- flow arrow -->
+      <path d="M60 295 L680 295" stroke="#2a7a4b" stroke-width="2" marker-end="url(#ag)" stroke-dasharray="8,4"></path>
+      <text x="370" y="288" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#2a7a4b" font-weight="600">FORWARD PASS DIRECTION</text>
+      <text x="370" y="313" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#888" font-style="italic">Note: every hidden node connects to BOTH outputs — this matters in backprop.</text>
+    </svg>
+    <div class="diagram-caption">FIG 3 — The 2-3-2 network with all forward-pass values filled in. Weights w₁–w₆ connect input→hidden; w₇–w₁₂ connect hidden→output.</div>
+  </div>
+  <h4>Step 1 — Hidden layer pre-activations and activations</h4>
+  <div class="math-box">
+    <span class="comment">// z = w·i, then a = sigmoid(z) = 1/(1+e^-z)</span>
+    <span class="var">z_h1</span> = w₁·i₁ + w₄·i₂ = 0.1(0.85) + 0.4(0.25) = 0.085 + 0.100 = 
+    <span class="hi">0.185</span>
+    <span class="var">a_h1</span> = σ(0.185) = 1/(1 + e^-0.185) = 
+    <span class="ok">0.5461</span>
+    <span class="var">z_h2</span> = w₂·i₁ + w₅·i₂ = 0.2(0.85) + 0.5(0.25) = 0.170 + 0.125 = 
+    <span class="hi">0.295</span>
+    <span class="var">a_h2</span> = σ(0.295) = 
+    <span class="ok">0.5732</span>
+    <span class="var">z_h3</span> = w₃·i₁ + w₆·i₂ = 0.3(0.85) + 0.6(0.25) = 0.255 + 0.150 = 
+    <span class="hi">0.405</span>
+    <span class="var">a_h3</span> = σ(0.405) = 
+    <span class="ok">0.5999</span>
+  </div>
+  <h4>Step 2 — Output layer</h4>
+  <div class="math-box">
+    <span class="var">z_o1</span> = w₇·a_h1 + w₉·a_h2 + w₁₁·a_h3
+     = 0.25(0.5461) + 0.1(0.5732) + 0.3(0.5999)
+     = 0.13653 + 0.05732 + 0.17997 = 
+    <span class="hi">0.3738</span>
+    <span class="var">a_o1</span> = σ(0.3738) = 
+    <span class="ok">0.5924</span>       
+    <span class="comment">// target = 1.0</span>
+    <span class="var">z_o2</span> = w₈·a_h1 + w₁₀·a_h2 + w₁₂·a_h3
+     = 0.5(0.5461) + 0.2(0.5732) + 0.4(0.5999)
+     = 0.27305 + 0.11464 + 0.23996 = 
+    <span class="hi">0.6277</span>
+    <span class="var">a_o2</span> = σ(0.6277) = 
+    <span class="ok">0.6520</span>       
+    <span class="comment">// target = 0.0</span>
+  </div>
+  <table>
+    <tbody>
+      <tr>
+        <th>Node</th>
+        <th>Weighted sum z</th>
+        <th>Activation a = σ(z)</th>
+        <th>Target</th>
+        <th>Error</th>
+      </tr>
+      <tr>
+        <td>h₁</td>
+        <td>0.185</td>
+        <td>0.5461</td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>h₂</td>
+        <td>0.295</td>
+        <td>0.5732</td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>h₃</td>
+        <td>0.405</td>
+        <td>0.5999</td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>o₁</strong>
+        </td>
+        <td>0.3738</td>
+        <td>
+          <strong>0.5924</strong>
+        </td>
+        <td>1.0</td>
+        <td>−0.4076</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>o₂</strong>
+        </td>
+        <td>0.6277</td>
+        <td>
+          <strong>0.6520</strong>
+        </td>
+        <td>0.0</td>
+        <td>+0.6520</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+<!-- ══════════ 04 LOSS ══════════ -->
+<section class="section" id="s4">
+  <div class="section-eyebrow">Section 04</div>
+  <h2>Loss Functions</h2>
+  <p>The loss converts "how wrong is the prediction" into a single scalar that can be differentiated. Choosing the wrong loss for the task is one of the most common practical mistakes.</p>
+  <h4>Our example — squared error with ½ factor</h4>
+  <div class="math-box">
+    <span class="var">E_total</span> = ½ · [ (target₁ − a_o1)² + (target₂ − a_o2)² ]
+        = ½ · [ (1 − 0.5924)² + (0 − 0.6520)² ]
+        = ½ · [ (−0.4076)² + (0.6520)² ]
+        = ½ · [ 0.16614 + 0.42510 ]
+        = ½ · 0.59124
+        = 
+    <span class="hi">0.29562</span>
+    <span class="comment">// Why the ½ factor?</span>
+    <span class="comment">// d/da [½(t−a)²] = −(t−a) = (a−t)</span>
+    <span class="comment">// The 2 from the power rule cancels the ½ — the derivative comes out clean.</span>
+    <span class="comment">// It has no effect on where the minimum is, only on the constant.</span>
+  </div>
+  <table>
+    <tbody>
+      <tr>
+        <th>Loss</th>
+        <th>Formula</th>
+        <th>Derivative w.r.t. prediction</th>
+        <th>Use for</th>
+      </tr>
+      <tr>
+        <td>Mean Squared Error</td>
+        <td>½(y − ŷ)²</td>
+        <td>ŷ − y</td>
+        <td>Regression, continuous targets</td>
+      </tr>
+      <tr>
+        <td>Mean Absolute Error</td>
+        <td>|y − ŷ|</td>
+        <td>sign(ŷ − y)</td>
+        <td>Regression robust to outliers</td>
+      </tr>
+      <tr>
+        <td>Binary Cross-Entropy</td>
+        <td>−[y·log ŷ + (1−y)·log(1−ŷ)]</td>
+        <td>(ŷ − y)/(ŷ(1−ŷ))</td>
+        <td>Binary classification</td>
+      </tr>
+      <tr>
+        <td>Categorical Cross-Entropy</td>
+        <td>−Σᵢ yᵢ · log ŷᵢ</td>
+        <td>ŷ − y (with softmax)</td>
+        <td>Multi-class classification</td>
+      </tr>
+      <tr>
+        <td>Huber</td>
+        <td>MSE near 0, MAE far away</td>
+        <td>piecewise</td>
+        <td>Regression with some outliers</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-green">
+    <strong>The softmax + cross-entropy shortcut:</strong> When categorical cross-entropy follows a softmax layer, the combined derivative simplifies to exactly 
+    <code>ŷ − y</code>. All the messy softmax Jacobian terms cancel. This is why the two are almost always paired — the gradient is both simple and numerically stable.
+  </div>
+  <div class="callout callout-red">
+    <strong>Why not MSE for classification?</strong> MSE with a sigmoid output produces a gradient containing σ′(z), which is tiny when the model is confidently wrong — exactly when you most want a large correction. Cross-entropy's gradient does not have this term, so wrong-and-confident predictions get corrected fast.
+  </div>
+</section>
+<!-- ══════════ 05 BACKPROP ══════════ -->
+<section class="section" id="s5">
+  <div class="section-eyebrow">Section 05</div>
+  <h2>Backpropagation — Full Derivation</h2>
+  <p>Backpropagation is the chain rule applied systematically, computing gradients from the output backward so that shared sub-expressions are calculated once and reused.</p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 740 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:740px;display:block;margin:0 auto">
+      <text x="370" y="24" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700" letter-spacing="1.5">THE CHAIN RULE PATH FOR w₇</text>
+      <!-- chain of boxes -->
+      <rect x="40" y="60" width="90" height="46" rx="8" fill="#e8a020"></rect>
+      <text x="85" y="80" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="12" fill="#fff" font-weight="700">w₇</text>
+      <text x="85" y="95" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#fff8ee">the weight</text>
+      <line x1="130" y1="83" x2="168" y2="83" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="173" y="60" width="90" height="46" rx="8" fill="#1a3a5c"></rect>
+      <text x="218" y="80" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="12" fill="#fff" font-weight="700">z_o1</text>
+      <text x="218" y="95" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#88aacc">weighted sum</text>
+      <line x1="263" y1="83" x2="301" y2="83" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="306" y="60" width="90" height="46" rx="8" fill="#2a7a4b"></rect>
+      <text x="351" y="80" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="12" fill="#fff" font-weight="700">a_o1</text>
+      <text x="351" y="95" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#c8ead6">activation</text>
+      <line x1="396" y1="83" x2="434" y2="83" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="439" y="60" width="90" height="46" rx="8" fill="#b83232"></rect>
+      <text x="484" y="80" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="12" fill="#fff" font-weight="700">E_o1</text>
+      <text x="484" y="95" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#ffcccc">loss</text>
+      <!-- backward arrows with derivative labels -->
+      <path d="M484 118 L484 140 L85 140 L85 122" stroke="#6b3fa0" stroke-width="2" fill="none" stroke-dasharray="5,3" marker-end="url(#a1)"></path>
+      <text x="285" y="158" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#6b3fa0" font-weight="700">GRADIENT FLOWS BACKWARD</text>
+      <!-- three derivative terms -->
+      <rect x="40" y="180" width="180" height="72" rx="8" fill="#fff0f0" stroke="#e0b0b0"></rect>
+      <text x="130" y="200" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#b83232" font-weight="700">∂E_o1 / ∂a_o1</text>
+      <text x="130" y="219" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333">= a_o1 − target₁</text>
+      <text x="130" y="236" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#b83232" font-weight="700">= −0.4076</text>
+      <text x="235" y="220" text-anchor="middle" font-family="monospace" font-size="18" fill="#555">×</text>
+      <rect x="255" y="180" width="180" height="72" rx="8" fill="#edfaf3" stroke="#80c8a0"></rect>
+      <text x="345" y="200" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#2a7a4b" font-weight="700">∂a_o1 / ∂z_o1</text>
+      <text x="345" y="219" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333">= a_o1(1 − a_o1)</text>
+      <text x="345" y="236" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#2a7a4b" font-weight="700">= 0.24146</text>
+      <text x="450" y="220" text-anchor="middle" font-family="monospace" font-size="18" fill="#555">×</text>
+      <rect x="470" y="180" width="180" height="72" rx="8" fill="#fff3cc" stroke="#e8a020"></rect>
+      <text x="560" y="200" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#7a5000" font-weight="700">∂z_o1 / ∂w₇</text>
+      <text x="560" y="219" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333">= a_h1</text>
+      <text x="560" y="236" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#7a5000" font-weight="700">= 0.5461</text>
+      <text x="670" y="220" text-anchor="middle" font-family="monospace" font-size="18" fill="#555">=</text>
+      <text x="700" y="215" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a3a5c" font-weight="700">−0.0537</text>
+      <text x="700" y="231" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">gradient</text>
+      <text x="370" y="278" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#666" font-style="italic">Three local derivatives multiplied together. That is the entire idea of backpropagation.</text>
+    </svg>
+    <div class="diagram-caption">FIG 4 — The chain rule made concrete. Each box is a local derivative computed independently; the product is the gradient for w₇.</div>
+  </div>
+  <h4>Step 1 — Output layer deltas</h4>
+  <p>A 
+    <strong>delta</strong> (δ) is the error signal at a node — it bundles the first two chain-rule terms so they don't have to be recomputed for every incoming weight.
+  </p>
+  <div class="math-box">
+    <span class="comment">// δ_o = (a_o − target) · a_o(1 − a_o)</span>
+    <span class="comment">//        └── loss deriv ──┘  └─ sigmoid deriv ─┘</span>
+    <span class="var">δ_o1</span> = (0.5924 − 1.0) · 0.5924 · (1 − 0.5924)
+     = (−0.4076) · 0.5924 · 0.4076
+     = (−0.4076) · 0.24146 = 
+    <span class="hi">−0.09843</span>
+    <span class="var">δ_o2</span> = (0.6520 − 0.0) · 0.6520 · (1 − 0.6520)
+     = (0.6520) · 0.6520 · 0.3480
+     = (0.6520) · 0.22690 = 
+    <span class="hi">+0.14793</span>
+  </div>
+  <h4>Step 2 — Output layer weight gradients &amp; updates</h4>
+  <div class="math-box">
+    <span class="comment">// Gradient for any hidden→output weight:  ∂E/∂w = δ_o · a_h</span>
+    <span class="comment">// Update rule:  w_new = w_old − α·gradient,  with α = 0.1</span>
+∂E/∂w₇  = δ_o1 · a_h1 = (−0.09843)(0.5461) = 
+    <span class="hi">−0.05375</span>
+w₇_new  = 0.25 − 0.1(−0.05375) = 
+    <span class="ok">0.25538</span>
+  </div>
+  <table>
+    <tbody>
+      <tr>
+        <th>Weight</th>
+        <th>Connects</th>
+        <th>δ used</th>
+        <th>a used</th>
+        <th>Gradient</th>
+        <th>Updated value</th>
+      </tr>
+      <tr>
+        <td>w₇</td>
+        <td>h₁ → o₁</td>
+        <td>δ_o1</td>
+        <td>a_h1</td>
+        <td>−0.05375</td>
+        <td>0.25538</td>
+      </tr>
+      <tr>
+        <td>w₉</td>
+        <td>h₂ → o₁</td>
+        <td>δ_o1</td>
+        <td>a_h2</td>
+        <td>−0.05642</td>
+        <td>0.10564</td>
+      </tr>
+      <tr>
+        <td>w₁₁</td>
+        <td>h₃ → o₁</td>
+        <td>δ_o1</td>
+        <td>a_h3</td>
+        <td>−0.05904</td>
+        <td>0.30590</td>
+      </tr>
+      <tr>
+        <td>w₈</td>
+        <td>h₁ → o₂</td>
+        <td>δ_o2</td>
+        <td>a_h1</td>
+        <td>+0.08079</td>
+        <td>0.49192</td>
+      </tr>
+      <tr>
+        <td>w₁₀</td>
+        <td>h₂ → o₂</td>
+        <td>δ_o2</td>
+        <td>a_h2</td>
+        <td>+0.08480</td>
+        <td>0.19152</td>
+      </tr>
+      <tr>
+        <td>w₁₂</td>
+        <td>h₃ → o₂</td>
+        <td>δ_o2</td>
+        <td>a_h3</td>
+        <td>+0.08874</td>
+        <td>0.39113</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-blue">
+    <strong>Read the signs:</strong> o₁ was too low (0.59 vs target 1.0), so its gradients are negative and the update 
+    <em>increases</em> those weights. o₂ was too high (0.65 vs target 0.0), so its gradients are positive and the update 
+    <em>decreases</em> those weights. The arithmetic is doing exactly what intuition says it should.
+  </div>
+  <h4>Step 3 — Hidden layer deltas (the interesting part)</h4>
+  <p>Each hidden neuron influences 
+    <strong>both</strong> outputs, so its error signal must be summed over all downstream paths. This is the part that separates real backpropagation from a single-path chain rule.
+  </p>
+  <div class="math-box">
+    <span class="comment">// Downstream error reaching h₁ (sum over BOTH output paths)</span>
+∂E_total/∂a_h1 = δ_o1·w₇ + δ_o2·w₈
+               = (−0.09843)(0.25) + (0.14793)(0.5)
+               = −0.02461 + 0.07397 = 
+    <span class="hi">0.04936</span>
+    <span class="comment">// Multiply by the local sigmoid derivative to get δ_h1</span>
+    <span class="var">δ_h1</span> = 0.04936 · a_h1(1 − a_h1)
+     = 0.04936 · 0.5461 · 0.4539
+     = 0.04936 · 0.24788 = 
+    <span class="hi">0.012235</span>
+    <span class="comment">// Same procedure for h₂ and h₃</span>
+    <span class="var">δ_h2</span> = (δ_o1·w₉  + δ_o2·w₁₀) · a_h2(1−a_h2) = 
+    <span class="hi">0.004830</span>
+    <span class="var">δ_h3</span> = (δ_o1·w₁₁ + δ_o2·w₁₂) · a_h3(1−a_h3) = 
+    <span class="hi">0.007116</span>
+  </div>
+  <h4>Step 4 — Input layer weight updates</h4>
+  <table>
+    <tbody>
+      <tr>
+        <th>Weight</th>
+        <th>Connects</th>
+        <th>δ used</th>
+        <th>Input</th>
+        <th>Gradient</th>
+        <th>Updated value</th>
+      </tr>
+      <tr>
+        <td>w₁</td>
+        <td>i₁ → h₁</td>
+        <td>δ_h1</td>
+        <td>0.85</td>
+        <td>0.010400</td>
+        <td>0.098960</td>
+      </tr>
+      <tr>
+        <td>w₂</td>
+        <td>i₁ → h₂</td>
+        <td>δ_h2</td>
+        <td>0.85</td>
+        <td>0.004106</td>
+        <td>0.199589</td>
+      </tr>
+      <tr>
+        <td>w₃</td>
+        <td>i₁ → h₃</td>
+        <td>δ_h3</td>
+        <td>0.85</td>
+        <td>0.006048</td>
+        <td>0.299395</td>
+      </tr>
+      <tr>
+        <td>w₄</td>
+        <td>i₂ → h₁</td>
+        <td>δ_h1</td>
+        <td>0.25</td>
+        <td>0.003059</td>
+        <td>0.399694</td>
+      </tr>
+      <tr>
+        <td>w₅</td>
+        <td>i₂ → h₂</td>
+        <td>δ_h2</td>
+        <td>0.25</td>
+        <td>0.001208</td>
+        <td>0.499879</td>
+      </tr>
+      <tr>
+        <td>w₆</td>
+        <td>i₂ → h₃</td>
+        <td>δ_h3</td>
+        <td>0.25</td>
+        <td>0.001779</td>
+        <td>0.599822</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    <strong>Notice the magnitudes:</strong> the input-layer gradients (~0.001–0.01) are roughly ten times smaller than the output-layer gradients (~0.05–0.09). In a two-layer network that's harmless. Repeat this shrinkage across twenty layers and the early layers effectively stop learning — this is the vanishing gradient problem, visible right here in a hand calculation.
+  </div>
+  <h4>The general backpropagation algorithm</h4>
+  <div class="math-box">
+    <span class="comment">// For each training example:</span>
+1. FORWARD:   for l = 1…L:   zˡ = Wˡaˡ⁻¹ + bˡ ;  aˡ = g(zˡ)
+2. LOSS:      E = Loss(aᴸ, y)
+3. OUTPUT δ:  δᴸ = ∇ₐE ⊙ g′(zᴸ)
+4. BACKWARD:  for l = L−1…1:  δˡ = ((Wˡ⁺¹)ᵀ δˡ⁺¹) ⊙ g′(zˡ)
+5. GRADIENTS: ∂E/∂Wˡ = δˡ (aˡ⁻¹)ᵀ   and   ∂E/∂bˡ = δˡ
+6. UPDATE:    Wˡ ← Wˡ − α·∂E/∂Wˡ
+    <span class="comment">// ⊙ = elementwise (Hadamard) product</span>
+  </div>
+</section>
+<!-- ══════════ 06 OPTIMIZATION ══════════ -->
+<section class="section" id="s6">
+  <div class="section-eyebrow">Section 06</div>
+  <h2>Gradient Descent &amp; Optimization</h2>
+  <p>Gradients tell you which direction reduces the loss. The optimizer decides how big a step to take and whether to use history from previous steps.</p>
+  <h4>The three descent variants</h4>
+  <table>
+    <tbody>
+      <tr>
+        <th>Variant</th>
+        <th>Samples per update</th>
+        <th>Pros</th>
+        <th>Cons</th>
+      </tr>
+      <tr>
+        <td>Batch GD</td>
+        <td>Entire dataset</td>
+        <td>Stable, smooth convergence</td>
+        <td>Very slow; whole dataset must fit in memory</td>
+      </tr>
+      <tr>
+        <td>Stochastic GD</td>
+        <td>1 sample</td>
+        <td>Fast updates; noise can escape local minima</td>
+        <td>Noisy path; poor hardware utilization</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Mini-batch GD</strong>
+        </td>
+        <td>32 – 512</td>
+        <td>Best of both; GPU-efficient</td>
+        <td>Batch size becomes a hyperparameter</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="math-box">
+    <span class="comment">// Vanilla SGD</span>
+    <span class="var">w</span> ← 
+    <span class="eq">w − α · ∂E/∂w</span>
+    <span class="comment">// SGD with momentum — accumulates a velocity term</span>
+    <span class="var">v</span> ← 
+    <span class="eq">β·v + (1−β)·∂E/∂w</span>        
+    <span class="comment">// β ≈ 0.9</span>
+    <span class="var">w</span> ← 
+    <span class="eq">w − α·v</span>
+    <span class="comment">// RMSProp — scales the step by recent gradient magnitude</span>
+    <span class="var">s</span> ← 
+    <span class="eq">β·s + (1−β)·(∂E/∂w)²</span>
+    <span class="var">w</span> ← 
+    <span class="eq">w − α·∂E/∂w / (√s + ε)</span>
+    <span class="comment">// Adam — momentum + RMSProp, with bias correction</span>
+    <span class="var">v</span> ← β₁·v + (1−β₁)·g          
+    <span class="comment">// β₁ = 0.9</span>
+    <span class="var">s</span> ← β₂·s + (1−β₂)·g²         
+    <span class="comment">// β₂ = 0.999</span>
+    <span class="var">v̂</span> = v/(1−β₁ᵗ) ,  
+    <span class="var">ŝ</span> = s/(1−β₂ᵗ)   
+    <span class="comment">// bias correction</span>
+    <span class="var">w</span> ← 
+    <span class="eq">w − α·v̂/(√ŝ + ε)</span>          
+    <span class="comment">// ε = 1e-8</span>
+  </div>
+  <h4>Learning rate — the single most important hyperparameter</h4>
+  <div class="steps">
+    <div class="step-card">
+      <div class="step-num" style="color:#b83232">↑</div>
+      <h4>Too large</h4>
+      <p>Loss oscillates or diverges to NaN. The step overshoots the minimum every time.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#b83232">↓</div>
+      <h4>Too small</h4>
+      <p>Training crawls; may stall in a flat region and never reach a good minimum.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#2a7a4b">✓</div>
+      <h4>Good starting points</h4>
+      <p>Adam: 1e-3. SGD: 1e-2. Transformers: 1e-4 with warmup.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">~</div>
+      <h4>Scheduling</h4>
+      <p>Decay over training — step, cosine, or warmup-then-decay for Transformers.</p>
+    </div>
+  </div>
+  <h4>Weight initialization</h4>
+  <table>
+    <tbody>
+      <tr>
+        <th>Scheme</th>
+        <th>Variance</th>
+        <th>Pair with</th>
+      </tr>
+      <tr>
+        <td>Zeros</td>
+        <td>—</td>
+        <td>
+          <strong>Never.</strong> All neurons compute the same thing and receive identical gradients — symmetry never breaks
+        </td>
+      </tr>
+      <tr>
+        <td>Xavier / Glorot</td>
+        <td>2 / (d_in + d_out)</td>
+        <td>Sigmoid, tanh</td>
+      </tr>
+      <tr>
+        <td>He / Kaiming</td>
+        <td>2 / d_in</td>
+        <td>ReLU and variants</td>
+      </tr>
+    </tbody>
+  </table>
+  <h4>Regularization</h4>
+  <table>
+    <tbody>
+      <tr>
+        <th>Method</th>
+        <th>How it works</th>
+        <th>Typical setting</th>
+      </tr>
+      <tr>
+        <td>L2 / weight decay</td>
+        <td>Adds λ‖w‖² to the loss, shrinking large weights</td>
+        <td>λ = 1e-4</td>
+      </tr>
+      <tr>
+        <td>L1</td>
+        <td>Adds λ‖w‖, drives weights exactly to zero (sparsity)</td>
+        <td>Feature selection</td>
+      </tr>
+      <tr>
+        <td>Dropout</td>
+        <td>Randomly zeroes activations during training only</td>
+        <td>p = 0.2 – 0.5</td>
+      </tr>
+      <tr>
+        <td>Early stopping</td>
+        <td>Halt when validation loss stops improving</td>
+        <td>patience = 5–10 epochs</td>
+      </tr>
+      <tr>
+        <td>Batch normalization</td>
+        <td>Normalizes layer inputs per mini-batch</td>
+        <td>CNNs, MLPs</td>
+      </tr>
+      <tr>
+        <td>Gradient clipping</td>
+        <td>Caps gradient norm to prevent explosion</td>
+        <td>max_norm = 1.0 (essential for RNNs)</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+<!-- ══════════ 07 FAMILIES ══════════ -->
+<section class="section" id="s7">
+  <div class="section-eyebrow">Section 07</div>
+  <h2>Neural Network Families</h2>
+  <p>Every architecture family exists because it exploits a different 
+    <strong>structural assumption</strong> about the data. Choosing an architecture is mostly about matching that assumption to your data's shape and dependency pattern.
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;display:block;margin:0 auto">
+      <text x="380" y="24" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700" letter-spacing="1.5">CHOOSE BY DATA SHAPE</text>
+      <!-- MLP -->
+      <rect x="20" y="45" width="135" height="105" rx="10" fill="#eef3ff" stroke="#2255aa" stroke-width="2"></rect>
+      <text x="87" y="68" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a3a5c" font-weight="700">MLP</text>
+      <!-- mini dense diagram -->
+      <circle cx="50" cy="90" r="6" fill="#2255aa"></circle>
+      <circle cx="50" cy="112" r="6" fill="#2255aa"></circle>
+      <circle cx="87" cy="80" r="6" fill="#88aacc"></circle>
+      <circle cx="87" cy="101" r="6" fill="#88aacc"></circle>
+      <circle cx="87" cy="122" r="6" fill="#88aacc"></circle>
+      <circle cx="124" cy="101" r="6" fill="#2255aa"></circle>
+      <line x1="56" y1="90" x2="81" y2="80" stroke="#aac" stroke-width="1"></line>
+      <line x1="56" y1="90" x2="81" y2="101" stroke="#aac" stroke-width="1"></line>
+      <line x1="56" y1="90" x2="81" y2="122" stroke="#aac" stroke-width="1"></line>
+      <line x1="56" y1="112" x2="81" y2="80" stroke="#aac" stroke-width="1"></line>
+      <line x1="56" y1="112" x2="81" y2="101" stroke="#aac" stroke-width="1"></line>
+      <line x1="56" y1="112" x2="81" y2="122" stroke="#aac" stroke-width="1"></line>
+      <line x1="93" y1="80" x2="118" y2="101" stroke="#aac" stroke-width="1"></line>
+      <line x1="93" y1="101" x2="118" y2="101" stroke="#aac" stroke-width="1"></line>
+      <line x1="93" y1="122" x2="118" y2="101" stroke="#aac" stroke-width="1"></line>
+      <text x="87" y="143" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">fixed vector</text>
+      <!-- CNN -->
+      <rect x="170" y="45" width="135" height="105" rx="10" fill="#fff3cc" stroke="#e8a020" stroke-width="2"></rect>
+      <text x="237" y="68" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#7a5000" font-weight="700">CNN</text>
+      <!-- grid -->
+      <g stroke="#e8a020" stroke-width="1" fill="none">
+        <rect x="192" y="80" width="14" height="14"></rect>
+        <rect x="206" y="80" width="14" height="14"></rect>
+        <rect x="220" y="80" width="14" height="14"></rect>
+        <rect x="192" y="94" width="14" height="14"></rect>
+        <rect x="206" y="94" width="14" height="14" fill="#e8a020" opacity=".4"></rect>
+        <rect x="220" y="94" width="14" height="14"></rect>
+        <rect x="192" y="108" width="14" height="14"></rect>
+        <rect x="206" y="108" width="14" height="14"></rect>
+        <rect x="220" y="108" width="14" height="14"></rect>
+      </g>
+      <rect x="199" y="87" width="28" height="28" stroke="#b83232" stroke-width="2" fill="none"></rect>
+      <text x="262" y="105" font-family="IBM Plex Mono,monospace" font-size="8" fill="#b83232">kernel</text>
+      <text x="237" y="143" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">spatial grid</text>
+      <!-- RNN -->
+      <rect x="320" y="45" width="135" height="105" rx="10" fill="#edfaf3" stroke="#2a7a4b" stroke-width="2"></rect>
+      <text x="387" y="68" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a5c38" font-weight="700">RNN / LSTM</text>
+      <rect x="340" y="90" width="26" height="24" rx="4" fill="#c8ead6" stroke="#2a7a4b"></rect>
+      <rect x="376" y="90" width="26" height="24" rx="4" fill="#c8ead6" stroke="#2a7a4b"></rect>
+      <rect x="412" y="90" width="26" height="24" rx="4" fill="#c8ead6" stroke="#2a7a4b"></rect>
+      <line x1="366" y1="102" x2="374" y2="102" stroke="#2a7a4b" stroke-width="2" marker-end="url(#ag)"></line>
+      <line x1="402" y1="102" x2="410" y2="102" stroke="#2a7a4b" stroke-width="2" marker-end="url(#ag)"></line>
+      <text x="387" y="143" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">ordered sequence</text>
+      <!-- Transformer -->
+      <rect x="470" y="45" width="135" height="105" rx="10" fill="#f5f0ff" stroke="#6b3fa0" stroke-width="2"></rect>
+      <text x="537" y="68" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#4a1a80" font-weight="700">Transformer</text>
+      <circle cx="497" cy="105" r="8" fill="#6b3fa0"></circle>
+      <circle cx="522" cy="105" r="8" fill="#6b3fa0"></circle>
+      <circle cx="547" cy="105" r="8" fill="#6b3fa0"></circle>
+      <circle cx="572" cy="105" r="8" fill="#6b3fa0"></circle>
+      <path d="M497 97 Q510 82 522 97" stroke="#6b3fa0" stroke-width="1" fill="none"></path>
+      <path d="M497 97 Q522 76 547 97" stroke="#6b3fa0" stroke-width="1" fill="none"></path>
+      <path d="M497 97 Q535 70 572 97" stroke="#6b3fa0" stroke-width="1" fill="none"></path>
+      <path d="M522 97 Q535 82 547 97" stroke="#6b3fa0" stroke-width="1" fill="none"></path>
+      <path d="M547 97 Q560 82 572 97" stroke="#6b3fa0" stroke-width="1" fill="none"></path>
+      <text x="537" y="143" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">any-to-any</text>
+      <!-- Autoencoder -->
+      <rect x="620" y="45" width="120" height="105" rx="10" fill="#e6f7f7" stroke="#0d7a7a" stroke-width="2"></rect>
+      <text x="680" y="68" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#0d5a5a" font-weight="700">Autoencoder</text>
+      <path d="M638 85 L638 125 L660 112 L660 98 Z" fill="#a0dede" stroke="#0d7a7a"></path>
+      <rect x="668" y="100" width="10" height="10" fill="#0d7a7a"></rect>
+      <path d="M722 85 L722 125 L700 112 L700 98 Z" fill="#a0dede" stroke="#0d7a7a"></path>
+      <text x="680" y="143" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">compress → rebuild</text>
+      <!-- Decision flow -->
+      <rect x="20" y="175" width="720" height="110" rx="10" fill="#fafaf7" stroke="#ddd"></rect>
+      <text x="380" y="198" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700">THE TEACHING SHORTCUT — ASK THE DATA SHAPE FIRST</text>
+      <text x="55" y="224" font-family="IBM Plex Mono,monospace" font-size="10" fill="#2255aa" font-weight="600">Fixed-length vector</text>
+      <text x="215" y="224" font-family="monospace" font-size="11" fill="#888">→</text>
+      <text x="240" y="224" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333">MLP</text>
+      <text x="410" y="224" font-family="IBM Plex Mono,monospace" font-size="10" fill="#e8a020" font-weight="600">Spatial grid / image</text>
+      <text x="570" y="224" font-family="monospace" font-size="11" fill="#888">→</text>
+      <text x="595" y="224" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333">CNN</text>
+      <text x="55" y="246" font-family="IBM Plex Mono,monospace" font-size="10" fill="#2a7a4b" font-weight="600">Ordered sequence</text>
+      <text x="215" y="246" font-family="monospace" font-size="11" fill="#888">→</text>
+      <text x="240" y="246" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333">RNN / LSTM / GRU</text>
+      <text x="410" y="246" font-family="IBM Plex Mono,monospace" font-size="10" fill="#6b3fa0" font-weight="600">Long-range dependency</text>
+      <text x="570" y="246" font-family="monospace" font-size="11" fill="#888">→</text>
+      <text x="595" y="246" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333">Transformer</text>
+      <text x="55" y="268" font-family="IBM Plex Mono,monospace" font-size="10" fill="#0d7a7a" font-weight="600">Sequence → sequence</text>
+      <text x="215" y="268" font-family="monospace" font-size="11" fill="#888">→</text>
+      <text x="240" y="268" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333">Encoder–Decoder</text>
+      <text x="410" y="268" font-family="IBM Plex Mono,monospace" font-size="10" fill="#0d7a7a" font-weight="600">Compression / anomaly</text>
+      <text x="570" y="268" font-family="monospace" font-size="11" fill="#888">→</text>
+      <text x="595" y="268" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333">Autoencoder</text>
+    </svg>
+    <div class="diagram-caption">FIG 5 — The five families and the structural assumption each one encodes. Start by asking what shape the data is, not which model is fashionable.</div>
+  </div>
+  <table>
+    <tbody>
+      <tr>
+        <th>#</th>
+        <th>Family</th>
+        <th>Structural assumption</th>
+        <th>Use when</th>
+        <th>Avoid when</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>
+          <strong>MLP / Feed-forward</strong>
+        </td>
+        <td>Features are independent; no spatial or temporal structure</td>
+        <td>Tabular data, risk scores, encoded metadata, small feature sets</td>
+        <td>Raw data has strong spatial or sequential structure</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>
+          <strong>CNN</strong>
+        </td>
+        <td>Local patterns are meaningful and repeat across positions (translation invariance)</td>
+        <td>Images, spectrograms, screenshots, spatial maps</td>
+        <td>Data has no locality — shuffling columns wouldn't matter</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>
+          <strong>Autoencoder</strong>
+        </td>
+        <td>Data lies on a lower-dimensional manifold</td>
+        <td>Compression, denoising, anomaly detection, representation learning</td>
+        <td>You need discriminative prediction, not reconstruction</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>
+          <strong>Encoder–Decoder</strong>
+        </td>
+        <td>Input and output are both sequences, possibly of different lengths</td>
+        <td>Translation, summarization, code generation</td>
+        <td>Output is a single label — just use an encoder</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td>
+          <strong>RNN</strong>
+        </td>
+        <td>Order matters; recent context is most relevant</td>
+        <td>Short/medium sequences where model size must stay small</td>
+        <td>Long sequences (vanishing gradients) or when parallelism is needed</td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td>
+          <strong>LSTM / GRU</strong>
+        </td>
+        <td>Order matters and long-term memory must persist</td>
+        <td>Sequence memory matters but Transformer cost isn't justified</td>
+        <td>Very long context, or when you have data and compute for a Transformer</td>
+      </tr>
+      <tr>
+        <td>7</td>
+        <td>
+          <strong>Transformer</strong>
+        </td>
+        <td>Any token may depend on any other, at any distance</td>
+        <td>Language, long-range dependency, large-scale pretraining, multimodal</td>
+        <td>Data or compute is small — a simpler model will generalize better</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3>Practical decision table</h3>
+  <table>
+    <tbody>
+      <tr>
+        <th>Situation</th>
+        <th>Start with</th>
+        <th>Reason</th>
+      </tr>
+      <tr>
+        <td>Small tabular dataset</td>
+        <td>Logistic regression, tree, or small MLP</td>
+        <td>Simple models often generalize better on limited data</td>
+      </tr>
+      <tr>
+        <td>Large tabular with nonlinear interactions</td>
+        <td>MLP or gradient boosting</td>
+        <td>Both learn feature interactions; boosting is often stronger on tabular</td>
+      </tr>
+      <tr>
+        <td>Images or visual layout</td>
+        <td>CNN, or Vision Transformer if data is large</td>
+        <td>CNN encodes locality efficiently and needs less data</td>
+      </tr>
+      <tr>
+        <td>Compression or anomaly detection</td>
+        <td>Autoencoder</td>
+        <td>Reconstruction error flags unusual samples</td>
+      </tr>
+      <tr>
+        <td>Short ordered sequence</td>
+        <td>RNN or GRU</td>
+        <td>Small recurrent model is efficient and sufficient</td>
+      </tr>
+      <tr>
+        <td>Longer sequence needing memory</td>
+        <td>LSTM or GRU</td>
+        <td>Gates preserve information across many timesteps</td>
+      </tr>
+      <tr>
+        <td>Sequence in → sequence out</td>
+        <td>Encoder–decoder</td>
+        <td>Separates reading from generating</td>
+      </tr>
+      <tr>
+        <td>Text generation / LLM</td>
+        <td>Decoder-only Transformer</td>
+        <td>Masked self-attention matches next-token prediction</td>
+      </tr>
+      <tr>
+        <td>Text understanding / embeddings</td>
+        <td>Encoder-only Transformer</td>
+        <td>Bidirectional context gives richer representations</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+<!-- ══════════ 08 AUTOENCODER ══════════ -->
+<section class="section" id="s8">
+  <div class="section-eyebrow">Section 08</div>
+  <h2>Autoencoders</h2>
+  <p>An autoencoder learns to reconstruct its own input through a narrow bottleneck. Because the bottleneck can't carry everything, the network is forced to keep only what matters — which is exactly what a good representation is.</p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 740 250" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:740px;display:block;margin:0 auto"><!-- input -->
+      <rect x="30" y="70" width="60" height="110" rx="6" fill="#eef3ff" stroke="#2255aa" stroke-width="2"></rect>
+      <text x="60" y="120" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#1a3a5c" font-weight="700">x</text>
+      <text x="60" y="136" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">784-d</text>
+      <text x="60" y="200" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#555">input</text>
+      <!-- encoder trapezoid -->
+      <path d="M105 70 L105 180 L200 145 L200 105 Z" fill="#c8ead6" stroke="#2a7a4b" stroke-width="2"></path>
+      <text x="152" y="120" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a5c38" font-weight="700">ENCODER</text>
+      <text x="152" y="135" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#1a5c38">z = f(x)</text>
+      <text x="152" y="200" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#555">compress</text>
+      <!-- bottleneck -->
+      <rect x="215" y="105" width="46" height="40" rx="6" fill="#e8a020"></rect>
+      <text x="238" y="122" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#fff" font-weight="700">z</text>
+      <text x="238" y="136" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#fff8ee">32-d</text>
+      <text x="238" y="200" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#7a5000" font-weight="700">latent code</text>
+      <text x="238" y="214" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">bottleneck</text>
+      <!-- decoder trapezoid -->
+      <path d="M276 105 L276 145 L371 180 L371 70 Z" fill="#c8ead6" stroke="#2a7a4b" stroke-width="2"></path>
+      <text x="324" y="120" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a5c38" font-weight="700">DECODER</text>
+      <text x="324" y="135" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#1a5c38">x̂ = g(z)</text>
+      <text x="324" y="200" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#555">reconstruct</text>
+      <!-- output -->
+      <rect x="386" y="70" width="60" height="110" rx="6" fill="#eef3ff" stroke="#2255aa" stroke-width="2"></rect>
+      <text x="416" y="120" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#1a3a5c" font-weight="700">x̂</text>
+      <text x="416" y="136" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">784-d</text>
+      <text x="416" y="200" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#555">output</text>
+      <!-- loss connection -->
+      <path d="M60 60 Q238 20 416 60" stroke="#b83232" stroke-width="2" fill="none" stroke-dasharray="5,3"></path>
+      <rect x="195" y="20" width="88" height="26" rx="6" fill="#b83232"></rect>
+      <text x="239" y="38" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff" font-weight="600">‖x − x̂‖²</text>
+      <!-- anomaly detection panel -->
+      <rect x="470" y="45" width="255" height="160" rx="10" fill="#fafaf7" stroke="#ddd"></rect>
+      <text x="597" y="68" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700">ANOMALY DETECTION USE</text>
+      <text x="490" y="94" font-family="IBM Plex Mono,monospace" font-size="9" fill="#2a7a4b" font-weight="600">Normal sample</text>
+      <rect x="490" y="102" width="140" height="12" rx="3" fill="#c8ead6"></rect>
+      <rect x="490" y="102" width="22" height="12" rx="3" fill="#2a7a4b"></rect>
+      <text x="640" y="112" font-family="IBM Plex Mono,monospace" font-size="9" fill="#2a7a4b">low error</text>
+      <text x="490" y="140" font-family="IBM Plex Mono,monospace" font-size="9" fill="#b83232" font-weight="600">Anomalous sample</text>
+      <rect x="490" y="148" width="140" height="12" rx="3" fill="#ffd0d0"></rect>
+      <rect x="490" y="148" width="112" height="12" rx="3" fill="#b83232"></rect>
+      <text x="640" y="158" font-family="IBM Plex Mono,monospace" font-size="9" fill="#b83232">high error</text>
+      <text x="597" y="185" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666">Train only on normal data. Anything the</text>
+      <text x="597" y="198" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666">model can't reconstruct is likely an anomaly.</text>
+    </svg>
+    <div class="diagram-caption">FIG 6 — Autoencoder structure. The bottleneck forces compression; the reconstruction error is both the training signal and, at inference, an anomaly score.</div>
+  </div>
+  <div class="math-box">
+    <span class="comment">// Encoder compresses, decoder reconstructs</span>
+    <span class="var">z</span>  = 
+    <span class="eq">f_encoder(x)</span>       
+    <span class="comment">// dim(z) &lt;&lt; dim(x)</span>
+    <span class="var">x̂</span>  = 
+    <span class="eq">f_decoder(z)</span>
+    <span class="comment">// Training objective — reconstruct your own input</span>
+    <span class="var">L</span>  = 
+    <span class="eq">‖x − x̂‖²</span>          
+    <span class="comment">// or binary cross-entropy for [0,1] data</span>
+  </div>
+  <table>
+    <tbody>
+      <tr>
+        <th>Variant</th>
+        <th>Modification</th>
+        <th>Purpose</th>
+      </tr>
+      <tr>
+        <td>Undercomplete AE</td>
+        <td>dim(z) &lt; dim(x)</td>
+        <td>Standard compression / dimensionality reduction</td>
+      </tr>
+      <tr>
+        <td>Denoising AE</td>
+        <td>Corrupt the input, reconstruct the clean original</td>
+        <td>Learns robust features; prevents identity shortcut</td>
+      </tr>
+      <tr>
+        <td>Sparse AE</td>
+        <td>L1 penalty on latent activations</td>
+        <td>Forces interpretable, sparse codes</td>
+      </tr>
+      <tr>
+        <td>Variational AE (VAE)</td>
+        <td>z is a distribution; adds a KL divergence term</td>
+        <td>Generative — you can sample new data from the latent space</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-blue">
+    <strong>Why the bottleneck matters:</strong> if dim(z) ≥ dim(x), the network can simply learn the identity function and achieve zero loss while learning nothing useful. The constraint 
+    <em>is</em> the learning signal.
+  </div>
+</section>
+<!-- ══════════ 09 ENCODER-DECODER ══════════ -->
+<section class="section" id="s9">
+  <div class="section-eyebrow">Section 09</div>
+  <h2>Encoder–Decoder (Seq2Seq)</h2>
+  <p>Encoder–decoder is a 
+    <strong>design pattern</strong>, not a specific architecture. It can be built from RNNs, LSTMs, GRUs, CNNs, or Transformers. The idea: one network reads the whole input into a representation, a second network generates the output from it.
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 740 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:740px;display:block;margin:0 auto"><!-- encoder side -->
+      <rect x="20" y="45" width="300" height="150" rx="10" fill="#eef3ff" stroke="#2255aa" stroke-width="1.5"></rect>
+      <text x="170" y="68" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#2255aa" font-weight="700" letter-spacing="1">ENCODER — reads input</text>
+      <!-- input tokens -->
+      <text x="65" y="180" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#666">"I"</text>
+      <text x="130" y="180" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#666">"love"</text>
+      <text x="195" y="180" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#666">"India"</text>
+      <text x="262" y="180" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#666">&lt;eos&gt;</text>
+      <line x1="65" y1="168" x2="65" y2="145" stroke="#888" stroke-width="1.3" marker-end="url(#a1)"></line>
+      <line x1="130" y1="168" x2="130" y2="145" stroke="#888" stroke-width="1.3" marker-end="url(#a1)"></line>
+      <line x1="195" y1="168" x2="195" y2="145" stroke="#888" stroke-width="1.3" marker-end="url(#a1)"></line>
+      <line x1="262" y1="168" x2="262" y2="145" stroke="#888" stroke-width="1.3" marker-end="url(#a1)"></line>
+      <rect x="42" y="105" width="46" height="38" rx="6" fill="#ddeeff" stroke="#2255aa" stroke-width="1.5"></rect>
+      <text x="65" y="128" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a3a5c">h₁</text>
+      <rect x="107" y="105" width="46" height="38" rx="6" fill="#ddeeff" stroke="#2255aa" stroke-width="1.5"></rect>
+      <text x="130" y="128" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a3a5c">h₂</text>
+      <rect x="172" y="105" width="46" height="38" rx="6" fill="#ddeeff" stroke="#2255aa" stroke-width="1.5"></rect>
+      <text x="195" y="128" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a3a5c">h₃</text>
+      <rect x="239" y="105" width="46" height="38" rx="6" fill="#2255aa"></rect>
+      <text x="262" y="128" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="600">h₄</text>
+      <line x1="88" y1="124" x2="105" y2="124" stroke="#2255aa" stroke-width="1.8" marker-end="url(#ab)"></line>
+      <line x1="153" y1="124" x2="170" y2="124" stroke="#2255aa" stroke-width="1.8" marker-end="url(#ab)"></line>
+      <line x1="218" y1="124" x2="237" y2="124" stroke="#2255aa" stroke-width="1.8" marker-end="url(#ab)"></line>
+      <!-- CONTEXT -->
+      <rect x="332" y="100" width="76" height="48" rx="10" fill="#e8a020"></rect>
+      <text x="370" y="120" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">CONTEXT</text>
+      <text x="370" y="135" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff8ee">c = h₄</text>
+      <line x1="285" y1="124" x2="330" y2="124" stroke="#e8a020" stroke-width="2.5" marker-end="url(#a1)"></line>
+      <text x="370" y="172" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#b83232" font-weight="600">⚠ fixed-size</text>
+      <text x="370" y="185" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#b83232">bottleneck</text>
+      <!-- decoder side -->
+      <rect x="420" y="45" width="300" height="150" rx="10" fill="#edfaf3" stroke="#2a7a4b" stroke-width="1.5"></rect>
+      <text x="570" y="68" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#2a7a4b" font-weight="700" letter-spacing="1">DECODER — generates output</text>
+      <rect x="442" y="105" width="46" height="38" rx="6" fill="#c8ead6" stroke="#2a7a4b" stroke-width="1.5"></rect>
+      <text x="465" y="128" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a5c38">s₁</text>
+      <rect x="507" y="105" width="46" height="38" rx="6" fill="#c8ead6" stroke="#2a7a4b" stroke-width="1.5"></rect>
+      <text x="530" y="128" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a5c38">s₂</text>
+      <rect x="572" y="105" width="46" height="38" rx="6" fill="#c8ead6" stroke="#2a7a4b" stroke-width="1.5"></rect>
+      <text x="595" y="128" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a5c38">s₃</text>
+      <line x1="408" y1="124" x2="440" y2="124" stroke="#e8a020" stroke-width="2.5" marker-end="url(#a1)"></line>
+      <line x1="488" y1="124" x2="505" y2="124" stroke="#2a7a4b" stroke-width="1.8" marker-end="url(#ag)"></line>
+      <line x1="553" y1="124" x2="570" y2="124" stroke="#2a7a4b" stroke-width="1.8" marker-end="url(#ag)"></line>
+      <line x1="465" y1="105" x2="465" y2="88" stroke="#888" stroke-width="1.3" marker-end="url(#a1)"></line>
+      <line x1="530" y1="105" x2="530" y2="88" stroke="#888" stroke-width="1.3" marker-end="url(#a1)"></line>
+      <line x1="595" y1="105" x2="595" y2="88" stroke="#888" stroke-width="1.3" marker-end="url(#a1)"></line>
+      <text x="465" y="100" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a5c38" font-weight="600">"J'aime"</text>
+      <text x="535" y="100" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a5c38" font-weight="600">"l'Inde"</text>
+      <text x="595" y="100" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a5c38" font-weight="600">&lt;eos&gt;</text>
+      <text x="570" y="180" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666" font-style="italic">each output token feeds into the next step</text>
+      <!-- limitation callout -->
+      <rect x="20" y="215" width="700" height="52" rx="8" fill="#fff0f0" stroke="#e0b0b0"></rect>
+      <text x="370" y="236" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#b83232" font-weight="700">THE LIMITATION THAT MOTIVATED ATTENTION (Part 2)</text>
+      <text x="370" y="254" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#555">The entire input must be compressed into one fixed vector c. For long sentences, information is lost before decoding even begins.</text>
+    </svg>
+    <div class="diagram-caption">FIG 7 — Basic Seq2Seq. Everything the decoder knows about the source passes through a single context vector — the bottleneck that attention was invented to remove.</div>
+  </div>
+  <div class="math-box">
+    <span class="comment">// Encoder reads the full input sequence</span>
+    <span class="var">c</span> = 
+    <span class="eq">Encoder(x₁, x₂, …, x_Tx)</span>     
+    <span class="comment">// usually c = h_Tx, the final hidden state</span>
+    <span class="comment">// Decoder generates one token at a time, conditioned on c</span>
+    <span class="var">s_t</span> = 
+    <span class="eq">Decoder(s_{t-1}, y_{t-1}, c)</span>
+    <span class="var">y_t</span> = 
+    <span class="eq">softmax(W·s_t + b)</span>
+    <span class="comment">// Training loss over the whole target sequence</span>
+    <span class="var">L</span> = 
+    <span class="eq">− Σ_t log P(y_t* | y*_&lt;t, x)</span>
+  </div>
+  <h4>Teacher forcing</h4>
+  <div class="compare-grid">
+    <div class="compare-card">
+      <div class="compare-card-header" style="background:#2a7a4b;color:#fff">During training</div>
+      <div class="compare-card-body">
+        <ul>
+          <li>Feed the 
+            <strong>true</strong> previous token y*ₜ₋₁
+          </li>
+          <li>Converges much faster and more stably</li>
+          <li>All timesteps can be computed in parallel</li>
+        </ul>
+      </div>
+    </div>
+    <div class="compare-card">
+      <div class="compare-card-header" style="background:#b83232;color:#fff">During inference</div>
+      <div class="compare-card-body">
+        <ul>
+          <li>Feed the model's 
+            <strong>own</strong> previous prediction
+          </li>
+          <li>Errors compound — called 
+            <em>exposure bias</em>
+          </li>
+          <li>Mitigated by scheduled sampling or beam search</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ══════════ 10 RNN & BPTT ══════════ -->
+<section class="section" id="s10">
+  <div class="section-eyebrow">Section 10</div>
+  <h2>RNN and Backpropagation Through Time</h2>
+  <p>A recurrent neural network processes a sequence one timestep at a time, carrying a 
+    <strong>hidden state</strong> that acts as memory. Critically, the 
+    <em>same weights</em> are reused at every timestep — this is weight sharing across time, exactly analogous to a CNN's weight sharing across space.
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 740 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:740px;display:block;margin:0 auto"><!-- folded version -->
+      <text x="90" y="26" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700">FOLDED</text>
+      <rect x="45" y="105" width="90" height="55" rx="8" fill="#c8ead6" stroke="#2a7a4b" stroke-width="2"></rect>
+      <text x="90" y="130" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a5c38" font-weight="700">RNN cell</text>
+      <text x="90" y="146" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">W_xh, W_hh</text>
+      <!-- self loop -->
+      <path d="M135 120 Q168 132 135 145" stroke="#2a7a4b" stroke-width="2" fill="none" marker-end="url(#ag)"></path>
+      <text x="172" y="136" font-family="IBM Plex Mono,monospace" font-size="9" fill="#2a7a4b">h</text>
+      <line x1="90" y1="180" x2="90" y2="163" stroke="#888" stroke-width="1.5" marker-end="url(#a1)"></line>
+      <text x="90" y="194" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#666">xₜ</text>
+      <line x1="90" y1="103" x2="90" y2="86" stroke="#888" stroke-width="1.5" marker-end="url(#a1)"></line>
+      <text x="90" y="80" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#666">yₜ</text>
+      <text x="215" y="136" text-anchor="middle" font-family="monospace" font-size="20" fill="#888">≡</text>
+      <!-- unrolled version -->
+      <text x="480" y="26" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700">UNROLLED THROUGH TIME</text>
+      <!-- h0 -->
+      <text x="272" y="136" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#999">h₀</text>
+      <line x1="285" y1="132" x2="303" y2="132" stroke="#2a7a4b" stroke-width="2" marker-end="url(#ag)"></line>
+      <!-- cells -->
+      <g>
+        <rect x="308" y="110" width="62" height="48" rx="7" fill="#c8ead6" stroke="#2a7a4b" stroke-width="1.8"></rect>
+        <text x="339" y="139" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a5c38" font-weight="600">h₁</text>
+        <line x1="339" y1="180" x2="339" y2="161" stroke="#888" stroke-width="1.4" marker-end="url(#a1)"></line>
+        <text x="339" y="194" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#666">x₁</text>
+        <line x1="339" y1="108" x2="339" y2="89" stroke="#888" stroke-width="1.4" marker-end="url(#a1)"></line>
+        <text x="339" y="82" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#666">y₁</text>
+      </g>
+      <line x1="370" y1="134" x2="393" y2="134" stroke="#2a7a4b" stroke-width="2" marker-end="url(#ag)"></line>
+      <g>
+        <rect x="398" y="110" width="62" height="48" rx="7" fill="#c8ead6" stroke="#2a7a4b" stroke-width="1.8"></rect>
+        <text x="429" y="139" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a5c38" font-weight="600">h₂</text>
+        <line x1="429" y1="180" x2="429" y2="161" stroke="#888" stroke-width="1.4" marker-end="url(#a1)"></line>
+        <text x="429" y="194" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#666">x₂</text>
+        <line x1="429" y1="108" x2="429" y2="89" stroke="#888" stroke-width="1.4" marker-end="url(#a1)"></line>
+        <text x="429" y="82" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#666">y₂</text>
+      </g>
+      <line x1="460" y1="134" x2="483" y2="134" stroke="#2a7a4b" stroke-width="2" marker-end="url(#ag)"></line>
+      <g>
+        <rect x="488" y="110" width="62" height="48" rx="7" fill="#c8ead6" stroke="#2a7a4b" stroke-width="1.8"></rect>
+        <text x="519" y="139" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a5c38" font-weight="600">h₃</text>
+        <line x1="519" y1="180" x2="519" y2="161" stroke="#888" stroke-width="1.4" marker-end="url(#a1)"></line>
+        <text x="519" y="194" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#666">x₃</text>
+        <line x1="519" y1="108" x2="519" y2="89" stroke="#888" stroke-width="1.4" marker-end="url(#a1)"></line>
+        <text x="519" y="82" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#666">y₃</text>
+      </g>
+      <line x1="550" y1="134" x2="573" y2="134" stroke="#2a7a4b" stroke-width="2" marker-end="url(#ag)"></line>
+      <g>
+        <rect x="578" y="110" width="62" height="48" rx="7" fill="#c8ead6" stroke="#2a7a4b" stroke-width="1.8"></rect>
+        <text x="609" y="139" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a5c38" font-weight="600">h₄</text>
+        <line x1="609" y1="180" x2="609" y2="161" stroke="#888" stroke-width="1.4" marker-end="url(#a1)"></line>
+        <text x="609" y="194" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#666">x₄</text>
+        <line x1="609" y1="108" x2="609" y2="89" stroke="#888" stroke-width="1.4" marker-end="url(#a1)"></line>
+        <text x="609" y="82" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#666">y₄</text>
+      </g>
+      <text x="480" y="216" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#e8a020" font-weight="700">SAME W_xh, W_hh, W_hy at every timestep — weights are shared</text>
+      <!-- BPTT gradient flow -->
+      <path d="M609 168 L609 240 L339 240 L339 168" stroke="#b83232" stroke-width="2" fill="none" stroke-dasharray="6,3" marker-end="url(#ar)"></path>
+      <text x="474" y="258" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#b83232" font-weight="700">BPTT — gradient flows backward through time</text>
+      <text x="474" y="276" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#888">Repeated multiplication by W_hh at every step → vanishing or exploding gradients</text>
+    </svg>
+    <div class="diagram-caption">FIG 8 — The same RNN cell drawn folded (left) and unrolled across four timesteps (right). Unrolling is what makes backpropagation possible — but also what creates the long multiplication chain.</div>
+  </div>
+  <div class="math-box">
+    <span class="comment">// RNN forward equations</span>
+    <span class="var">h_t</span> = 
+    <span class="eq">tanh( W_xh·x_t  +  W_hh·h_{t-1}  +  b_h )</span>
+    <span class="var">y_t</span> = 
+    <span class="eq">W_hy·h_t + b_y</span>
+    <span class="comment">// Symbols</span>
+    <span class="comment">//   x_t    input at timestep t</span>
+    <span class="comment">//   h_t    hidden state (memory) at timestep t</span>
+    <span class="comment">//   W_xh   input → hidden weights          (h × d)</span>
+    <span class="comment">//   W_hh   hidden → hidden (recurrent)     (h × h)</span>
+    <span class="comment">//   W_hy   hidden → output weights         (o × h)</span>
+  </div>
+  <h4>Numerical example — one RNN timestep</h4>
+  <div class="math-box">
+    <span class="comment">// Given: x_t = 0.7,  h_{t-1} = 0.4,  W_xh = 0.8,  W_hh = 0.5,  b = 0.1</span>
+    <span class="var">z_t</span> = W_xh·x_t + W_hh·h_{t-1} + b
+    = 0.8(0.7) + 0.5(0.4) + 0.1
+    = 0.56 + 0.20 + 0.10 = 
+    <span class="hi">0.86</span>
+    <span class="var">h_t</span> = tanh(0.86) = 
+    <span class="ok">0.696</span>
+    <span class="comment">// This new h_t becomes h_{t-1} for the next timestep.</span>
+  </div>
+  <h4>Backpropagation Through Time</h4>
+  <div class="math-box">
+    <span class="comment">// Total loss is summed over all timesteps</span>
+    <span class="var">L</span> = 
+    <span class="eq">L₁ + L₂ + … + L_T</span>
+    <span class="comment">// The recurrent weight receives gradient from EVERY timestep</span>
+    <span class="var">∂L/∂W_hh</span> = 
+    <span class="eq">Σ_t  ∂L_t/∂W_hh</span>
+    <span class="comment">// Expanding one term reveals the product chain:</span>
+    <span class="var">∂L_t/∂h_k</span> = 
+    <span class="eq">(∂L_t/∂h_t) · Π_{j=k+1}^{t} (∂h_j/∂h_{j-1})</span>
+           = 
+    <span class="eq">(∂L_t/∂h_t) · Π_{j} ( W_hhᵀ · diag(tanh′(z_j)) )</span>
+    <span class="hi">└─── this product is the problem ───┘</span>
+  </div>
+  <h3>Vanishing and exploding gradients</h3>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 740 230" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:740px;display:block;margin:0 auto">
+      <text x="370" y="24" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700" letter-spacing="1">WHAT REPEATED MULTIPLICATION DOES OVER 20 TIMESTEPS</text>
+      <!-- vanishing -->
+      <rect x="25" y="45" width="215" height="150" rx="10" fill="#fff0f0" stroke="#e0b0b0" stroke-width="1.5"></rect>
+      <text x="132" y="68" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#b83232" font-weight="700">VANISHING  (|W| &lt; 1)</text>
+      <!-- decaying bars -->
+      <rect x="45" y="90" width="14" height="70" fill="#b83232"></rect>
+      <rect x="65" y="115" width="14" height="45" fill="#b83232" opacity=".8"></rect>
+      <rect x="85" y="133" width="14" height="27" fill="#b83232" opacity=".6"></rect>
+      <rect x="105" y="145" width="14" height="15" fill="#b83232" opacity=".45"></rect>
+      <rect x="125" y="152" width="14" height="8" fill="#b83232" opacity=".35"></rect>
+      <rect x="145" y="156" width="14" height="4" fill="#b83232" opacity=".25"></rect>
+      <rect x="165" y="158" width="14" height="2" fill="#b83232" opacity=".15"></rect>
+      <rect x="185" y="159" width="14" height="1" fill="#b83232" opacity=".1"></rect>
+      <rect x="205" y="159.5" width="14" height="0.5" fill="#b83232" opacity=".08"></rect>
+      <line x1="42" y1="160" x2="225" y2="160" stroke="#999" stroke-width="1"></line>
+      <text x="132" y="178" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#b83232">0.9²⁰ ≈ 0.12   ·   0.5²⁰ ≈ 1e-6</text>
+      <text x="132" y="190" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666">Early timesteps stop learning</text>
+      <!-- exploding -->
+      <rect x="260" y="45" width="215" height="150" rx="10" fill="#fff8ee" stroke="#e8c080" stroke-width="1.5"></rect>
+      <text x="367" y="68" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#c07000" font-weight="700">EXPLODING  (|W| &gt; 1)</text>
+      <rect x="280" y="155" width="14" height="5" fill="#e8a020" opacity=".3"></rect>
+      <rect x="300" y="152" width="14" height="8" fill="#e8a020" opacity=".4"></rect>
+      <rect x="320" y="146" width="14" height="14" fill="#e8a020" opacity=".5"></rect>
+      <rect x="340" y="137" width="14" height="23" fill="#e8a020" opacity=".6"></rect>
+      <rect x="360" y="122" width="14" height="38" fill="#e8a020" opacity=".7"></rect>
+      <rect x="380" y="104" width="14" height="56" fill="#e8a020" opacity=".8"></rect>
+      <rect x="400" y="88" width="14" height="72" fill="#e8a020" opacity=".9"></rect>
+      <rect x="420" y="80" width="14" height="80" fill="#e8a020"></rect>
+      <rect x="440" y="78" width="14" height="82" fill="#e8a020"></rect>
+      <line x1="277" y1="160" x2="460" y2="160" stroke="#999" stroke-width="1"></line>
+      <text x="367" y="178" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#c07000">1.5²⁰ ≈ 3,325   ·   2.0²⁰ ≈ 1e6</text>
+      <text x="367" y="190" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666">Loss becomes NaN</text>
+      <!-- solutions -->
+      <rect x="495" y="45" width="220" height="150" rx="10" fill="#edfaf3" stroke="#80c8a0" stroke-width="1.5"></rect>
+      <text x="605" y="68" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#2a7a4b" font-weight="700">MITIGATIONS</text>
+      <text x="513" y="92" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a5c38" font-weight="600">Vanishing →</text>
+      <text x="520" y="107" font-family="Inter,sans-serif" font-size="9" fill="#555">• LSTM / GRU gates</text>
+      <text x="520" y="121" font-family="Inter,sans-serif" font-size="9" fill="#555">• Residual / skip connections</text>
+      <text x="520" y="135" font-family="Inter,sans-serif" font-size="9" fill="#555">• Attention (Part 2)</text>
+      <text x="513" y="158" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a5c38" font-weight="600">Exploding →</text>
+      <text x="520" y="173" font-family="Inter,sans-serif" font-size="9" fill="#555">• Gradient clipping (max_norm=1.0)</text>
+      <text x="520" y="187" font-family="Inter,sans-serif" font-size="9" fill="#555">• Careful initialization</text>
+      <text x="370" y="220" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#666" font-style="italic">Both problems come from the same source: multiplying by W_hh once per timestep.</text>
+    </svg>
+    <div class="diagram-caption">FIG 9 — The two failure modes of BPTT. Since tanh′ ≤ 1 always, vanishing is by far the more common problem in practice.</div>
+  </div>
+  <table>
+    <tbody>
+      <tr>
+        <th>Problem</th>
+        <th>Cause</th>
+        <th>Symptom</th>
+        <th>Fix</th>
+      </tr>
+      <tr>
+        <td>Vanishing gradient</td>
+        <td>Repeated multiplication by values &lt; 1</td>
+        <td>Model ignores long-range context; early timesteps don't learn</td>
+        <td>LSTM/GRU, residual paths, attention</td>
+      </tr>
+      <tr>
+        <td>Exploding gradient</td>
+        <td>Repeated multiplication by values &gt; 1</td>
+        <td>Loss spikes then becomes NaN</td>
+        <td>Gradient clipping, lower learning rate</td>
+      </tr>
+    </tbody>
+  </table>
+  <h4>RNN input/output configurations</h4>
+  <table>
+    <tbody>
+      <tr>
+        <th>Type</th>
+        <th>Shape</th>
+        <th>Example task</th>
+      </tr>
+      <tr>
+        <td>One-to-many</td>
+        <td>1 input → sequence out</td>
+        <td>Image captioning</td>
+      </tr>
+      <tr>
+        <td>Many-to-one</td>
+        <td>Sequence in → 1 output</td>
+        <td>Sentiment classification</td>
+      </tr>
+      <tr>
+        <td>Many-to-many (aligned)</td>
+        <td>Same length in and out</td>
+        <td>POS tagging, NER</td>
+      </tr>
+      <tr>
+        <td>Many-to-many (seq2seq)</td>
+        <td>Different lengths</td>
+        <td>Translation, summarization</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+<!-- ══════════ 11 LSTM ══════════ -->
+<section class="section" id="s11">
+  <div class="section-eyebrow">Section 11</div>
+  <h2>LSTM — Long Short-Term Memory</h2>
+  <p>LSTM's key innovation is a separate 
+    <strong>cell state</strong> c
+    <sub>t</sub> that flows through time with only 
+    <em>additive</em> updates and elementwise multiplications — no repeated matrix multiplication. This is the "memory highway" that lets gradients travel far without vanishing.
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 760 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;display:block;margin:0 auto"><!-- cell state highway -->
+      <line x1="40" y1="70" x2="720" y2="70" stroke="#e8a020" stroke-width="5"></line>
+      <text x="40" y="58" font-family="IBM Plex Mono,monospace" font-size="11" fill="#7a5000" font-weight="700">c_{t-1}</text>
+      <text x="690" y="58" font-family="IBM Plex Mono,monospace" font-size="11" fill="#7a5000" font-weight="700">c_t</text>
+      <text x="380" y="42" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#e8a020" font-weight="700" letter-spacing="1.5">MEMORY HIGHWAY — only × and + , no matrix multiply</text>
+      <!-- forget multiply node -->
+      <circle cx="205" cy="70" r="17" fill="#b83232"></circle>
+      <text x="205" y="76" text-anchor="middle" font-family="monospace" font-size="16" fill="#fff" font-weight="700">×</text>
+      <text x="205" y="102" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#b83232" font-weight="600">forget old</text>
+      <!-- add node -->
+      <circle cx="440" cy="70" r="17" fill="#2a7a4b"></circle>
+      <text x="440" y="77" text-anchor="middle" font-family="monospace" font-size="18" fill="#fff" font-weight="700">+</text>
+      <text x="440" y="102" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#2a7a4b" font-weight="600">add new</text>
+      <!-- input row -->
+      <rect x="35" y="330" width="130" height="34" rx="7" fill="#1a3a5c"></rect>
+      <text x="100" y="352" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="600">[h_{t-1} , x_t]</text>
+      <!-- distribution line -->
+      <line x1="165" y1="347" x2="700" y2="347" stroke="#1a3a5c" stroke-width="2"></line>
+      <!-- FORGET GATE -->
+      <line x1="205" y1="347" x2="205" y2="290" stroke="#b83232" stroke-width="1.8" marker-end="url(#ar)"></line>
+      <rect x="150" y="238" width="110" height="52" rx="8" fill="#b83232"></rect>
+      <text x="205" y="258" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">FORGET  f_t</text>
+      <text x="205" y="273" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#ffcccc">σ(W_f·[h,x]+b_f)</text>
+      <text x="205" y="285" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#ffcccc">0 = erase, 1 = keep</text>
+      <line x1="205" y1="238" x2="205" y2="90" stroke="#b83232" stroke-width="1.8" marker-end="url(#ar)"></line>
+      <!-- INPUT GATE -->
+      <line x1="330" y1="347" x2="330" y2="290" stroke="#2255aa" stroke-width="1.8" marker-end="url(#ab)"></line>
+      <rect x="275" y="238" width="110" height="52" rx="8" fill="#2255aa"></rect>
+      <text x="330" y="258" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">INPUT  i_t</text>
+      <text x="330" y="273" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#cce0ff">σ(W_i·[h,x]+b_i)</text>
+      <text x="330" y="285" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#cce0ff">how much to write</text>
+      <!-- CANDIDATE -->
+      <line x1="455" y1="347" x2="455" y2="290" stroke="#2a7a4b" stroke-width="1.8" marker-end="url(#ag)"></line>
+      <rect x="400" y="238" width="110" height="52" rx="8" fill="#2a7a4b"></rect>
+      <text x="455" y="258" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">CANDIDATE  c̃_t</text>
+      <text x="455" y="273" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#c8ead6">tanh(W_c·[h,x]+b_c)</text>
+      <text x="455" y="285" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#c8ead6">what to write</text>
+      <!-- i * c~ multiply -->
+      <circle cx="392" cy="180" r="16" fill="#555"></circle>
+      <text x="392" y="186" text-anchor="middle" font-family="monospace" font-size="15" fill="#fff" font-weight="700">×</text>
+      <line x1="330" y1="238" x2="378" y2="194" stroke="#2255aa" stroke-width="1.6" marker-end="url(#a1)"></line>
+      <line x1="455" y1="238" x2="406" y2="194" stroke="#2a7a4b" stroke-width="1.6" marker-end="url(#a1)"></line>
+      <line x1="400" y1="166" x2="432" y2="88" stroke="#555" stroke-width="1.8" marker-end="url(#a1)"></line>
+      <!-- OUTPUT GATE -->
+      <line x1="600" y1="347" x2="600" y2="290" stroke="#6b3fa0" stroke-width="1.8" marker-end="url(#a1)"></line>
+      <rect x="545" y="238" width="110" height="52" rx="8" fill="#6b3fa0"></rect>
+      <text x="600" y="258" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">OUTPUT  o_t</text>
+      <text x="600" y="273" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#e0d0ff">σ(W_o·[h,x]+b_o)</text>
+      <text x="600" y="285" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#e0d0ff">how much to expose</text>
+      <!-- tanh of c_t -->
+      <rect x="530" y="115" width="70" height="30" rx="7" fill="#555"></rect>
+      <text x="565" y="135" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff">tanh</text>
+      <line x1="565" y1="80" x2="565" y2="113" stroke="#e8a020" stroke-width="1.8" marker-end="url(#a1)"></line>
+      <!-- final multiply for h_t -->
+      <circle cx="655" cy="180" r="16" fill="#555"></circle>
+      <text x="655" y="186" text-anchor="middle" font-family="monospace" font-size="15" fill="#fff" font-weight="700">×</text>
+      <line x1="580" y1="145" x2="643" y2="170" stroke="#555" stroke-width="1.6" marker-end="url(#a1)"></line>
+      <line x1="600" y1="238" x2="648" y2="196" stroke="#6b3fa0" stroke-width="1.6" marker-end="url(#a1)"></line>
+      <!-- h_t output -->
+      <rect x="690" y="165" width="60" height="32" rx="7" fill="#1a3a5c"></rect>
+      <text x="720" y="186" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#fff" font-weight="700">h_t</text>
+      <line x1="671" y1="180" x2="688" y2="180" stroke="#555" stroke-width="1.8" marker-end="url(#a1)"></line>
+      <!-- annotation -->
+      <text x="380" y="386" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#666" font-style="italic">All four gates read the same input [h_{t-1}, x_t] but have separate weight matrices.</text>
+    </svg>
+    <div class="diagram-caption">FIG 10 — LSTM cell. The orange highway at the top is the cell state: it passes through only a multiply (forget) and an add (input), which is why gradients survive along it.</div>
+  </div>
+  <div class="math-box">
+    <span class="comment">// The four gates — all read [h_{t-1}, x_t], all have their own weights</span>
+    <span class="var">f_t</span> = 
+    <span class="eq">σ( W_f·[h_{t-1}, x_t] + b_f )</span>    
+    <span class="comment">// forget:  what to erase from memory</span>
+    <span class="var">i_t</span> = 
+    <span class="eq">σ( W_i·[h_{t-1}, x_t] + b_i )</span>    
+    <span class="comment">// input:   how much new info to write</span>
+    <span class="var">c̃_t</span> = 
+    <span class="eq">tanh( W_c·[h_{t-1}, x_t] + b_c )</span> 
+    <span class="comment">// candidate: what the new info IS</span>
+    <span class="var">o_t</span> = 
+    <span class="eq">σ( W_o·[h_{t-1}, x_t] + b_o )</span>    
+    <span class="comment">// output:  how much memory to expose</span>
+    <span class="comment">// The two state updates</span>
+    <span class="var">c_t</span> = 
+    <span class="eq">f_t ⊙ c_{t-1}  +  i_t ⊙ c̃_t</span>    
+    <span class="comment">// cell state — ADDITIVE, no matmul</span>
+    <span class="var">h_t</span> = 
+    <span class="eq">o_t ⊙ tanh(c_t)</span>                
+    <span class="comment">// hidden state — filtered view of memory</span>
+    <span class="comment">// ⊙ = elementwise product.  σ outputs ∈ (0,1) — gates act as soft switches.</span>
+  </div>
+  <h4>Numerical example — one LSTM timestep</h4>
+  <div class="math-box">
+    <span class="comment">// Given: c_{t-1} = 1.20,  f_t = 0.75,  i_t = 0.40,  c̃_t = 0.60,  o_t = 0.80</span>
+    <span class="comment">// Step 1 — how much of the old memory survives?</span>
+f_t ⊙ c_{t-1} = 0.75 × 1.20 = 
+    <span class="hi">0.90</span>      
+    <span class="comment">// kept 75% of 1.20</span>
+    <span class="comment">// Step 2 — how much new information is written?</span>
+i_t ⊙ c̃_t     = 0.40 × 0.60 = 
+    <span class="hi">0.24</span>      
+    <span class="comment">// wrote 40% of the candidate</span>
+    <span class="comment">// Step 3 — new cell state is the sum</span>
+    <span class="var">c_t</span> = 0.90 + 0.24 = 
+    <span class="ok">1.14</span>
+    <span class="comment">// Step 4 — hidden output is a gated, squashed view of the cell</span>
+tanh(1.14) = 0.8144
+    <span class="var">h_t</span> = 0.80 × 0.8144 = 
+    <span class="ok">0.651</span>
+  </div>
+  <div class="callout callout-green">
+    <strong>Why this solves vanishing gradients:</strong> The cell-state path is c_t = f_t ⊙ c_{t−1} + …. Differentiating gives ∂c_t/∂c_{t−1} = f_t. If the forget gate learns to stay near 1, the gradient passes through 
+    <em>almost unchanged</em> across many timesteps. Compare this to the vanilla RNN, where every step multiplies by W_hhᵀ·diag(tanh′) — a term that is essentially always &lt; 1.
+  </div>
+  <h4>Gate intuition with a concrete example</h4>
+  <table>
+    <tbody>
+      <tr>
+        <th>Gate</th>
+        <th>Range</th>
+        <th>Question it answers</th>
+        <th>Example: reading "The cat, which was hungry, ate"</th>
+      </tr>
+      <tr>
+        <td>
+          <strong>Forget f_t</strong>
+        </td>
+        <td>0 – 1</td>
+        <td>What should I erase?</td>
+        <td>Near 1 for "cat is the subject" — keep it through the clause</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Input i_t</strong>
+        </td>
+        <td>0 – 1</td>
+        <td>How much should I write?</td>
+        <td>Low during "which was hungry" — it's a side detail</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Candidate c̃_t</strong>
+        </td>
+        <td>−1 – 1</td>
+        <td>What content would I write?</td>
+        <td>Encodes the new information available at this step</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Output o_t</strong>
+        </td>
+        <td>0 – 1</td>
+        <td>What should I expose now?</td>
+        <td>High for subject info when reaching "ate" — needed for agreement</td>
+      </tr>
+    </tbody>
+  </table>
+  <h4>Parameter count</h4>
+  <div class="math-box">
+    <span class="comment">// Each of the four gates has a weight matrix of shape (h × (h+d)) plus a bias</span>
+    <span class="var">params</span> = 
+    <span class="eq">4 × [ h·(h + d) + h ]</span>
+    <span class="comment">// Example: h = 256, d = 100</span>
+       = 4 × [ 256 × 356 + 256 ]
+       = 4 × [ 91,136 + 256 ]
+       = 4 × 91,392 = 
+    <span class="hi">365,568 parameters</span>
+    <span class="comment">// A vanilla RNN with the same dimensions: 91,392 — exactly 1/4 as many.</span>
+  </div>
+</section>
+<!-- ══════════ 12 GRU ══════════ -->
+<section class="section" id="s12">
+  <div class="section-eyebrow">Section 12</div>
+  <h2>GRU — Gated Recurrent Unit</h2>
+  <p>GRU simplifies the LSTM: it merges the forget and input gates into a single 
+    <strong>update gate</strong>, and drops the separate cell state entirely. Three gates instead of four, ~25% fewer parameters, often equal accuracy.
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 740 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:740px;display:block;margin:0 auto"><!-- hidden state line -->
+      <line x1="40" y1="70" x2="700" y2="70" stroke="#2a7a4b" stroke-width="4"></line>
+      <text x="40" y="58" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a5c38" font-weight="700">h_{t-1}</text>
+      <text x="668" y="58" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a5c38" font-weight="700">h_t</text>
+      <text x="370" y="40" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#2a7a4b" font-weight="700" letter-spacing="1.5">SINGLE STATE — no separate cell state</text>
+      <!-- interpolation node -->
+      <circle cx="480" cy="70" r="20" fill="#e8a020"></circle>
+      <text x="480" y="76" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">lerp</text>
+      <text x="480" y="106" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#7a5000" font-weight="600">(1−z)h + z·h̃</text>
+      <!-- input -->
+      <rect x="35" y="245" width="130" height="32" rx="7" fill="#1a3a5c"></rect>
+      <text x="100" y="266" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="600">[h_{t-1} , x_t]</text>
+      <line x1="165" y1="261" x2="640" y2="261" stroke="#1a3a5c" stroke-width="2"></line>
+      <!-- RESET GATE -->
+      <line x1="230" y1="261" x2="230" y2="215" stroke="#b83232" stroke-width="1.8" marker-end="url(#ar)"></line>
+      <rect x="175" y="165" width="110" height="48" rx="8" fill="#b83232"></rect>
+      <text x="230" y="185" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">RESET  r_t</text>
+      <text x="230" y="199" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#ffcccc">σ(W_r·[h,x])</text>
+      <text x="230" y="209" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#ffcccc">forget old state?</text>
+      <!-- CANDIDATE -->
+      <line x1="360" y1="261" x2="360" y2="215" stroke="#2a7a4b" stroke-width="1.8" marker-end="url(#ag)"></line>
+      <rect x="305" y="165" width="110" height="48" rx="8" fill="#2a7a4b"></rect>
+      <text x="360" y="185" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">CANDIDATE  h̃_t</text>
+      <text x="360" y="199" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#c8ead6">tanh(W·[r⊙h, x])</text>
+      <text x="360" y="209" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#c8ead6">proposed new state</text>
+      <line x1="285" y1="189" x2="303" y2="189" stroke="#b83232" stroke-width="1.6" marker-end="url(#ar)"></line>
+      <line x1="360" y1="165" x2="462" y2="88" stroke="#2a7a4b" stroke-width="1.8" marker-end="url(#ag)"></line>
+      <!-- UPDATE GATE -->
+      <line x1="565" y1="261" x2="565" y2="215" stroke="#6b3fa0" stroke-width="1.8" marker-end="url(#a1)"></line>
+      <rect x="510" y="165" width="110" height="48" rx="8" fill="#6b3fa0"></rect>
+      <text x="565" y="185" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">UPDATE  z_t</text>
+      <text x="565" y="199" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#e0d0ff">σ(W_z·[h,x])</text>
+      <text x="565" y="209" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#e0d0ff">keep old or take new?</text>
+      <line x1="540" y1="165" x2="496" y2="88" stroke="#6b3fa0" stroke-width="1.8" marker-end="url(#a1)"></line>
+      <!-- annotation -->
+      <text x="370" y="292" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#666" font-style="italic">The update gate does the job of LSTM's forget AND input gates: z controls both what's dropped and what's added.</text>
+    </svg>
+    <div class="diagram-caption">FIG 11 — GRU cell. One state, three gates. The update gate z performs a linear interpolation between keeping the old state and adopting the candidate.</div>
+  </div>
+  <div class="math-box">
+    <span class="comment">// GRU equations</span>
+    <span class="var">z_t</span> = 
+    <span class="eq">σ( W_z·[h_{t-1}, x_t] )</span>          
+    <span class="comment">// update gate</span>
+    <span class="var">r_t</span> = 
+    <span class="eq">σ( W_r·[h_{t-1}, x_t] )</span>          
+    <span class="comment">// reset gate</span>
+    <span class="var">h̃_t</span> = 
+    <span class="eq">tanh( W_h·[ r_t ⊙ h_{t-1}, x_t ] )</span> 
+    <span class="comment">// candidate, with reset applied</span>
+    <span class="var">h_t</span> = 
+    <span class="eq">(1 − z_t) ⊙ h_{t-1}  +  z_t ⊙ h̃_t</span>
+    <span class="comment">// Note the coupling: (1−z) and z must sum to 1.</span>
+    <span class="comment">// In an LSTM, f_t and i_t are independent — LSTM can keep old AND add new;</span>
+    <span class="comment">// GRU must trade one against the other. That's the expressiveness difference.</span>
+  </div>
+  <h4>Numerical example — one GRU timestep</h4>
+  <div class="math-box">
+    <span class="comment">// Given: h_{t-1} = 0.50,  z_t = 0.30,  h̃_t = 0.90</span>
+    <span class="var">h_t</span> = (1 − 0.30) × 0.50  +  0.30 × 0.90
+    = 0.70 × 0.50  +  0.27
+    = 0.35 + 0.27 = 
+    <span class="ok">0.62</span>
+    <span class="comment">// z = 0.30 means "keep 70% of the old state, take 30% of the new candidate"</span>
+    <span class="comment">// z → 0 means ignore the new input entirely (perfect memory)</span>
+    <span class="comment">// z → 1 means overwrite completely (no memory)</span>
+  </div>
+  <h3>Head-to-head comparison</h3>
+  <table>
+    <tbody>
+      <tr>
+        <th></th>
+        <th>Vanilla RNN</th>
+        <th>LSTM</th>
+        <th>GRU</th>
+      </tr>
+      <tr>
+        <td>Gates</td>
+        <td>0</td>
+        <td>4 (f, i, c̃, o)</td>
+        <td>3 (z, r, h̃)</td>
+      </tr>
+      <tr>
+        <td>States carried</td>
+        <td>h only</td>
+        <td>h and c</td>
+        <td>h only</td>
+      </tr>
+      <tr>
+        <td>Params (h hidden, d input)</td>
+        <td>h(h+d)+h</td>
+        <td>4·[h(h+d)+h]</td>
+        <td>3·[h(h+d)+h]</td>
+      </tr>
+      <tr>
+        <td>Relative cost</td>
+        <td>1×</td>
+        <td>4×</td>
+        <td>3×</td>
+      </tr>
+      <tr>
+        <td>Long-range memory</td>
+        <td>Poor</td>
+        <td>
+          <strong>Best</strong>
+        </td>
+        <td>Good</td>
+      </tr>
+      <tr>
+        <td>Training speed</td>
+        <td>Fastest</td>
+        <td>Slowest</td>
+        <td>Middle</td>
+      </tr>
+      <tr>
+        <td>Best for</td>
+        <td>Very short sequences</td>
+        <td>Long sequences, large data</td>
+        <td>Small/medium data, faster iteration</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-purple">
+    <strong>Which to pick:</strong> Empirically the two are close on most tasks. Start with GRU — it trains faster and has fewer parameters to overfit. Switch to LSTM if you have a lot of data and long dependencies, where the independent forget/input gates give real extra capacity.
+  </div>
+</section>
+<!-- ══════════ 13 COMPLEXITY ══════════ -->
+<section class="section" id="s13">
+  <div class="section-eyebrow">Section 13</div>
+  <h2>Complexity by Model Family</h2>
+  <p>These are classroom-level approximations for one forward pass or training step. Actual cost depends on implementation, batch size, and hardware.</p>
+  <div class="callout callout-blue">
+    <strong>Notation:</strong> n = dataset size · T = sequence length · d = input dimension · h = hidden size · L = number of layers · k = kernel size · H, W = image height/width · C = channels · |V| = vocabulary size
+  </div>
+  <table>
+    <tbody>
+      <tr>
+        <th>Model</th>
+        <th>Time complexity</th>
+        <th>Space complexity</th>
+        <th>Main cost driver</th>
+      </tr>
+      <tr>
+        <td>Dense / MLP</td>
+        <td>O(Σ_l d_{l−1}·d_l) per sample</td>
+        <td>Params + activations</td>
+        <td>Matrix multiplication size</td>
+      </tr>
+      <tr>
+        <td>CNN conv layer</td>
+        <td>O(H·W·C_in·C_out·k²)</td>
+        <td>O(C_in·C_out·k²) params + O(H·W·C_out) activations</td>
+        <td>Image size and filter count</td>
+      </tr>
+      <tr>
+        <td>Autoencoder</td>
+        <td>Encoder cost + decoder cost</td>
+        <td>Encoder/decoder params + latent</td>
+        <td>Bottleneck size, layer depth</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Vanilla RNN</strong>
+        </td>
+        <td>O(T·h(d+h))</td>
+        <td>O(h(d+h)) params + O(T·h) BPTT activations</td>
+        <td>Sequence length × hidden size</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>LSTM</strong>
+        </td>
+        <td>O(T·4h(d+h))</td>
+        <td>O(4h(d+h)) params + O(T·h)</td>
+        <td>Four gates per timestep</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>GRU</strong>
+        </td>
+        <td>O(T·3h(d+h))</td>
+        <td>O(3h(d+h)) params + O(T·h)</td>
+        <td>Three gate computations</td>
+      </tr>
+      <tr>
+        <td>RNN encoder–decoder</td>
+        <td>O(T_x·h(d+h) + T_y·h(o+h))</td>
+        <td>Encoder + decoder params + O((T_x+T_y)h)</td>
+        <td>Both sequence lengths</td>
+      </tr>
+      <tr>
+        <td>Enc–dec with attention</td>
+        <td>Above + O(T_x·T_y·h)</td>
+        <td>Adds O(T_x·T_y) alignment map</td>
+        <td>Source × target length product</td>
+      </tr>
+      <tr>
+        <td>Transformer layer</td>
+        <td>O(T²·d + T·d²)</td>
+        <td>O(T²) attention map + O(T·d)</td>
+        <td>Self-attention, then FFN</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-red">
+    <strong>Training vs inference memory:</strong> Training requires storing every intermediate activation for the backward pass. For an RNN over T timesteps, that's O(T·h) held in memory simultaneously. Inference only needs the current timestep. This is why you can run a model at inference on hardware that couldn't train it.
+  </div>
+  <h4>Cost ratios at a glance</h4>
+  <table>
+    <tbody>
+      <tr>
+        <th>Comparison</th>
+        <th>Ratio</th>
+        <th>Why</th>
+      </tr>
+      <tr>
+        <td>LSTM vs RNN</td>
+        <td>4×</td>
+        <td>Four gate computations instead of one</td>
+      </tr>
+      <tr>
+        <td>GRU vs RNN</td>
+        <td>3×</td>
+        <td>Three gate computations</td>
+      </tr>
+      <tr>
+        <td>LSTM vs GRU</td>
+        <td>1.33×</td>
+        <td>One extra gate</td>
+      </tr>
+      <tr>
+        <td>Bidirectional vs unidirectional</td>
+        <td>2×</td>
+        <td>Two full passes over the sequence</td>
+      </tr>
+      <tr>
+        <td>Transformer vs RNN</td>
+        <td>Depends on T vs d</td>
+        <td>Transformer wins when T &lt; d; loses when T ≫ d</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+<!-- ══════════ 14 REVISION ══════════ -->
+<section class="section" id="s14">
+  <div class="section-eyebrow">Section 14</div>
+  <h2>Summary &amp; Revision</h2>
+  <h3>Every formula in one place</h3>
+  <table>
+    <tbody>
+      <tr>
+        <th>Topic</th>
+        <th>Key formula</th>
+      </tr>
+      <tr>
+        <td>Neuron</td>
+        <td>z = Wx + b · a = g(z)</td>
+      </tr>
+      <tr>
+        <td>Sigmoid &amp; derivative</td>
+        <td>σ(z) = 1/(1+e⁻ᶻ) · σ′ = σ(1−σ)</td>
+      </tr>
+      <tr>
+        <td>Tanh derivative</td>
+        <td>1 − tanh²(z)</td>
+      </tr>
+      <tr>
+        <td>Squared-error loss</td>
+        <td>E = ½Σ(target − output)²</td>
+      </tr>
+      <tr>
+        <td>Cross-entropy loss</td>
+        <td>E = −Σ y·log ŷ</td>
+      </tr>
+      <tr>
+        <td>Output delta</td>
+        <td>δ_o = (a_o − target)·a_o(1−a_o)</td>
+      </tr>
+      <tr>
+        <td>Hidden delta</td>
+        <td>δ_h = (Σ δ_downstream·w)·a_h(1−a_h)</td>
+      </tr>
+      <tr>
+        <td>Weight gradient</td>
+        <td>∂E/∂w = δ_downstream · a_upstream</td>
+      </tr>
+      <tr>
+        <td>Gradient descent</td>
+        <td>w_new = w_old − α·∂E/∂w</td>
+      </tr>
+      <tr>
+        <td>Autoencoder</td>
+        <td>z = f_enc(x) · x̂ = f_dec(z) · L = ‖x − x̂‖²</td>
+      </tr>
+      <tr>
+        <td>Encoder–decoder</td>
+        <td>c = Encoder(x) · y_t = Decoder(y_{t−1}, c)</td>
+      </tr>
+      <tr>
+        <td>RNN</td>
+        <td>h_t = tanh(W_xh·x_t + W_hh·h_{t−1} + b)</td>
+      </tr>
+      <tr>
+        <td>LSTM cell state</td>
+        <td>c_t = f_t⊙c_{t−1} + i_t⊙c̃_t</td>
+      </tr>
+      <tr>
+        <td>LSTM hidden state</td>
+        <td>h_t = o_t⊙tanh(c_t)</td>
+      </tr>
+      <tr>
+        <td>GRU</td>
+        <td>h_t = (1−z_t)⊙h_{t−1} + z_t⊙h̃_t</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3>Common exam questions</h3>
+  <table>
+    <tbody>
+      <tr>
+        <th>Question</th>
+        <th>Answer</th>
+      </tr>
+      <tr>
+        <td>Why do we need non-linear activations?</td>
+        <td>Without them, stacked linear layers collapse to a single linear transformation — depth buys nothing</td>
+      </tr>
+      <tr>
+        <td>Why the ½ in the squared-error loss?</td>
+        <td>The 2 from differentiating the square cancels it, giving the clean derivative (a − target)</td>
+      </tr>
+      <tr>
+        <td>Why does a hidden delta sum over multiple terms?</td>
+        <td>Each hidden neuron influences every downstream neuron, so its error contribution comes from all those paths</td>
+      </tr>
+      <tr>
+        <td>What causes vanishing gradients?</td>
+        <td>Repeated multiplication by values &lt; 1 during backprop — sigmoid's derivative caps at 0.25, and W_hh compounds across timesteps</td>
+      </tr>
+      <tr>
+        <td>How does LSTM fix vanishing gradients?</td>
+        <td>The cell state updates additively (c_t = f⊙c_{t−1} + …), so ∂c_t/∂c_{t−1} = f_t — near 1 when the gate stays open</td>
+      </tr>
+      <tr>
+        <td>How many gates in LSTM vs GRU?</td>
+        <td>LSTM has 4 (forget, input, candidate, output); GRU has 3 (update, reset, candidate)</td>
+      </tr>
+      <tr>
+        <td>What is the LSTM parameter count?</td>
+        <td>4·[h(h+d) + h] — four times the vanilla RNN</td>
+      </tr>
+      <tr>
+        <td>What is teacher forcing?</td>
+        <td>Feeding the true previous token during training instead of the model's own prediction — faster convergence, but causes exposure bias at inference</td>
+      </tr>
+      <tr>
+        <td>Why can't Seq2Seq handle long sentences?</td>
+        <td>The entire source is compressed into one fixed-size context vector, so information is lost before decoding begins</td>
+      </tr>
+      <tr>
+        <td>How do you fix exploding gradients?</td>
+        <td>Gradient clipping — cap the gradient norm at a threshold (typically 1.0)</td>
+      </tr>
+      <tr>
+        <td>Why never initialize weights to zero?</td>
+        <td>All neurons in a layer compute identically and receive identical gradients — symmetry never breaks, so the layer behaves like one neuron</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3>Key takeaways</h3>
+  <div class="steps">
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Depth needs non-linearity</h4>
+      <p>The activation function is the only reason stacking layers adds power.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Backprop is the chain rule</h4>
+      <p>Deltas exist so shared sub-expressions are computed once, not per weight.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Match architecture to data shape</h4>
+      <p>Vector → MLP. Grid → CNN. Sequence → RNN family. Any-to-any → Transformer.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Gradients multiply</h4>
+      <p>Which is why depth and sequence length both cause vanishing or exploding gradients.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Gates are learned switches</h4>
+      <p>Sigmoid outputs in (0,1) let the network decide what to keep, write, and expose.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Additive memory survives</h4>
+      <p>LSTM's cell state adds rather than multiplies — that is the whole trick.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Enc–dec is a pattern</h4>
+      <p>Not an architecture. Build it from RNNs, LSTMs, or Transformers as needed.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>The bottleneck leads to Part 2</h4>
+      <p>One fixed context vector can't hold a long sentence — attention is the answer.</p>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:2rem">
+    <strong>Where this goes next:</strong>
+    <br>
+    <strong>Part 2</strong> — RNN with Attention: removing the fixed-vector bottleneck with Bahdanau and Luong alignment.
+    <br>
+    <strong>Part 3</strong> — Transformers &amp; Self-Attention: dropping recurrence entirely, scaled dot-product attention, multi-head, positional encoding.
+  </div>
+  <div class="callout callout-blue">
+    <strong>References:</strong>
+    <br>
+    Rumelhart, Hinton &amp; Williams (1986) — Learning representations by back-propagating errors.
+    <br>
+    Hochreiter &amp; Schmidhuber (1997) — Long Short-Term Memory.
+    <br>
+    Cho et al. (2014) — Learning Phrase Representations using RNN Encoder–Decoder (GRU).
+    <br>
+    Sutskever, Vinyals &amp; Le (2014) — Sequence to Sequence Learning with Neural Networks.
+    <br>
+    Glorot &amp; Bengio (2010) — Understanding the difficulty of training deep feedforward networks.
+    <br>
+    Kingma &amp; Ba (2015) — Adam: A Method for Stochastic Optimization.
+  </div>
+</section>
+<footer style="text-align:center;padding:2rem;font-family:var(--mono);font-size:.75rem;color:#aaa;border-top:1px solid var(--rule)">Module 1 · Part 6A · Part 1 — Neural Networks, Encoder–Decoder, RNN &amp; LSTM · Companion to Part 2 and Part 3</footer>

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evolution &amp; Types of Agents — Study Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Fraunces:ital,wght@0,300;0,700;1,300&family=Inter:wght@400;500;600&display=swap');
+  :root {
+    --ink: #0f1117; --paper: #f7f6f2; --mid: #e8e5dd; --rule: #c9c4b8; --accent: #1a3a5c;
+    --highlight: #e8a020; --green: #2a7a4b; --red: #b83232; --blue: #2255aa; --purple: #6b3fa0; --teal: #0d7a7a;
+    --mono: 'IBM Plex Mono', monospace; --display: 'Fraunces', Georgia, serif; --body: 'Inter', system-ui, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--body); background: var(--paper); color: var(--ink); line-height: 1.7; font-size: 16px; }
+  .hero { background: linear-gradient(160deg, #0f1117 0%, #1a3a5c 100%); color: #fff; padding: 4rem 2rem 3rem; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 20% 30%, rgba(232,160,32,0.10), transparent 40%), radial-gradient(circle at 80% 70%, rgba(42,122,75,0.12), transparent 40%); }
+  .hero-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--highlight); margin-bottom: 1rem; position: relative; }
+  .hero h1 { font-family: var(--display); font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; line-height: 1.1; margin-bottom: 1rem; position: relative; }
+  .hero p { font-size: 1.1rem; opacity: 0.82; max-width: 680px; margin: 0 auto; position: relative; }
+  .toc { background: var(--ink); color: #fff; padding: 1.2rem 2rem; display: flex; gap: 1.2rem; flex-wrap: wrap; justify-content: center; position: sticky; top: 0; z-index: 100; }
+  .toc a { color: rgba(255,255,255,0.7); text-decoration: none; font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.03em; transition: color 0.2s; }
+  .toc a:hover { color: var(--highlight); }
+  .section { max-width: 900px; margin: 0 auto; padding: 4rem 2rem; border-bottom: 1px solid var(--rule); }
+  .section-eyebrow { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.5rem; }
+  .section h2 { font-family: var(--display); font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 700; margin-bottom: 1.5rem; color: var(--ink); }
+  .section h3 { font-family: var(--display); font-size: 1.25rem; font-weight: 700; margin: 2rem 0 0.8rem; color: var(--accent); }
+  .section p { margin-bottom: 1rem; color: #333; }
+  .callout { border-left: 4px solid var(--highlight); background: #fff8ee; padding: 1rem 1.25rem; border-radius: 0 6px 6px 0; margin: 1.5rem 0; font-size: 0.95rem; }
+  .callout strong { color: var(--accent); }
+  .callout-blue  { border-left-color: var(--blue);   background: #eef3ff; }
+  .callout-green { border-left-color: var(--green);  background: #edfaf3; }
+  .callout-red   { border-left-color: var(--red);    background: #fff0f0; }
+  .callout-purple{ border-left-color: var(--purple); background: #f5f0ff; }
+  .callout-teal  { border-left-color: var(--teal);   background: #e9fafa; }
+  .math-box { background: var(--ink); color: #e8e8e8; font-family: var(--mono); font-size: 0.86rem; line-height: 1.9; padding: 1.5rem; border-radius: 8px; margin: 1.5rem 0; overflow-x: auto; white-space: pre; }
+  .math-box .comment { color: #6a9f6a; } .math-box .var { color: #f0b060; } .math-box .eq { color: #7ab8f5; } .math-box .hi { color: #ff9090; }
+  .codebox { background: #1c2333; color: #d8dee9; font-family: var(--mono); font-size: 0.8rem; line-height: 1.75; padding: 1.25rem 1.5rem; border-radius: 8px; margin: 1.5rem 0; overflow-x: auto; white-space: pre; }
+  .codebox .kw { color: #c792ea; } .codebox .str { color: #c3e88d; } .codebox .cm { color: #6a80a4; } .codebox .fn { color: #82aaff; } .codebox .num { color: #f78c6c; }
+  table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.88rem; }
+  th { background: var(--accent); color: #fff; padding: 0.6rem 0.9rem; text-align: left; font-family: var(--mono); font-size: 0.76rem; letter-spacing: 0.04em; }
+  td { padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--mid); vertical-align: top; }
+  tr:nth-child(even) td { background: #fafaf7; }
+  code { font-family: var(--mono); font-size: 0.85em; }
+  .diagram-wrap { background: #fff; border: 1px solid var(--rule); border-radius: 10px; padding: 1.5rem; margin: 2rem 0; overflow-x: auto; }
+  .diagram-caption { text-align: center; font-family: var(--mono); font-size: 0.74rem; color: #777; margin-top: 0.75rem; letter-spacing: 0.04em; line-height: 1.6; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+  .step-card { background: #fff; border: 1px solid var(--rule); border-radius: 8px; padding: 1.1rem; }
+  .step-num { font-family: var(--mono); font-size: 1.9rem; font-weight: 600; color: var(--mid); line-height: 1; margin-bottom: 0.4rem; }
+  .step-card h4 { font-size: 0.88rem; font-weight: 600; color: var(--accent); margin-bottom: 0.35rem; }
+  .step-card p { font-size: 0.82rem; margin: 0; color: #444; }
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+  .compare-card { border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; background: #fff; }
+  .compare-card-header { padding: 0.6rem 1rem; font-family: var(--mono); font-size: 0.76rem; font-weight: 600; letter-spacing: 0.04em; }
+  .compare-card-body { padding: 1rem; font-size: 0.86rem; }
+  .compare-card-body ul { list-style: none; }
+  .compare-card-body li { margin-bottom: 0.4rem; padding-left: 1.1rem; position: relative; }
+  .compare-card-body li::before { content: '→'; position: absolute; left: 0; color: var(--highlight); }
+  .section ul:not(.compare-card-body ul), .section ol { margin: 0 0 1rem 1.4rem; }
+  .family-banner { background: linear-gradient(160deg, #0f1117 0%, #1a3a5c 100%); color: #fff; text-align: center; padding: 2.2rem 1.5rem; }
+  .family-tag { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--highlight); margin-bottom: 0.4rem; }
+  .family-title { font-family: var(--display); font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 700; }
+  .family-sub { font-family: var(--mono); font-size: 0.76rem; opacity: 0.75; margin-top: 0.4rem; }
+  footer { text-align: center; padding: 2rem; font-family: var(--mono); font-size: 0.75rem; color: #aaa; border-top: 1px solid var(--rule); }
+  @media (max-width: 620px) { .compare-grid { grid-template-columns: 1fr; } .steps { grid-template-columns: 1fr 1fr; } .section { padding: 2.5rem 1.2rem; } }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-label">Module 4 · Part 1 — Study Guide</div>
+  <h1>The Evolution &amp; Types of Agents</h1>
+  <p>What an agent is, how the idea evolved from 1950s symbolic AI to today's LLM agents, and the <em>one</em> taxonomy of agent types you need. Part 2 then asks how an agent plans, Part 3 what its tools are, and Part 4 how agents are assembled into real systems.</p>
+</div>
+
+<nav class="toc">
+  <a href="#s1">01 What Is an Agent</a>
+  <a href="#s2">02 Historical Evolution</a>
+  <a href="#s3">03 The Five Agent Types</a>
+  <a href="#s4">04 Reactive vs. Deliberative</a>
+  <a href="#s5">05 Where LLM Agents Fit</a>
+  <a href="#s6">06 Takeaways</a>
+</nav>
+
+<section class="section" id="s1">
+  <div class="section-eyebrow">Section 01</div>
+  <h2>What Is an Agent?</h2>
+
+  <p>The classical definition (Russell &amp; Norvig): an <strong>agent</strong> is anything that <em>perceives</em> its environment through sensors and <em>acts</em> upon that environment through actuators. The definition is deliberately broad. A thermostat, a chess program, a robot vacuum and an LLM calling tools are all agents. They differ only in what happens inside the "decide" step.</p>
+
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;display:block;margin:0 auto">
+      <defs><marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#555"/></marker></defs>
+      <text x="350" y="24" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="600" letter-spacing="1.5">THE AGENT LOOP</text>
+
+      <rect x="270" y="45" width="160" height="60" rx="8" fill="#1a3a5c"/>
+      <text x="350" y="70" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#fff" font-weight="700">AGENT</text>
+      <text x="350" y="88" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#cce">decision function</text>
+
+      <rect x="60" y="150" width="150" height="46" rx="7" fill="#edfaf3" stroke="#2a7a4b" stroke-width="1.5"/>
+      <text x="135" y="178" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a5c38">Environment</text>
+
+      <rect x="490" y="150" width="150" height="46" rx="7" fill="#fff3cc" stroke="#e8a020" stroke-width="1.5"/>
+      <text x="565" y="178" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#7a5000">Actuators</text>
+
+      <path d="M135 150 L135 130 L270 90" stroke="#2a7a4b" stroke-width="2" fill="none" marker-end="url(#a1)"/>
+      <text x="150" y="120" font-family="IBM Plex Mono,monospace" font-size="9" fill="#2a7a4b">sensors / percepts</text>
+
+      <path d="M430 90 L565 130 L565 150" stroke="#e8a020" stroke-width="2" fill="none" marker-end="url(#a1)"/>
+      <text x="480" y="120" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#e8a020">actions</text>
+
+      <path d="M565 196 L565 210 L135 210 L135 196" stroke="#888" stroke-width="1.5" fill="none" stroke-dasharray="4,3" marker-end="url(#a1)"/>
+      <text x="350" y="222" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">actions change the environment -&gt; new percepts</text>
+    </svg>
+    <div class="diagram-caption">FIG 1 — The universal agent loop: perceive the environment via sensors, decide via some internal function, act via actuators, and the environment changes — feeding new percepts back in. Everything in this module is a different answer to "what happens inside the box?"</div>
+  </div>
+
+  <table>
+    <tr><th>Agent</th><th>Sensors (percepts)</th><th>Actuators (actions)</th><th>How it decides</th></tr>
+    <tr><td>Thermostat</td><td>Current temperature</td><td>Heater on / off</td><td>One fixed rule</td></tr>
+    <tr><td>Chess program</td><td>Board position</td><td>Move a piece</td><td>Search over future moves</td></tr>
+    <tr><td>Robot vacuum</td><td>Bump and cliff sensors</td><td>Wheels, brushes</td><td>Layered reflexes</td></tr>
+    <tr><td>LLM tool-calling agent</td><td>User message, tool results</td><td>Generate text, call a tool</td><td>Natural-language reasoning in a loop</td></tr>
+  </table>
+
+  <div class="callout callout-blue">
+    <strong>Keep this one question in mind for the whole module:</strong> <em>what happens inside the box?</em> Section 02 shows how the answer changed over 70 years. Section 03 gives the standard names for the answers.
+  </div>
+</section>
+
+<section class="section" id="s2">
+  <div class="section-eyebrow">Section 02</div>
+  <h2>The Historical Evolution of Agents</h2>
+
+  <p>"Agent" is not a new word in AI. Each era found a new way to fill the decision box, and each left behind an agent type we still use. Read the timeline as a story: <strong>rules → search → reflexes → commitments → learning → language</strong>.</p>
+
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 760 210" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;display:block;margin:0 auto">
+      <text x="380" y="22" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="600" letter-spacing="1.5">SEVENTY YEARS OF FILLING THE DECISION BOX</text>
+      <line x1="40" y1="105" x2="730" y2="105" stroke="#c9c4b8" stroke-width="3"/>
+      <g font-family="IBM Plex Mono,monospace">
+        <circle cx="70" cy="105" r="9" fill="#b83232"/>
+        <text x="70" y="80" text-anchor="middle" font-size="10" font-weight="700" fill="#7a0000">1950s–70s</text>
+        <text x="70" y="135" text-anchor="middle" font-size="9" fill="#333">Rules &amp; logic</text>
+        <text x="70" y="149" text-anchor="middle" font-size="8" fill="#777">Logic Theorist, GPS</text>
+
+        <circle cx="185" cy="105" r="9" fill="#e8a020"/>
+        <text x="185" y="80" text-anchor="middle" font-size="10" font-weight="700" fill="#7a5000">1966–72</text>
+        <text x="185" y="135" text-anchor="middle" font-size="9" fill="#333">Search &amp; planning</text>
+        <text x="185" y="149" text-anchor="middle" font-size="8" fill="#777">Shakey: A*, STRIPS</text>
+
+        <circle cx="300" cy="105" r="9" fill="#2a7a4b"/>
+        <text x="300" y="80" text-anchor="middle" font-size="10" font-weight="700" fill="#1a5c38">1970s–80s</text>
+        <text x="300" y="135" text-anchor="middle" font-size="9" fill="#333">Expert systems</text>
+        <text x="300" y="149" text-anchor="middle" font-size="8" fill="#777">MYCIN</text>
+
+        <circle cx="415" cy="105" r="9" fill="#2255aa"/>
+        <text x="415" y="80" text-anchor="middle" font-size="10" font-weight="700" fill="#1a3a5c">1986–99</text>
+        <text x="415" y="135" text-anchor="middle" font-size="9" fill="#333">Reactive · BDI · MAS</text>
+        <text x="415" y="149" text-anchor="middle" font-size="8" fill="#777">Brooks, Remote Agent</text>
+
+        <circle cx="530" cy="105" r="9" fill="#6b3fa0"/>
+        <text x="530" y="80" text-anchor="middle" font-size="10" font-weight="700" fill="#4a1a80">1992–2016</text>
+        <text x="530" y="135" text-anchor="middle" font-size="9" fill="#333">Learning agents (RL)</text>
+        <text x="530" y="149" text-anchor="middle" font-size="8" fill="#777">TD-Gammon, AlphaGo</text>
+
+        <circle cx="660" cy="105" r="11" fill="#0d7a7a"/>
+        <text x="660" y="80" text-anchor="middle" font-size="10" font-weight="700" fill="#0d5a5a">2022–now</text>
+        <text x="660" y="135" text-anchor="middle" font-size="9" fill="#333">LLM agents</text>
+        <text x="660" y="149" text-anchor="middle" font-size="8" fill="#777">ReAct, tools, MCP</text>
+      </g>
+      <text x="380" y="190" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#555">Each era kept the agent loop from Section 01 and changed only what decides the next action.</text>
+    </svg>
+    <div class="diagram-caption">FIG 2 — The six eras. The structure around the decision (goals, actions, state, search) has barely changed; the decision-maker has.</div>
+  </div>
+
+  <table>
+    <tr><th>Era</th><th>Landmark systems</th><th>What decided the next action</th><th>Agent idea it left us</th></tr>
+    <tr><td><strong>1956–1970s<br>Symbolic AI</strong></td><td>Logic Theorist (1956), General Problem Solver (1957–59)</td><td>Hand-coded logical rules over symbols</td><td>Agents reason over an explicit representation of the problem</td></tr>
+    <tr><td><strong>1966–1972<br>Search &amp; planning</strong></td><td>SRI's Shakey robot, which produced A* search (1968) and STRIPS planning (1971)</td><td>Search for a sequence of actions from start to goal</td><td><strong>Goal-based agents</strong> and planning (Part 2)</td></tr>
+    <tr><td><strong>1970s–1980s<br>Expert systems</strong></td><td>MYCIN (medical diagnosis)</td><td>Hundreds of if-then rules written by experts</td><td>Knowledge-based agents; and why hand-written rules don't scale</td></tr>
+    <tr><td><strong>1986–1999<br>Reactive, BDI &amp; multi-agent</strong></td><td>Brooks' subsumption robots (1986); BDI theory (1987–95); FIPA agent-communication standards (1996+); NASA Remote Agent on Deep Space 1 (1999)</td><td>Fast reflexes for robots; explicit beliefs, desires and intentions for deliberation; messages between agents</td><td><strong>Reactive vs. deliberative</strong> (Section 04), BDI, and multi-agent systems (Part 4)</td></tr>
+    <tr><td><strong>1992–2016<br>Learning agents</strong></td><td>TD-Gammon (1992), Deep Blue (1997, search), DeepMind's DQN on Atari (2013–15), AlphaGo (2016)</td><td>A policy learned from reward</td><td><strong>Learning agents</strong>: improve from experience instead of being re-programmed</td></tr>
+    <tr><td><strong>2022–now<br>LLM agents</strong></td><td>ReAct paper (2022); AutoGPT and OpenAI function calling (2023); Model Context Protocol and Claude computer use (2024); agent SDKs and coding agents (2025)</td><td>A language model reasoning in natural language, calling tools in a loop</td><td>Agents that handle open-ended tasks nobody wrote rules or a state space for</td></tr>
+  </table>
+
+  <div class="callout callout-blue">
+    <strong>What's actually new about LLM agents:</strong> not the concept of an agent, but the reasoning engine at its centre. Classical planners needed a hand-built symbolic model of the world. LLM agents reason in natural language and can be pointed at open-ended tasks without anyone writing the state space first. What's <em>reused</em>, largely unchanged, is the structure around it: goals, actions, state and search (Part 2), and tools as actions (Part 3).
+  </div>
+</section>
+
+<section class="section" id="s3">
+  <div class="section-eyebrow">Section 03</div>
+  <h2>The Five Agent Types (Russell &amp; Norvig)</h2>
+
+  <p>This is <strong>the</strong> taxonomy of agent types. Everything else in this Part (reactive, deliberative, BDI, rational) is a way of grouping or judging these five, not a separate list. Each type adds <strong>one capability</strong> to the one before, so the list is drawn as a ladder.</p>
+
+  <div class="steps">
+    <div class="step-card"><div class="step-num" style="color:#b83232">1</div><h4>Simple reflex</h4><p>Acts on the <em>current percept only</em>, using condition → action rules.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">2</div><h4>Model-based reflex</h4><p>+ <strong>internal state</strong>: remembers what it can't currently see.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#2a7a4b">3</div><h4>Goal-based</h4><p>+ <strong>goal</strong>: predicts outcomes and picks actions that reach it.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#2255aa">4</div><h4>Utility-based</h4><p>+ <strong>utility</strong>: picks the <em>best</em> way to reach the goal, not just any way.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#6b3fa0">5</div><h4>Learning</h4><p>+ <strong>improvement</strong>: any of types 1–4 that gets better from experience.</p></div>
+  </div>
+
+  <div class="math-box"><span class="comment">// The agent program for each type</span>
+<span class="var">1. Simple reflex</span>     action = <span class="eq">rules[ interpret(percept) ]</span>
+<span class="var">2. Model-based</span>       state  = <span class="eq">update(state, last_action, percept)</span>
+                     action = <span class="eq">rules[ state ]</span>
+<span class="var">3. Goal-based</span>        action = <span class="eq">first step of a plan whose result satisfies the goal</span>   <span class="comment">// HOW it plans: Part 2</span>
+<span class="var">4. Utility-based</span>     action = <span class="eq">argmax_a  E[ U( result(state, a) ) ]</span>
+<span class="var">5. Learning</span>          critic scores behaviour → <span class="eq">learning element</span> updates the rules / model / utility</div>
+
+  <h3>One running example: an automated taxi</h3>
+  <table>
+    <tr><th>Type</th><th>What the taxi does</th><th>What it <em>can't</em> do (and why the next rung exists)</th></tr>
+    <tr><td><strong>1. Simple reflex</strong></td><td><code>if car_in_front_is_braking → brake</code></td><td>Change lanes safely: a car in the blind spot isn't in the current percept</td></tr>
+    <tr><td><strong>2. Model-based reflex</strong></td><td>Remembers "a car went into my blind spot 2 seconds ago" and waits</td><td>Decide <em>which way</em> to turn: rules alone don't know where the passenger is going</td></tr>
+    <tr><td><strong>3. Goal-based</strong></td><td>Goal = <code>At(Airport)</code>. Predicts where each turn leads and picks a route that gets there</td><td>Tell a 20-minute route from a 2-hour route: both reach the goal, and a goal is just yes or no</td></tr>
+    <tr><td><strong>4. Utility-based</strong></td><td>Scores routes by <code>U = speed + safety + comfort − fuel cost</code> and picks the highest</td><td>Improve itself: its rules and weights stay fixed</td></tr>
+    <tr><td><strong>5. Learning</strong></td><td>Low tips after hard braking → the critic flags it → the braking rule is softened</td><td>(No new limit: learning can be added to any rung)</td></tr>
+  </table>
+
+  <div class="callout callout-red">
+    <strong>Exam favourite: goal-based vs. utility-based.</strong> A <em>goal</em> is binary: <code>At(Airport)</code> is true or false. A <em>utility</em> is a number that ranks outcomes, so the agent can compare "arrived quickly and safely" with "arrived late after a near-miss". Utility also handles <strong>conflicting goals</strong> (speed vs. safety) and <strong>uncertainty</strong> (90% chance of a fast route vs. a guaranteed slow one) by maximising <em>expected</em> utility.
+  </div>
+
+  <h3>How do we judge any of these? Rationality</h3>
+  <p>The ladder says how an agent is <em>built</em>. Rationality says whether it <em>acts well</em>. A <strong>rational agent</strong> chooses, for whatever it has perceived so far, the action expected to maximise its performance measure. The utility-based agent (rung 4) is simply this definition turned into a program.</p>
+
+  <div class="math-box"><span class="var">Rational action</span> = <span class="eq">argmax_action  E[ Performance | percept sequence, prior knowledge, action ]</span>
+<span class="comment">// Relative to FOUR things — change any one and the "rational" action changes:</span>
+<span class="comment">//   1. performance measure  2. percept sequence so far  3. prior knowledge  4. available actions</span></div>
+
+  <div class="callout callout-teal">
+    <strong>Real-world example:</strong> a streaming service's recommender. Performance measure = expected watch time; percepts = your watch history and clicks; prior knowledge = what millions of other viewers watched; actions = which titles to show. It isn't guaranteed to pick a film you'll love. It is rational in the formal sense: the best choice given exactly that information. <strong>Rational ≠ always right.</strong>
+  </div>
+</section>
+
+<section class="section" id="s4">
+  <div class="section-eyebrow">Section 04</div>
+  <h2>Reactive vs. Deliberative: Two Halves of the Same Ladder</h2>
+
+  <p>"Reactive" and "deliberative" are <strong>not new agent types</strong>. They split the ladder from Section 03 into two families, by one question: <em>does the agent think ahead before acting?</em></p>
+
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;display:block;margin:0 auto">
+      <text x="360" y="22" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="600" letter-spacing="1.5">THE LADDER, SPLIT INTO TWO FAMILIES</text>
+      <rect x="30" y="40" width="300" height="95" rx="10" fill="#fff0f0" stroke="#b83232" stroke-width="1.5"/>
+      <text x="180" y="62" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#7a0000" font-weight="700">REACTIVE — no lookahead</text>
+      <rect x="50" y="78" width="125" height="40" rx="6" fill="#f2c7c7"/><text x="112" y="102" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10">1 Simple reflex</text>
+      <rect x="185" y="78" width="130" height="40" rx="6" fill="#f2c7c7"/><text x="250" y="102" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10">2 Model-based</text>
+      <rect x="390" y="40" width="300" height="95" rx="10" fill="#edfaf3" stroke="#2a7a4b" stroke-width="1.5"/>
+      <text x="540" y="62" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a5c38" font-weight="700">DELIBERATIVE — thinks ahead</text>
+      <rect x="410" y="78" width="125" height="40" rx="6" fill="#c8ead6"/><text x="472" y="102" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10">3 Goal-based</text>
+      <rect x="545" y="78" width="130" height="40" rx="6" fill="#c8ead6"/><text x="610" y="102" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10">4 Utility-based</text>
+      <rect x="160" y="152" width="400" height="34" rx="6" fill="#f5f0ff" stroke="#6b3fa0" stroke-width="1.5"/>
+      <text x="360" y="174" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#4a1a80">5 Learning — can be added to either family</text>
+    </svg>
+    <div class="diagram-caption">FIG 3 — Rungs 1–2 react to what they perceive; rungs 3–4 reason over a model of the world and look ahead. Learning cuts across both.</div>
+  </div>
+
+  <table>
+    <tr><th></th><th>Reactive (rungs 1–2)</th><th>Deliberative (rungs 3–4)</th></tr>
+    <tr><td>Decides by</td><td>Matching rules to the current percept (plus a little memory)</td><td>Reasoning or search over an internal model of the world</td></tr>
+    <tr><td>Speed</td><td>Very fast</td><td>Slower: reasoning costs time</td></tr>
+    <tr><td>Novel situations</td><td>Poor: only what the rules anticipated</td><td>Better: can reason about situations never seen before</td></tr>
+    <tr><td>Failure mode</td><td>No fallback when the rules don't cover the case</td><td>A wrong or stale world model leads to wrong plans</td></tr>
+    <tr><td>Classic example</td><td>Early iRobot Roomba: drive, bump, turn. Brooks' <strong>subsumption architecture</strong> layers reflexes, with higher layers overriding lower ones</td><td>GPS navigation: builds a route over a road graph, and re-plans from scratch when you miss a turn</td></tr>
+  </table>
+
+  <div class="callout callout-green">
+    <strong>Most real systems are hybrid.</strong> A self-driving car brakes reflexively for an obstacle (reactive, for safety) while planning its route deliberatively (for efficiency). LLM agents do the same: answer simple requests directly, and switch to step-by-step reasoning and planning for hard ones.
+  </div>
+
+  <h3>BDI: how a deliberative agent is organised inside</h3>
+  <p>Deliberative agents need a structure for "what I know, what I want, and what I'm doing about it". The most influential one is <strong>BDI</strong> (Bratman, 1987; Rao &amp; Georgeff, 1995). It is an <em>architecture for rungs 3–4</em>, not a sixth type.</p>
+
+  <div class="steps">
+    <div class="step-card"><div class="step-num" style="color:#2255aa">B</div><h4>Beliefs</h4><p>The agent's model of the world. May be incomplete or wrong; updated by new percepts.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">D</div><h4>Desires</h4><p>Goals it would like to achieve. Can be many, and can conflict.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#2a7a4b">I</div><h4>Intentions</h4><p>The desires it has <em>committed</em> to, each with a concrete plan it is now executing.</p></div>
+  </div>
+
+  <div class="callout callout-teal">
+    <strong>Real-world example:</strong> NASA's <em>Remote Agent</em> flew the Deep Space 1 probe in 1999. Beliefs: the spacecraft's state from telemetry. Desires: mission goals such as an asteroid fly-by. Intentions: the committed sequence of thruster burns it was executing, re-planned only when beliefs changed enough. The same "commit to a plan, re-plan only on failure" idea returns in Part 2 as the <strong>plan-and-execute</strong> strategy for LLM agents.
+  </div>
+</section>
+
+<section class="section" id="s5">
+  <div class="section-eyebrow">Section 05</div>
+  <h2>Where LLM Agents Fit — and the Map of This Module</h2>
+
+  <p>An LLM agent is not a sixth type either. Depending on what you wrap around the model, the same LLM climbs the ladder:</p>
+
+  <table>
+    <tr><th>What you build around the LLM</th><th>Rung it reaches</th><th>Example</th></tr>
+    <tr><td>A single prompt → response call</td><td>1 · Simple reflex</td><td>A classifier prompt: email in, label out</td></tr>
+    <tr><td>+ conversation memory</td><td>2 · Model-based reflex</td><td>A chatbot that remembers earlier turns</td></tr>
+    <tr><td>+ a goal and a reason–act loop with tools</td><td>3 · Goal-based</td><td>A ReAct agent that looks things up until it can answer</td></tr>
+    <tr><td>+ a judge or reward model that scores candidate answers</td><td>4 · Utility-based</td><td>Best-of-N answers ranked by a verifier</td></tr>
+    <tr><td>+ feedback that updates prompts or weights</td><td>5 · Learning</td><td>Prompt optimisation (DSPy, Module 2) or fine-tuning from feedback</td></tr>
+  </table>
+
+  <h3>The five capabilities of a modern agent — and where each is taught</h3>
+  <table>
+    <tr><th>Capability</th><th>What it means</th><th>Where you learn it</th></tr>
+    <tr><td><strong>Perception</strong></td><td>Reading the current state: user input, tool results, observations</td><td>Module 2 (ReAct's Observation)</td></tr>
+    <tr><td><strong>Reasoning</strong></td><td>Deciding what to do next given the state and the goal</td><td>Module 2 (CoT, ToT, test-time scaling)</td></tr>
+    <tr><td><strong>Planning</strong></td><td>Sequencing several actions towards a goal</td><td><strong>Part 2</strong> of this module</td></tr>
+    <tr><td><strong>Action / tool use</strong></td><td>Calling tools to retrieve information or change the world</td><td><strong>Part 3</strong> of this module</td></tr>
+    <tr><td><strong>Memory</strong></td><td>Keeping information across steps and sessions</td><td><strong>Part 4</strong> (the agent harness)</td></tr>
+  </table>
+
+  <div class="callout callout-purple">
+    <strong>The module in one line:</strong> Part 1 says <em>what</em> an agent is. Part 2 says how it <em>plans</em>. Part 3 says how it <em>acts</em> through tools and MCP. Part 4 says how agents are <em>assembled</em>: single-agent and multi-agent systems, running inside an agent harness. The lab builds all of it in one LangGraph system.
+  </div>
+</section>
+
+<section class="section" id="s6">
+  <div class="section-eyebrow">Section 06</div>
+  <h2>Key Takeaways &amp; Exam Prep</h2>
+
+  <div class="steps">
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Agent = perceive + decide + act</h4><p>A thermostat and an LLM tool-caller both qualify; only the decision box differs.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Six eras, one loop</h4><p>Rules → search → expert systems → reactive/BDI → learning → LLMs.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>One taxonomy: the five-rung ladder</h4><p>Simple reflex → model-based → goal-based → utility-based, with learning on top.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Reactive / deliberative = two halves</h4><p>Rungs 1–2 react; rungs 3–4 look ahead. BDI organises the deliberative half.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Rational ≠ always right</h4><p>Best expected action given the information available.</p></div>
+  </div>
+
+  <h3>Common exam questions</h3>
+  <table>
+    <tr><th>Question</th><th>Short answer</th></tr>
+    <tr><td>Name the five Russell &amp; Norvig agent types and what each adds.</td><td>Simple reflex (current percept) → model-based (+ internal state) → goal-based (+ goal and lookahead) → utility-based (+ a score to choose the best outcome) → learning (+ improvement, applicable to any type)</td></tr>
+    <tr><td>How do "reactive" and "deliberative" relate to the five types?</td><td>They are two families of the same ladder: reactive = simple and model-based reflex (no lookahead); deliberative = goal- and utility-based (reason over a world model before acting)</td></tr>
+    <tr><td>Why is a utility-based agent more general than a goal-based one?</td><td>A goal is binary; utility ranks outcomes, so the agent can trade off conflicting goals and handle uncertainty by maximising expected utility</td></tr>
+    <tr><td>What four things is rationality relative to? Is a rational agent always successful?</td><td>Performance measure, percept sequence, prior knowledge, available actions. No: rationality is the best expected decision given the information, not omniscience</td></tr>
+    <tr><td>In BDI, why are desires and intentions separate?</td><td>Desires are candidate goals and may conflict; intentions are the committed subset being acted on, which stops endless reconsideration</td></tr>
+    <tr><td>What is genuinely new about LLM agents compared with classical agents?</td><td>The decision-maker: natural-language reasoning that works on open-ended tasks without a hand-built state space. Goals, actions, state and search are inherited</td></tr>
+  </table>
+
+  <div class="callout" style="margin-top:2rem">
+    <strong>References:</strong><br>
+    Russell &amp; Norvig — Artificial Intelligence: A Modern Approach (intelligent agents chapter).<br>
+    Nilsson (1984) — Shakey the Robot, SRI Technical Note 323.<br>
+    Brooks (1986) — A Robust Layered Control System for a Mobile Robot.<br>
+    Bratman (1987) — Intention, Plans, and Practical Reason; Rao &amp; Georgeff (1995) — BDI Agents: From Theory to Practice.<br>
+    Muscettola et al. (1998) — Remote Agent: To Boldly Go Where No AI System Has Gone Before.<br>
+    Yao et al. (2022) — ReAct: Synergizing Reasoning and Acting in Language Models.
+  </div>
+</section>
+
+<footer>Module 4 · Part 1 — The Evolution &amp; Types of Agents · Continues in Part 2 (How Agents Plan)</footer>
+
+</body>
+</html>

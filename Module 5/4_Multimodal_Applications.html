@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multimodal Applications — Study Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Fraunces:ital,wght@0,300;0,700;1,300&family=Inter:wght@400;500;600&display=swap');
+  :root {
+    --ink: #0f1117; --paper: #f7f6f2; --mid: #e8e5dd; --rule: #c9c4b8; --accent: #1a3a5c;
+    --highlight: #e8a020; --green: #2a7a4b; --red: #b83232; --blue: #2255aa; --purple: #6b3fa0; --teal: #0d7a7a;
+    --mono: 'IBM Plex Mono', monospace; --display: 'Fraunces', Georgia, serif; --body: 'Inter', system-ui, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--body); background: var(--paper); color: var(--ink); line-height: 1.7; font-size: 16px; }
+  .hero { background: linear-gradient(160deg, #0f1117 0%, #1a3a5c 100%); color: #fff; padding: 4rem 2rem 3rem; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 20% 30%, rgba(232,160,32,0.10), transparent 40%), radial-gradient(circle at 80% 70%, rgba(42,122,75,0.12), transparent 40%); }
+  .hero-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--highlight); margin-bottom: 1rem; position: relative; }
+  .hero h1 { font-family: var(--display); font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; line-height: 1.1; margin-bottom: 1rem; position: relative; }
+  .hero p { font-size: 1.1rem; opacity: 0.82; max-width: 640px; margin: 0 auto; position: relative; }
+  .toc { background: var(--ink); color: #fff; padding: 1.2rem 2rem; display: flex; gap: 0.9rem; flex-wrap: wrap; justify-content: center; position: sticky; top: 0; z-index: 100; }
+  .toc a { color: rgba(255,255,255,0.7); text-decoration: none; font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.02em; transition: color 0.2s; }
+  .toc a:hover { color: var(--highlight); }
+  .section { max-width: 900px; margin: 0 auto; padding: 4rem 2rem; border-bottom: 1px solid var(--rule); }
+  .section-eyebrow { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.5rem; }
+  .section h2 { font-family: var(--display); font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 700; margin-bottom: 1.5rem; color: var(--ink); }
+  .section h3 { font-family: var(--display); font-size: 1.25rem; font-weight: 700; margin: 2rem 0 0.8rem; color: var(--accent); }
+  .section p { margin-bottom: 1rem; color: #333; }
+  .callout { border-left: 4px solid var(--highlight); background: #fff8ee; padding: 1rem 1.25rem; border-radius: 0 6px 6px 0; margin: 1.5rem 0; font-size: 0.95rem; }
+  .callout strong { color: var(--accent); }
+  .callout-blue  { border-left-color: var(--blue);   background: #eef3ff; }
+  .callout-green { border-left-color: var(--green);  background: #edfaf3; }
+  .callout-red   { border-left-color: var(--red);    background: #fff0f0; }
+  .callout-purple{ border-left-color: var(--purple); background: #f5f0ff; }
+  .math-box { background: var(--ink); color: #e8e8e8; font-family: var(--mono); font-size: 0.86rem; line-height: 1.9; padding: 1.5rem; border-radius: 8px; margin: 1.5rem 0; overflow-x: auto; white-space: pre; }
+  .math-box .comment { color: #6a9f6a; } .math-box .var { color: #f0b060; } .math-box .eq { color: #7ab8f5; } .math-box .hi { color: #ff9090; }
+  table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.88rem; }
+  th { background: var(--accent); color: #fff; padding: 0.6rem 0.9rem; text-align: left; font-family: var(--mono); font-size: 0.76rem; letter-spacing: 0.04em; }
+  td { padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--mid); vertical-align: top; }
+  tr:nth-child(even) td { background: #fafaf7; }
+  .diagram-wrap { background: #fff; border: 1px solid var(--rule); border-radius: 10px; padding: 1.5rem; margin: 2rem 0; overflow-x: auto; }
+  .diagram-caption { text-align: center; font-family: var(--mono); font-size: 0.74rem; color: #777; margin-top: 0.75rem; letter-spacing: 0.04em; line-height: 1.6; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+  .step-card { background: #fff; border: 1px solid var(--rule); border-radius: 8px; padding: 1.1rem; }
+  .step-num { font-family: var(--mono); font-size: 1.9rem; font-weight: 600; color: var(--mid); line-height: 1; margin-bottom: 0.4rem; }
+  .step-card h4 { font-size: 0.88rem; font-weight: 600; color: var(--accent); margin-bottom: 0.35rem; }
+  .step-card p { font-size: 0.82rem; margin: 0; color: #444; }
+  @media (max-width: 620px) { .steps { grid-template-columns: 1fr 1fr; } .section { padding: 2.5rem 1.2rem; } }
+
+  .roadmap { max-width: 900px; margin: 2.5rem auto 0; padding: 0 2rem; }
+  .roadmap-inner { background: #fff; border: 1px solid var(--rule); border-left: 5px solid var(--highlight); border-radius: 10px; padding: 1.3rem 1.5rem; }
+  .roadmap-path { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; margin-bottom: 1rem; font-family: var(--mono); font-size: 0.72rem; }
+  .roadmap-path a, .roadmap-path span.cur { padding: 0.25rem 0.6rem; border-radius: 999px; text-decoration: none; border: 1px solid var(--rule); color: #555; }
+  .roadmap-path span.cur { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+  .roadmap-path a:hover { border-color: var(--highlight); color: var(--accent); }
+  .roadmap-path i { color: #aaa; font-style: normal; }
+  .roadmap-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+  .roadmap-grid h5 { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin: 0 0 0.35rem; }
+  .roadmap-grid p, .roadmap-grid li { font-size: 0.9rem; color: #333; margin: 0 0 0.3rem; }
+  .roadmap-grid ul { margin: 0 0 0 1.1rem; padding: 0; }
+  .roadmap-contrast { margin-top: 1rem; padding: 0.7rem 0.9rem; background: var(--paper); border-radius: 8px; font-size: 0.88rem; color: #333; }
+  .next-part { max-width: 900px; margin: 2rem auto; padding: 0 2rem; text-align: right; font-family: var(--mono); font-size: 0.85rem; }
+  .next-part a { color: var(--accent); text-decoration: none; border: 1px solid var(--accent); border-radius: 6px; padding: 0.5rem 0.9rem; display: inline-block; }
+  .next-part a:hover { background: var(--accent); color: #fff; }
+  @media (max-width: 620px) { .roadmap, .next-part { padding: 0 1.2rem; } }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-label">Module 5 · Part 4 — Study Guide</div>
+  <h1>Multimodal Applications</h1>
+  <p>Where every idea from Parts 1-3 lands in production: OCR pipelines, image embeddings, multimodal retrieval and RAG, document intelligence, captioning, and the enterprise systems built from all of it.</p>
+</div>
+
+<nav class="toc">
+  <a href="#s1">01 OCR</a>
+  <a href="#s2">02 Image Embeddings</a>
+  <a href="#s3">03 Multimodal Retrieval</a>
+  <a href="#s4">04 Multimodal RAG</a>
+  <a href="#s5">05 Document Intelligence</a>
+  <a href="#s6">06 Captioning</a>
+  <a href="#s7">07 Enterprise Apps</a>
+  <a href="#s8">08 Takeaways</a>
+</nav>
+
+<div class="roadmap"><div class="roadmap-inner">
+  <div class="roadmap-path"><a href="1_Foundations_of_Multimodal_AI.html">1 Foundations</a> <i>→</i> <a href="2a_Alignment_CLIP.html">2a Alignment</a> <i>→</i> <a href="2b_Generation_VLMs.html">2b Generation</a> <i>→</i> <a href="3_Challenges_in_Multimodal_AI.html">3 Challenges</a> <i>→</i> <span class="cur">4 Applications</span> <i>→</i> <a href="Lab/1_Multimodal_PDF_QA_Lab.ipynb">Lab</a></div>
+  <div class="roadmap-grid">
+    <div><h5>What you learned before</h5><ul><li>How the models work (Parts 2a and 2b) and how they fail (Part 3).</li></ul></div>
+    <div><h5>What this part answers</h5><ul><li>Building real systems: OCR pipelines, image embeddings, multimodal retrieval (uses 2a), multimodal RAG and document intelligence (use 2b), captioning, enterprise use cases.</li></ul></div>
+    <div><h5>Where it leads</h5><ul><li>The lab: a PDF question-answering system that routes each question to a text or a vision pipeline.</li></ul></div>
+  </div>
+  
+</div></div>
+
+
+<section class="section" id="s1">
+  <div class="section-eyebrow">Section 01</div>
+  <h2>OCR Pipelines</h2>
+
+  <p><strong>OCR (Optical Character Recognition)</strong> extracts machine-readable text from an image — still the workhorse first step in most document pipelines, even alongside full vision-language models (Module 5 Part 2b §01–§06), because it's cheap, fast, and precise for pure text extraction.</p>
+
+  <table>
+    <tr><th>Stage</th><th>What happens</th></tr>
+    <tr><td>Layout detection</td><td>Locate text regions, tables, columns, headers before reading any characters</td></tr>
+    <tr><td>Text recognition</td><td>Convert each detected region's pixels into character sequences</td></tr>
+    <tr><td>Post-processing</td><td>Spell-correction, reading-order reconstruction, confidence scoring</td></tr>
+  </table>
+
+  <div class="callout callout-blue">
+    <strong>OCR vs. a VLM reading the same document, revisited from Part 1 §02:</strong> OCR is precise but blind to non-text content (charts, photos, signatures) and to why layout matters; a VLM understands layout and visual context but can be less precise character-for-character, especially on small or stylized text. Production document pipelines (§05) commonly use <em>both</em>: OCR for exact text, a VLM for everything OCR can't capture.
+  </div>
+</section>
+
+<section class="section" id="s2">
+  <div class="section-eyebrow">Section 02</div>
+  <h2>Image Embeddings</h2>
+
+  <p>Module 5 Part 2a §04–§05 explained how CLIP builds cross-modal embeddings. As an application, this means: run every image in a collection through CLIP's image encoder once, store the resulting vectors, and you have a searchable index — identical in structure to Module 3's text-chunk embeddings.</p>
+
+  <div class="math-box"><span class="comment">// Building an image embedding index — directly parallels Module 3 §03's FAISS setup</span>
+image_embeddings = clip_model.encode_images(all_images)   <span class="comment">// [n_images, embedding_dim]</span>
+index = faiss.IndexFlatIP(embedding_dim)
+index.add(image_embeddings)
+
+<span class="comment">// Query by TEXT (cross-modal) or by IMAGE (pure visual similarity) — same index, either query type</span>
+query_vec = clip_model.encode_text(["a red bicycle"])   <span class="comment">// or: clip_model.encode_image(query_img)</span>
+D, I = index.search(query_vec, k=5)</div>
+
+  <div class="callout callout-green">
+    <strong>No new infrastructure needed.</strong> Everything downstream — FAISS index type choice (Module 3 §03), hybrid retrieval, re-ranking (Module 3 §§06-07) — applies to image embeddings exactly as it applied to text chunks. The only thing that changed is which encoder produced the vectors.
+  </div>
+</section>
+
+<section class="section" id="s3">
+  <div class="section-eyebrow">Section 03</div>
+  <h2>Multimodal Retrieval</h2>
+
+  <p><strong>Multimodal retrieval</strong> extends Module 3's semantic search (§02) across modalities: a text query can retrieve images, an image query can retrieve text, and — with a shared index — both at once.</p>
+
+  <table>
+    <tr><th>Query type</th><th>Retrieves</th><th>Example</th></tr>
+    <tr><td>Text → Image</td><td>Images matching a text description</td><td>"Find product photos showing visible stitching damage"</td></tr>
+    <tr><td>Image → Text</td><td>Text passages relevant to an image</td><td>Upload a photo of a rash, retrieve relevant medical documentation</td></tr>
+    <tr><td>Image → Image</td><td>Visually similar images</td><td>"Find other products that look like this one"</td></tr>
+  </table>
+
+  <div class="callout callout-blue">
+    <strong>Exam favourite:</strong> "How is multimodal retrieval different from running OCR on images and then doing text retrieval?" — OCR-then-text-retrieval only works for images that are mostly text and only matches on textual content; multimodal retrieval (via CLIP-style embeddings) matches on <em>visual meaning</em> directly, working for photos, diagrams, and charts that have little or no text at all.
+  </div>
+</section>
+
+<section class="section" id="s4">
+  <div class="section-eyebrow">Section 04</div>
+  <h2>Multimodal RAG</h2>
+
+  <p>Module 3's RAG pipeline (chunk → embed → retrieve → generate) extends directly: retrieve relevant <em>images</em> (or image+text chunks) alongside or instead of text, and feed them into a vision-language model's context for grounded generation.</p>
+
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 760 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;display:block;margin:0 auto">
+      <defs><marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#555"/></marker></defs>
+      <text x="380" y="22" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="600" letter-spacing="1.5">MULTIMODAL RAG — MODULE 3'S PIPELINE, EXTENDED</text>
+
+      <rect x="30" y="45" width="140" height="40" rx="6" fill="#1a3a5c"/>
+      <text x="100" y="70" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff">User question</text>
+
+      <line x1="170" y1="65" x2="205" y2="65" stroke="#555" stroke-width="2" marker-end="url(#a1)"/>
+      <rect x="210" y="45" width="150" height="40" rx="6" fill="#6b3fa0"/>
+      <text x="285" y="70" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff">Retrieve (CLIP index)</text>
+
+      <line x1="360" y1="65" x2="395" y2="65" stroke="#555" stroke-width="2" marker-end="url(#a1)"/>
+      <rect x="400" y="30" width="150" height="30" rx="6" fill="#eef3ff" stroke="#2255aa"/>
+      <text x="475" y="50" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#1a3a5c">relevant TEXT chunks</text>
+      <rect x="400" y="70" width="150" height="30" rx="6" fill="#fff3cc" stroke="#e8a020"/>
+      <text x="475" y="90" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#7a5000">relevant IMAGES</text>
+
+      <line x1="550" y1="65" x2="585" y2="65" stroke="#555" stroke-width="2" marker-end="url(#a1)"/>
+      <rect x="590" y="45" width="140" height="40" rx="6" fill="#2a7a4b"/>
+      <text x="660" y="70" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff">VLM generates</text>
+
+      <text x="380" y="140" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#444">The VLM's answer is grounded in BOTH retrieved text and retrieved images —</text>
+      <text x="380" y="155" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#444">e.g. "According to page 12's diagram [image] and the specification text [text],</text>
+      <text x="380" y="170" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#444">the maximum load is 500kg."</text>
+    </svg>
+    <div class="diagram-caption">FIG 1 — Multimodal RAG is not a new architecture — it's Module 3 §04's index-time / query-time pipeline, with the retrieval step returning images as well as text, and the generation step using a VLM (Module 5 Part 2b §01–§06) instead of a text-only LLM.</div>
+  </div>
+
+  <div class="callout callout-purple">
+    <strong>Why this matters especially for §05's documents:</strong> a scanned technical manual's answer to "what does the wiring diagram show for pin 4?" genuinely requires retrieving the <em>diagram itself</em>, not a lossy text description of it (Module 5 Part 1 §02) — multimodal RAG is what makes that retrieval possible at all.
+  </div>
+</section>
+
+<section class="section" id="s5">
+  <div class="section-eyebrow">Section 05</div>
+  <h2>Document Intelligence &amp; PDF Intelligence Systems</h2>
+
+  <p>A PDF is not one modality — it's a mix of text, tables, images, and layout, often as a raster scan with no underlying text layer at all. <strong>Document intelligence</strong> systems combine §01's OCR, layout detection, and VLM understanding to extract structured, queryable information from documents like these.</p>
+
+  <table>
+    <tr><th>Pipeline stage</th><th>Technique used</th></tr>
+    <tr><td>Page rendering</td><td>Convert each PDF page to an image (needed even for "digital" PDFs, to handle scanned pages uniformly)</td></tr>
+    <tr><td>Layout &amp; table detection</td><td>Locate structural regions before extracting content from them</td></tr>
+    <tr><td>Text extraction</td><td>OCR (§01) for scanned regions; native text extraction for digital-text PDFs</td></tr>
+    <tr><td>Chunking &amp; embedding</td><td>Module 3 §05's chunking, applied per detected region rather than blindly by character count</td></tr>
+    <tr><td>Indexing &amp; retrieval</td><td>Module 3's FAISS pipeline, extended per §03-§04 to include image regions</td></tr>
+  </table>
+
+  <div class="callout callout-red">
+    <strong>Exam favourite:</strong> "Why does document intelligence chunk by detected layout region rather than by fixed character count (Module 3 §05)?" — a fixed-size chunker has no notion of "this text belongs to this table" or "this caption belongs to this figure," and can silently split a table's header from its rows, corrupting retrieval. Layout-aware chunking respects the document's actual structure, at the cost of a more complex pipeline.
+  </div>
+</section>
+
+<section class="section" id="s6">
+  <div class="section-eyebrow">Section 06</div>
+  <h2>Image Captioning</h2>
+
+  <p><strong>Image captioning</strong> — generating a natural-language description of an image — is the most direct application of a VLM's generation capability (Module 5 Part 2b §01–§06), and the task where Part 3's hallucination and evaluation challenges are most visible.</p>
+
+  <table>
+    <tr><th>Captioning style</th><th>Output</th><th>Use case</th></tr>
+    <tr><td>Generic</td><td>"A dog running on a beach"</td><td>Alt-text generation, accessibility</td></tr>
+    <tr><td>Dense/detailed</td><td>Multi-sentence description covering multiple objects and relationships</td><td>Content indexing, search</td></tr>
+    <tr><td>Instruction-conditioned</td><td>"Describe only the safety hazards visible in this image"</td><td>Domain-specific extraction (Module 5 Part 4's enterprise use cases)</td></tr>
+  </table>
+
+  <div class="callout callout-green">
+    <strong>Connects directly to Part 3 §03:</strong> a captioning system deployed in production needs some mitigation for hallucination — commonly, cross-checking generated claims against object-detection output, or explicitly prompting the VLM to only describe high-confidence visual elements — since an unverified caption can silently introduce false information into every downstream system that trusts it (search indexes, accessibility tools, automated reports).
+  </div>
+</section>
+
+<section class="section" id="s7">
+  <div class="section-eyebrow">Section 07</div>
+  <h2>Enterprise Multimodal Applications</h2>
+
+  <p>Where all of the above compose into real systems:</p>
+
+  <div class="steps">
+    <div class="step-card"><div class="step-num" style="color:#2255aa">1</div><h4>Invoice &amp; receipt processing</h4><p>OCR + layout detection + structured field extraction — §01 + §05, output as structured data.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">2</div><h4>Compliance document review</h4><p>Multimodal RAG (§04) over scanned contracts and regulations, with faithfulness-checked answers.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#2a7a4b">3</div><h4>Visual product search</h4><p>Image-to-image and text-to-image retrieval (§03) over a product catalog.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#6b3fa0">4</div><h4>Automated quality inspection</h4><p>VLM-based visual reasoning over photos, flagging anomalies for human review (Module 4 Part 3 §06's autonomy spectrum applies directly).</p></div>
+  </div>
+
+  <div class="callout callout-blue">
+    <strong>The throughline across all four:</strong> none of these introduce a genuinely new technique — each is a specific composition of OCR, cross-modal embeddings, multimodal RAG, and VLM generation, chosen and combined for a concrete business process. This module's lab notebook builds exactly this kind of composition: a multimodal PDF and image QA system.
+  </div>
+</section>
+
+<section class="section" id="s8">
+  <div class="section-eyebrow">Section 08</div>
+  <h2>Key Takeaways &amp; Exam Prep</h2>
+
+  <div class="steps">
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>OCR and VLMs are complementary, not competing</h4><p>OCR for precise text; VLMs for layout, visual context, and non-text content.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Image embeddings reuse Module 3's infrastructure unchanged</h4><p>Same FAISS pipeline, different encoder.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Multimodal RAG grounds generation in retrieved images, not just text</h4><p>Essential when the answer genuinely lives in a diagram or photo.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Document intelligence chunks by layout, not character count</h4><p>Preserves table/figure structure that fixed-size chunking would corrupt.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Enterprise systems compose these pieces, not invent new ones</h4><p>Invoice processing, compliance review, visual search — all recombinations of §01-§06.</p></div>
+  </div>
+
+  <h3>Common exam questions</h3>
+  <table>
+    <tr><th>Question</th><th>Short answer</th></tr>
+    <tr><td>Why do production document pipelines often use both OCR and a VLM?</td><td>OCR gives precise text extraction but is blind to layout meaning and non-text content; a VLM understands visual context and layout but is less precise character-for-character — combining both covers each one's blind spot</td></tr>
+    <tr><td>What changes, structurally, going from Module 3's text RAG to multimodal RAG?</td><td>The retrieval step can return images as well as text chunks, and the generation step uses a vision-language model instead of a text-only LLM — the overall index-time/query-time pipeline structure is unchanged</td></tr>
+    <tr><td>Why does document intelligence use layout-aware chunking rather than fixed-size chunking?</td><td>Fixed-size chunking has no notion of table/figure boundaries and can split structurally related content (e.g. a table header from its rows) across chunks, corrupting retrieval</td></tr>
+  </table>
+
+  <div class="callout" style="margin-top:2rem">
+    <strong>References:</strong><br>
+    Smith, R. (2007) — An Overview of the Tesseract OCR Engine.<br>
+    Radford et al. (2021) — Learning Transferable Visual Models From Natural Language Supervision (CLIP) — image embedding backbone.<br>
+    Chen et al. (2022) — PaLI: A Jointly-Scaled Multilingual Language-Image Model.<br>
+    Xu et al. (2020) — LayoutLM: Pre-training of Text and Layout for Document Image Understanding.
+  </div>
+
+  <div class="callout callout-blue" style="margin-top:1.5rem">
+    <strong>Companion notebook:</strong> <code>1_Multimodal_PDF_QA_Lab.ipynb</code> builds a real multimodal PDF and image QA system — the syllabus lab for this module.
+  </div>
+</section>
+
+<footer style="text-align:center;padding:2rem;font-family:var(--mono);font-size:0.75rem;color:#aaa;border-top:1px solid var(--rule)">
+  Module 5 · Part 4 — Multimodal Applications · Companion to Part 3 (Challenges) and 1_Multimodal_PDF_QA_Lab.ipynb
+</footer>
+
+
+<div class="next-part"><a href="Lab/1_Multimodal_PDF_QA_Lab.ipynb">Next: Lab — Multimodal PDF Q&amp;A →</a></div>
+</body>
+</html>

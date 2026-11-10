@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Common Exam Questions | GenAI Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#18251f; --muted:#68756e; --paper:#f5f7f2; --panel:#fff; --line:#dfe7de; --lime:#b9e769; --mint:#ddf4e2; --orange:#f2995b; }
+  * { box-sizing:border-box; }
+  body { margin:0; color:var(--ink); background:var(--paper); font-family:'DM Sans',sans-serif; }
+  .wrap { max-width:1120px; margin:auto; padding:34px 28px 70px; }
+  header { display:flex; justify-content:space-between; align-items:flex-start; gap:24px; margin-bottom:34px; }
+  .back { color:var(--muted); font-size:13px; text-decoration:none; }
+  .back:hover { color:var(--ink); }
+  .eyebrow { color:#80907f; font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
+  h1, h2 { margin:0; font-family:'Space Grotesk',sans-serif; letter-spacing:-.05em; }
+  h1 { max-width:700px; margin-top:10px; font-size:clamp(36px,6vw,68px); line-height:.95; }
+  .lede { max-width:680px; margin:18px 0 0; color:var(--muted); font-size:16px; line-height:1.55; }
+  .search { width:280px; padding:12px 14px; border:1px solid var(--line); border-radius:10px; outline:0; background:#fff; color:var(--ink); font:inherit; }
+  .search:focus { border-color:#96c76a; box-shadow:0 0 0 3px rgba(185,231,105,.25); }
+  .stats { display:flex; gap:10px; flex-wrap:wrap; margin:26px 0 38px; }
+  .stat { padding:10px 13px; border:1px solid var(--line); border-radius:9px; background:var(--panel); font-size:12px; }
+  .stat strong { margin-right:4px; font:700 18px 'Space Grotesk',sans-serif; }
+  .module { margin:0 0 36px; }
+  .module-head { display:flex; align-items:baseline; gap:12px; padding-bottom:10px; border-bottom:2px solid var(--ink); }
+  .module-head h2 { font-size:26px; }
+  .module-head span { color:var(--muted); font-size:12px; }
+  .questions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:13px; }
+  details { border:1px solid var(--line); border-radius:10px; background:var(--panel); }
+  details[open] { border-color:#c9e59b; box-shadow:0 5px 16px rgba(24,37,31,.06); }
+  summary { display:flex; gap:12px; align-items:flex-start; padding:15px 16px; cursor:pointer; list-style:none; font-weight:700; line-height:1.4; }
+  summary::-webkit-details-marker { display:none; }
+  summary::before { flex:none; width:23px; height:23px; display:grid; place-items:center; border-radius:7px; color:#607936; background:var(--lime); content:'?'; font:700 13px 'Space Grotesk',sans-serif; }
+  details p { margin:0; padding:0 18px 17px 51px; color:var(--muted); font-size:13px; line-height:1.6; }
+  .tag { display:inline-block; margin:0 0 7px; padding:3px 7px; border-radius:5px; color:#6c5831; background:#fff0db; font-size:10px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; }
+  .empty { display:none; padding:25px; color:var(--muted); text-align:center; }
+  footer { margin-top:45px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:12px; }
+  @media (max-width:760px) { .wrap { padding:24px 16px 50px; } header { display:block; } .search { width:100%; margin-top:24px; } .questions { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div><a class="back" href="index.html">&larr; Back to GenAI Studio</a><div class="eyebrow" style="margin-top:28px">Revision sheet</div><h1>Common exam questions.</h1><p class="lede">High-yield questions collected from the course lessons. Open each question for the answer points an exam response should cover.</p></div>
+    <input class="search" id="search" type="search" placeholder="Search questions..." aria-label="Search exam questions">
+  </header>
+  <div class="stats"><div class="stat"><strong id="count">44</strong> questions</div><div class="stat"><strong>3</strong> modules</div><div class="stat">Short-answer focused</div></div>
+  <main id="content">
+    <section class="module"><div class="module-head"><h2>Module 1</h2><span>Neural networks, attention, LLMs and fine-tuning</span></div><div class="questions">
+      <details><summary>Derive one step of forward propagation in a neural network.</summary><p><span class="tag">Core derivation</span>Define the weighted sum z = Wx + b, apply the activation a = f(z), and identify the dimensions of W, x, b and a. Explain how the calculation repeats layer by layer.</p></details>
+      <details><summary>Why are activation functions necessary? Compare sigmoid, tanh and ReLU.</summary><p><span class="tag">Compare</span>Without a nonlinear activation, stacked layers collapse into one linear transformation. Compare output range, saturation, gradient behavior and the practical use of each function.</p></details>
+      <details><summary>Explain backpropagation and the chain rule.</summary><p><span class="tag">Core derivation</span>Start from the loss, propagate gradients backward through each operation using the chain rule, and update parameters with gradient descent: theta := theta - learning_rate times gradient.</p></details>
+      <details><summary>What causes vanishing and exploding gradients in RNNs?</summary><p><span class="tag">Explain</span>Repeated multiplication by recurrent Jacobians makes gradients shrink or grow exponentially over many time steps. Relate this to long-term dependencies and explain how LSTM/GRU gates, clipping and initialization help.</p></details>
+      <details><summary>Compare an RNN, LSTM and GRU.</summary><p><span class="tag">Compare</span>Discuss recurrence, memory path, gates, parameter count, long-range memory and computational cost. LSTMs use separate cell and hidden states; GRUs combine them with fewer gates.</p></details>
+      <details><summary>What problem does attention solve in encoder-decoder models?</summary><p><span class="tag">High yield</span>A fixed context vector bottlenecks long inputs. Attention creates a context vector per decoder step by weighting encoder states according to relevance.</p></details>
+      <details><summary>Explain the four steps of additive or dot-product attention.</summary><p><span class="tag">Core derivation</span>Compute compatibility scores, normalize them with softmax, use the weights to form a weighted sum of values, and pass the resulting context to the decoder.</p></details>
+      <details><summary>What are Query, Key and Value vectors?</summary><p><span class="tag">High yield</span>Queries express what the current token is looking for, keys describe what each token offers for matching, and values contain the information blended into the output.</p></details>
+      <details><summary>Why is scaled dot-product attention divided by square root of d_k?</summary><p><span class="tag">Exam favourite</span>Dot products grow in magnitude as key dimension grows, saturating softmax and producing tiny gradients. Scaling keeps score variance controlled.</p></details>
+      <details><summary>Distinguish self-attention from cross-attention.</summary><p><span class="tag">Compare</span>Self-attention obtains Q, K and V from the same sequence. Cross-attention obtains queries from one sequence and keys/values from another, as in decoder-to-encoder attention.</p></details>
+      <details><summary>Why does a Transformer need positional information?</summary><p><span class="tag">Explain</span>Attention alone is permutation-equivariant and does not know token order. Positional encodings or RoPE inject relative or absolute position information.</p></details>
+      <details><summary>Explain multi-head attention and its advantage.</summary><p><span class="tag">High yield</span>Several smaller attention operations learn different relationship types in parallel, then concatenate and project their outputs. This gives the model multiple representation subspaces.</p></details>
+      <details><summary>What is causal masking and why is it required for decoder-only LLMs?</summary><p><span class="tag">Explain</span>Each position may attend only to itself and earlier positions. The mask prevents seeing future target tokens during training, preserving the next-token prediction objective.</p></details>
+      <details><summary>Compare encoder-only, decoder-only and encoder-decoder Transformers.</summary><p><span class="tag">Compare</span>Encoder-only models are strong for representation and classification, decoder-only models generate autoregressively, and encoder-decoder models map an input sequence to an output sequence.</p></details>
+      <details><summary>Explain BPE tokenization and its trade-offs.</summary><p><span class="tag">Explain</span>BPE repeatedly merges frequent symbol pairs. It balances vocabulary size and sequence length, but token boundaries can be unintuitive and rare words may split into many tokens.</p></details>
+      <details><summary>What is perplexity and what does it measure?</summary><p><span class="tag">Definition</span>Perplexity is the exponentiated average negative log-likelihood. Lower perplexity means the model assigns higher probability to the observed sequence, though it is not a complete measure of usefulness.</p></details>
+      <details><summary>Why do modern LLMs use RoPE?</summary><p><span class="tag">Exam favourite</span>RoPE rotates query and key pairs by position so their dot product encodes relative distance. It supports useful extrapolation and integrates position directly into attention.</p></details>
+      <details><summary>Why does KV-cache memory grow with conversation length?</summary><p><span class="tag">Exam favourite</span>Inference stores keys and values for every previous token in every layer. Each new token reuses them, but the stored sequence grows linearly with context length.</p></details>
+      <details><summary>Compare temperature, top-k and top-p decoding.</summary><p><span class="tag">Compare</span>Temperature reshapes the whole probability distribution, top-k keeps a fixed number of candidates, and top-p keeps the smallest adaptive set whose cumulative probability reaches p.</p></details>
+      <details><summary>Why does temperature 0 not eliminate hallucinations?</summary><p><span class="tag">Exam favourite</span>It makes decoding more deterministic but does not add knowledge or grounding. A confidently selected token can still be unsupported or wrong.</p></details>
+      <details><summary>Compare in-context learning, full fine-tuning and PEFT.</summary><p><span class="tag">Compare</span>ICL changes only the prompt at inference; full fine-tuning updates all weights; PEFT updates a small set of added or selected parameters while preserving most base weights.</p></details>
+      <details><summary>Why is full fine-tuning expensive?</summary><p><span class="tag">Explain</span>Training requires gradients and optimizer states in addition to weights. Memory, compute, data requirements and catastrophic forgetting all increase with model size.</p></details>
+      <details><summary>Explain LoRA and derive its trainable parameter count.</summary><p><span class="tag">Core derivation</span>Replace an update delta-W with B A, where the rank r is small. For a d-out by d-in weight, trainable parameters are r(d-in + d-out), far fewer than d-in d-out.</p></details>
+      <details><summary>Why is B initialized to zero and A randomly?</summary><p><span class="tag">Exam favourite</span>B A starts as zero, so the adapted model initially matches the base model. Both-zero initialization would block useful gradients, while both-random would immediately disturb pretrained behavior.</p></details>
+      <details><summary>What is quantization and what are its risks?</summary><p><span class="tag">Explain</span>Quantization maps higher-precision values to fewer bits using a scale and often a zero-point. It reduces memory and can speed inference, but may introduce accuracy loss and calibration sensitivity.</p></details>
+    </div></section>
+    <section class="module"><div class="module-head"><h2>Module 2</h2><span>Prompting, reasoning, scaling and structured outputs</span></div><div class="questions">
+      <details><summary>Compare zero-shot and few-shot prompting.</summary><p><span class="tag">Compare</span>Zero-shot gives instructions without examples; few-shot includes input-output demonstrations. Few-shot helps with format and edge cases but costs context and can introduce misleading patterns.</p></details>
+      <details><summary>Why does few-shot performance eventually stop improving?</summary><p><span class="tag">Exam favourite</span>More examples can dilute the query, introduce noise or bias, consume context window space and increase sensitivity to ordering and recency.</p></details>
+      <details><summary>What is chain-of-thought prompting and when is it useful?</summary><p><span class="tag">Explain</span>It elicits intermediate reasoning steps, improving many multi-step arithmetic, logic and planning tasks. It costs more tokens and should be evaluated for correctness rather than trusted automatically.</p></details>
+      <details><summary>How does self-consistency improve chain-of-thought?</summary><p><span class="tag">Explain</span>Sample multiple reasoning paths, extract their final answers and select the majority answer. It works when independent errors are diverse, but increases inference cost.</p></details>
+      <details><summary>What does Tree-of-Thoughts add beyond self-consistency?</summary><p><span class="tag">Exam favourite</span>Self-consistency samples complete paths independently. ToT maintains partial states, evaluates them, and deliberately expands, prunes or backtracks through a search tree.</p></details>
+      <details><summary>Compare Tree-of-Thoughts, Graph-of-Thoughts and ReAct.</summary><p><span class="tag">Compare</span>ToT searches branching states, GoT permits arbitrary graph connections and aggregation, while ReAct interleaves reasoning with actions and observations from tools or an environment.</p></details>
+      <details><summary>What is test-time scaling?</summary><p><span class="tag">Definition</span>Allocate additional computation during inference rather than only increasing training compute, using more samples, longer deliberation, verification or search to improve answers.</p></details>
+      <details><summary>Does majority voting always improve accuracy as sample count increases?</summary><p><span class="tag">Exam favourite</span>No. It helps when errors are sufficiently independent and the correct answer is more probable, but correlated reasoning errors and weak answer distributions can limit or reverse gains.</p></details>
+      <details><summary>What makes a prompt reliable and reproducible?</summary><p><span class="tag">Practical</span>Specify the task, context, constraints, output format, evaluation criteria and edge cases. Use consistent delimiters, examples where useful, and separate untrusted data from instructions.</p></details>
+      <details><summary>Why use structured generation instead of asking for JSON?</summary><p><span class="tag">Explain</span>Plain instructions do not guarantee valid syntax or schema compliance. Constrained decoding, schemas, validators and retries make outputs machine-readable and operationally reliable.</p></details>
+      <details><summary>Explain tool calling or function calling.</summary><p><span class="tag">Definition</span>The model emits a structured tool name and arguments matching a declared schema. The application validates and executes the tool, then returns the result to the model or user.</p></details>
+      <details><summary>What is DSPy and how does it differ from hand-written prompts?</summary><p><span class="tag">Explain</span>DSPy represents prompting as typed signatures and programs, then optimizes instructions and demonstrations against a metric rather than relying only on manual wording.</p></details>
+    </div></section>
+    <section class="module"><div class="module-head"><h2>Module 3</h2><span>Retrieval-augmented generation</span></div><div class="questions">
+      <details><summary>Explain the RAG pipeline from documents to answer.</summary><p><span class="tag">Core workflow</span>Ingest and clean documents, chunk them, embed and index chunks, retrieve candidates for a query, optionally re-rank, place selected context in the prompt, generate, and evaluate the answer.</p></details>
+      <details><summary>What is cosine similarity and why is it used for embeddings?</summary><p><span class="tag">Core derivation</span>Cosine similarity is the dot product divided by the product of vector magnitudes. It compares direction while reducing sensitivity to vector length, making it useful for semantic matching.</p></details>
+      <details><summary>Compare dense, sparse and hybrid retrieval.</summary><p><span class="tag">Compare</span>Dense retrieval captures semantic similarity, sparse methods such as BM25 preserve exact terms, and hybrid retrieval combines both to handle meaning plus identifiers, numbers and names.</p></details>
+      <details><summary>Why can semantic search perform worse than keyword search?</summary><p><span class="tag">Exam favourite</span>Embeddings may blur exact tokens that matter, such as product SKUs, error codes, proper nouns and numbers. Hybrid retrieval preserves these lexical signals.</p></details>
+      <details><summary>Compare Flat, IVF, PQ and HNSW vector indexes.</summary><p><span class="tag">Compare</span>Flat search is exact but expensive; IVF searches selected clusters; PQ compresses vectors with approximate distance; HNSW navigates a graph for fast approximate nearest-neighbor search.</p></details>
+      <details><summary>How does chunk size affect RAG quality?</summary><p><span class="tag">Design</span>Small chunks improve precision but can lose context; large chunks preserve context but dilute retrieval and consume the prompt budget. Choose boundaries, overlap and size for the document and task.</p></details>
+      <details><summary>Why use overlapping or parent-document chunks?</summary><p><span class="tag">Design</span>Overlap prevents facts at boundaries from being split. Parent-child retrieval searches precise child chunks but returns the larger parent context needed for a complete answer.</p></details>
+      <details><summary>Why is re-ranking a second retrieval stage?</summary><p><span class="tag">Exam favourite</span>A cross-encoder is more accurate but must jointly process every query-document pair and cannot precompute document representations. Retrieve cheaply first, then re-rank a small shortlist.</p></details>
+      <details><summary>What are Recall@k, MRR, faithfulness and answer relevance?</summary><p><span class="tag">Evaluation</span>Recall@k asks whether a relevant item appears in the top k, MRR rewards an early first relevant item, faithfulness checks support from retrieved context, and answer relevance checks whether the response addresses the query.</p></details>
+      <details><summary>What are common RAG failure modes?</summary><p><span class="tag">Diagnosis</span>Missing context, irrelevant or redundant retrieval, over-retrieval dilution, lost-in-the-middle effects, poor chunking, stale indexes and unsupported generation can all degrade answers.</p></details>
+      <details><summary>How is prompt injection through retrieved documents different?</summary><p><span class="tag">Exam favourite</span>The malicious instruction arrives inside data retrieved by the system, not necessarily from the user. Treat retrieved text as untrusted, isolate it from instructions and validate tool actions.</p></details>
+      <details><summary>How should a RAG system handle knowledge freshness?</summary><p><span class="tag">Design</span>Use full or incremental re-indexing, document versioning, timestamps, deletion handling and time-decay or freshness-aware ranking where the domain changes frequently.</p></details>
+    </div></section>
+  </main>
+  <div class="empty" id="empty">No questions match your search.</div>
+  <footer>Use the lesson pages for full derivations, worked examples and lab practice. This page is a high-yield revision guide.</footer>
+</div>
+<script>
+const search = document.getElementById('search');
+const empty = document.getElementById('empty');
+const modules = [...document.querySelectorAll('.module')];
+const allDetails = [...document.querySelectorAll('details')];
+function filterQuestions(value) {
+  const query = value.trim().toLowerCase(); let visible = 0;
+  modules.forEach(module => {
+    let moduleVisible = 0;
+    module.querySelectorAll('details').forEach(item => {
+      const match = item.textContent.toLowerCase().includes(query); item.style.display = match ? '' : 'none';
+      if (match) moduleVisible++;
+    });
+    module.style.display = moduleVisible ? '' : 'none'; visible += moduleVisible;
+  });
+  empty.style.display = visible ? 'none' : 'block';
+}
+search.addEventListener('input', event => filterQuestions(event.target.value));
+document.getElementById('count').textContent = allDetails.length;
+</script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 — Warm-Up Question</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#eef1f6; --ink-dim:#9aa7bd; --panel:#151926;
+    --accent:#4f8fd6; --highlight:#e8a020; --green:#5fb87b; --purple:#a888e0;
+    --border: rgba(255,255,255,0.10);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0; background:
+      radial-gradient(1100px 700px at 15% -10%, rgba(79,143,214,0.20), transparent 60%),
+      radial-gradient(900px 600px at 110% 10%, rgba(168,136,224,0.16), transparent 55%),
+      linear-gradient(160deg, #0a0c12 0%, #0c0e14 55%, #10121a 100%);
+    color:var(--ink); font-family:'Inter',sans-serif;
+    display:flex; flex-direction:column; overflow:hidden;
+  }
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 22px 40px 0; font-family:'IBM Plex Mono',monospace; font-size:0.78rem;
+    letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-dim);
+  }
+  .topbar .badge{ color:var(--highlight); font-weight:600; }
+  .stage{ flex:1; display:flex; align-items:center; justify-content:center; padding: 10px 8vw; }
+  .slide{
+    max-width: 880px; width:100%; text-align:center;
+    opacity:0; transform: translateY(18px) scale(0.98);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .slide.active{ opacity:1; transform: translateY(0) scale(1); }
+  .icon-wrap{
+    width:116px; height:116px; margin:0 auto 30px; border-radius:28px;
+    background: linear-gradient(160deg, rgba(79,143,214,0.18), rgba(168,136,224,0.10));
+    border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .icon-wrap svg{ width:58px; height:58px; }
+  .q-eyebrow{
+    font-family:'IBM Plex Mono',monospace; font-size:0.8rem; letter-spacing:0.12em;
+    text-transform:uppercase; color:var(--accent); margin-bottom:16px;
+  }
+  .q-text{
+    font-family:'Fraunces',serif; font-weight:600; font-size:clamp(1.8rem, 3.8vw, 2.9rem);
+    line-height:1.28; color:var(--ink); margin:0 0 34px;
+  }
+  .reveal-hint{
+    font-family:'IBM Plex Mono',monospace; font-size:0.85rem; color:var(--ink-dim);
+    letter-spacing:0.04em; cursor:pointer; user-select:none;
+    display:inline-flex; align-items:center; gap:8px; padding:12px 22px;
+    border:1px dashed var(--border); border-radius:999px; transition: all 0.2s ease;
+  }
+  .reveal-hint:hover{ border-color:var(--accent); color:var(--accent); }
+  .answer-box{
+    margin-top:0; text-align:left; background:var(--panel); border:1px solid var(--border);
+    border-left:3px solid var(--green); border-radius:14px;
+    max-height:0; opacity:0; overflow:hidden; transition: all 0.45s ease; padding:0 26px;
+  }
+  .answer-box.shown{ max-height:400px; opacity:1; padding:22px 26px; margin-top:28px; }
+  .answer-box .lbl{ font-family:'IBM Plex Mono',monospace; font-size:0.72rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--green); margin-bottom:8px; }
+  .answer-box .txt{ font-size:1.08rem; line-height:1.6; color:#dfe4ee; }
+  .footer{ text-align:center; padding: 0 0 26px; font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:var(--ink-dim); opacity:0.6; }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <span>Module 1 <span class="badge">·</span> Neural Nets, RNNs &amp; Attention</span>
+    <span>Warm-Up Question</span>
+  </div>
+  <div class="stage" id="stage"></div>
+  <div class="footer">Click the question, or press Space, to reveal the answer</div>
+
+<svg width="0" height="0" style="position:absolute">
+<defs>
+  <symbol id="ic-chain" viewBox="0 0 48 48"><g fill="none" stroke="#4f8fd6" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="24" r="6"/><circle cx="24" cy="24" r="6"/><circle cx="36" cy="24" r="6"/></g></symbol>
+</defs>
+</svg>
+
+<script>
+const ITEM = { icon:'ic-chain',
+  q:'In a Transformer, if you shuffle every word in a sentence before feeding it in, does self-attention notice anything is wrong?',
+  a:'No — self-attention is permutation-invariant on its own. That\'s exactly why positional encoding has to be added by hand: without it, "dog bites man" and "man bites dog" would look identical to the attention mechanism.' };
+
+let shown = false;
+const stage = document.getElementById('stage');
+
+function render(){
+  stage.innerHTML = `
+    <div class="slide" id="slideEl">
+      <div class="icon-wrap"><svg><use href="#${ITEM.icon}"/></svg></div>
+      <div class="q-eyebrow">Fun Question</div>
+      <div class="q-text" id="qText" style="cursor:pointer;">${ITEM.q}</div>
+      <div class="reveal-hint" id="revealBtn">${shown ? 'Answer revealed' : '💡 Click to reveal the answer'}</div>
+      <div class="answer-box ${shown?'shown':''}">
+        <div class="lbl">Answer</div>
+        <div class="txt">${ITEM.a}</div>
+      </div>
+    </div>`;
+  requestAnimationFrame(()=>document.getElementById('slideEl').classList.add('active'));
+  document.getElementById('revealBtn').addEventListener('click', ()=>{ shown=true; render(); });
+  document.getElementById('qText').addEventListener('click', ()=>{ shown=true; render(); });
+}
+
+document.addEventListener('keydown', (e)=>{
+  if(e.key===' '||e.key==='Enter'){ e.preventDefault(); shown=true; render(); }
+});
+
+render();
+</script>
+</body>
+</html>

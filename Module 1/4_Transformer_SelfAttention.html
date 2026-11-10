@@ -1,0 +1,1649 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transformers &amp; Self-Attention — Visual Study Guide</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Fraunces:ital,wght@0,300;0,700;1,300&family=Inter:wght@400;500;600&display=swap');
+  :root {
+    --ink:       #0f1117;
+    --paper:     #f7f6f2;
+    --mid:       #e8e5dd;
+    --rule:      #c9c4b8;
+    --accent:    #1a3a5c;
+    --highlight: #e8a020;
+    --green:     #2a7a4b;
+    --red:       #b83232;
+    --blue:      #2255aa;
+    --purple:    #6b3fa0;
+    --teal:      #0d7a7a;
+    --mono:      'IBM Plex Mono', monospace;
+    --display:   'Fraunces', Georgia, serif;
+    --body:      'Inter', system-ui, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--body);
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.7;
+    font-size: 16px;
+  }
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(160deg, #0f1117 0%, #1a3a5c 100%);
+    color: #fff;
+    padding: 4rem 2rem 3rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(232,160,32,0.10), transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(42,122,75,0.12), transparent 40%);
+  }
+  .hero-label {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--highlight);
+    margin-bottom: 1rem;
+    position: relative;
+  }
+  .hero h1 {
+    font-family: var(--display);
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+  .hero p {
+    font-size: 1.1rem;
+    opacity: 0.82;
+    max-width: 640px;
+    margin: 0 auto;
+    position: relative;
+  }
+  /* ── NAV ── */
+  .toc {
+    background: var(--ink);
+    color: #fff;
+    padding: 1.2rem 2rem;
+    display: flex;
+    gap: 1.3rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .toc a {
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    transition: color 0.2s;
+  }
+  .toc a:hover { color: var(--highlight); }
+  /* ── SECTIONS ── */
+  .section {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .section-eyebrow {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+  .section h2 {
+    font-family: var(--display);
+    font-size: clamp(1.5rem, 3vw, 2.2rem);
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: var(--ink);
+  }
+  .section h3 {
+    font-family: var(--display);
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 2rem 0 0.8rem;
+    color: var(--accent);
+  }
+  .section p { margin-bottom: 1rem; color: #333; }
+  /* ── CALLOUT ── */
+  .callout {
+    border-left: 4px solid var(--highlight);
+    background: #fff8ee;
+    padding: 1rem 1.25rem;
+    border-radius: 0 6px 6px 0;
+    margin: 1.5rem 0;
+    font-size: 0.95rem;
+  }
+  .callout strong { color: var(--accent); }
+  .callout-blue  { border-left-color: var(--blue);   background: #eef3ff; }
+  .callout-green { border-left-color: var(--green);  background: #edfaf3; }
+  .callout-red   { border-left-color: var(--red);    background: #fff0f0; }
+  .callout-purple{ border-left-color: var(--purple); background: #f5f0ff; }
+  /* ── MATH BOX ── */
+  .math-box {
+    background: var(--ink);
+    color: #e8e8e8;
+    font-family: var(--mono);
+    font-size: 0.86rem;
+    line-height: 1.9;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .math-box .comment { color: #6a9f6a; }
+  .math-box .var     { color: #f0b060; }
+  .math-box .eq      { color: #7ab8f5; }
+  .math-box .hi      { color: #ff9090; }
+  /* ── TABLE ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 0.88rem;
+  }
+  th {
+    background: var(--accent);
+    color: #fff;
+    padding: 0.6rem 0.9rem;
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 0.76rem;
+    letter-spacing: 0.04em;
+  }
+  td {
+    padding: 0.6rem 0.9rem;
+    border-bottom: 1px solid var(--mid);
+    vertical-align: top;
+  }
+  tr:nth-child(even) td { background: #fafaf7; }
+  .tag {
+    display: inline-block;
+    background: var(--mid);
+    padding: 0.12rem 0.45rem;
+    border-radius: 3px;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+  }
+  /* ── DIAGRAM ── */
+  .diagram-wrap {
+    background: #fff;
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    overflow-x: auto;
+  }
+  .diagram-caption {
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    color: #777;
+    margin-top: 0.75rem;
+    letter-spacing: 0.04em;
+    line-height: 1.6;
+  }
+  /* ── STEP CARDS ── */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  .step-card {
+    background: #fff;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 1.1rem;
+  }
+  .step-num {
+    font-family: var(--mono);
+    font-size: 1.9rem;
+    font-weight: 600;
+    color: var(--mid);
+    line-height: 1;
+    margin-bottom: 0.4rem;
+  }
+  .step-card h4 {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 0.35rem;
+  }
+  .step-card p { font-size: 0.82rem; margin: 0; color: #444; }
+  /* ── COMPARE GRID ── */
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  .compare-card {
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+  }
+  .compare-card-header {
+    padding: 0.6rem 1rem;
+    font-family: var(--mono);
+    font-size: 0.76rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .compare-card-body { padding: 1rem; font-size: 0.86rem; }
+  .compare-card-body ul { list-style: none; }
+  .compare-card-body li { margin-bottom: 0.4rem; padding-left: 1.1rem; position: relative; }
+  .compare-card-body li::before { content: '→'; position: absolute; left: 0; color: var(--highlight); }
+  @media (max-width: 620px) {
+    .compare-grid { grid-template-columns: 1fr; }
+    .steps { grid-template-columns: 1fr 1fr; }
+    .section { padding: 2.5rem 1.2rem; }
+  }</style>
+<!-- ══════════ HERO ══════════ -->
+<div class="hero">
+  <div class="hero-label">Module 1 · Part 6B · Part 3 — Study Guide</div>
+  <h1>Transformers &amp;
+    <br>Self-Attention
+  </h1>
+  <p>From scaled dot-product attention to multi-head, positional encoding, and the full encoder–decoder stack — with complete math and worked numbers.</p>
+</div>
+<!-- ══════════ NAV ══════════ -->
+<nav class="toc">
+  <a href="#s1">01 Why Transformers</a>
+  <a href="#s2">02 Q · K · V</a>
+  <a href="#s3">03 Scaled Dot-Product</a>
+  <a href="#s4">04 Worked Example</a>
+  <a href="#s5">05 Multi-Head</a>
+  <a href="#s6">06 Positional Encoding</a>
+  <a href="#s7">07 Masking</a>
+  <a href="#s8">08 Full Block</a>
+  <a href="#s9">09 Architecture</a>
+  <a href="#s10">10 Complexity</a>
+</nav>
+<!-- ═══════════════════════════════════════════════════
+     SECTION 1 — WHY TRANSFORMERS
+═══════════════════════════════════════════════════ -->
+<section class="section" id="s1">
+  <div class="section-eyebrow">Section 01</div>
+  <h2>Why Replace Recurrence Entirely?</h2>
+  <p>RNN+attention solved the bottleneck problem, but it kept the RNN. That means token 
+    <em>t</em> can only be computed after token 
+    <em>t−1</em> — the model is fundamentally 
+    <strong>sequential</strong>. On a GPU with thousands of cores, this wastes almost all of the hardware.
+  </p>
+  <p>The Transformer's radical move: 
+    <strong>throw away recurrence completely</strong>. If attention can already connect any two positions, why do we need a chain of hidden states at all?
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:800px;display:block;margin:0 auto">
+      <defs>
+        <marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#555"></polygon>
+        </marker>
+        <marker id="a-red" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#b83232"></polygon>
+        </marker>
+        <marker id="a-grn" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#2a7a4b"></polygon>
+        </marker>
+        <marker id="a-blu" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+          <polygon points="0 0, 7 2.5, 0 5" fill="#2255aa"></polygon>
+        </marker>
+      </defs>
+      <!-- ── LEFT: RNN sequential ── -->
+      <rect x="10" y="10" width="375" height="280" rx="10" fill="#fff5f5" stroke="#e0b0b0" stroke-width="1.5"></rect>
+      <text x="197" y="36" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#b83232" letter-spacing="2" font-weight="600">RNN — SEQUENTIAL</text>
+      <!-- timesteps -->
+      <text x="40" y="72" font-family="IBM Plex Mono,monospace" font-size="9" fill="#999">t=1</text>
+      <text x="120" y="72" font-family="IBM Plex Mono,monospace" font-size="9" fill="#999">t=2</text>
+      <text x="200" y="72" font-family="IBM Plex Mono,monospace" font-size="9" fill="#999">t=3</text>
+      <text x="280" y="72" font-family="IBM Plex Mono,monospace" font-size="9" fill="#999">t=4</text>
+      <rect x="30" y="82" width="52" height="38" rx="6" fill="#ffd0d0" stroke="#b83232" stroke-width="1.5"></rect>
+      <text x="56" y="106" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#7a0000">h₁</text>
+      <rect x="110" y="82" width="52" height="38" rx="6" fill="#ffd0d0" stroke="#b83232" stroke-width="1.5"></rect>
+      <text x="136" y="106" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#7a0000">h₂</text>
+      <rect x="190" y="82" width="52" height="38" rx="6" fill="#ffd0d0" stroke="#b83232" stroke-width="1.5"></rect>
+      <text x="216" y="106" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#7a0000">h₃</text>
+      <rect x="270" y="82" width="52" height="38" rx="6" fill="#ffd0d0" stroke="#b83232" stroke-width="1.5"></rect>
+      <text x="296" y="106" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#7a0000">h₄</text>
+      <line x1="82" y1="101" x2="108" y2="101" stroke="#b83232" stroke-width="2" marker-end="url(#a-red)"></line>
+      <line x1="162" y1="101" x2="188" y2="101" stroke="#b83232" stroke-width="2" marker-end="url(#a-red)"></line>
+      <line x1="242" y1="101" x2="268" y2="101" stroke="#b83232" stroke-width="2" marker-end="url(#a-red)"></line>
+      <!-- wait indicators -->
+      <text x="95" y="140" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#b83232">⏱ wait</text>
+      <text x="175" y="140" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#b83232">⏱ wait</text>
+      <text x="255" y="140" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#b83232">⏱ wait</text>
+      <!-- path length illustration -->
+      <text x="30" y="180" font-family="IBM Plex Mono,monospace" font-size="9" fill="#555" font-weight="600">Path from h₁ to h₄:</text>
+      <path d="M56 195 L136 195 L216 195 L296 195" stroke="#b83232" stroke-width="2.5" fill="none" stroke-dasharray="6,3"></path>
+      <circle cx="56" cy="195" r="4" fill="#b83232"></circle>
+      <circle cx="136" cy="195" r="4" fill="#b83232"></circle>
+      <circle cx="216" cy="195" r="4" fill="#b83232"></circle>
+      <circle cx="296" cy="195" r="4" fill="#b83232"></circle>
+      <text x="176" y="215" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#b83232" font-weight="600">3 hops — O(n) distance</text>
+      <text x="197" y="248" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#777">✗ cannot parallelize across time</text>
+      <text x="197" y="264" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#777">✗ gradients weaken over long paths</text>
+      <text x="197" y="280" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#777">✗ training time scales with length</text>
+      <!-- ── RIGHT: Transformer parallel ── -->
+      <rect x="405" y="10" width="385" height="280" rx="10" fill="#f0fff6" stroke="#80c8a0" stroke-width="1.5"></rect>
+      <text x="597" y="36" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#2a7a4b" letter-spacing="2" font-weight="600">TRANSFORMER — PARALLEL</text>
+      <text x="597" y="72" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#999">all positions computed at once</text>
+      <rect x="435" y="82" width="52" height="38" rx="6" fill="#c8ead6" stroke="#2a7a4b" stroke-width="1.5"></rect>
+      <text x="461" y="106" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a5c38">z₁</text>
+      <rect x="515" y="82" width="52" height="38" rx="6" fill="#c8ead6" stroke="#2a7a4b" stroke-width="1.5"></rect>
+      <text x="541" y="106" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a5c38">z₂</text>
+      <rect x="595" y="82" width="52" height="38" rx="6" fill="#c8ead6" stroke="#2a7a4b" stroke-width="1.5"></rect>
+      <text x="621" y="106" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a5c38">z₃</text>
+      <rect x="675" y="82" width="52" height="38" rx="6" fill="#c8ead6" stroke="#2a7a4b" stroke-width="1.5"></rect>
+      <text x="701" y="106" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a5c38">z₄</text>
+      <!-- all-to-all connections -->
+      <path d="M461 82 Q500 45 541 82" stroke="#2a7a4b" stroke-width="1.2" fill="none" opacity="0.6"></path>
+      <path d="M461 82 Q540 30 621 82" stroke="#2a7a4b" stroke-width="1.2" fill="none" opacity="0.6"></path>
+      <path d="M461 82 Q580 22 701 82" stroke="#2a7a4b" stroke-width="1.2" fill="none" opacity="0.6"></path>
+      <path d="M541 82 Q580 45 621 82" stroke="#2a7a4b" stroke-width="1.2" fill="none" opacity="0.6"></path>
+      <path d="M541 82 Q620 38 701 82" stroke="#2a7a4b" stroke-width="1.2" fill="none" opacity="0.6"></path>
+      <path d="M621 82 Q660 45 701 82" stroke="#2a7a4b" stroke-width="1.2" fill="none" opacity="0.6"></path>
+      <!-- path length -->
+      <text x="435" y="180" font-family="IBM Plex Mono,monospace" font-size="9" fill="#555" font-weight="600">Path from z₁ to z₄:</text>
+      <circle cx="461" cy="195" r="4" fill="#2a7a4b"></circle>
+      <circle cx="701" cy="195" r="4" fill="#2a7a4b"></circle>
+      <path d="M461 195 Q581 160 701 195" stroke="#2a7a4b" stroke-width="3" fill="none"></path>
+      <text x="581" y="215" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#2a7a4b" font-weight="600">1 hop — O(1) distance</text>
+      <text x="597" y="248" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#777">✓ fully parallel across positions</text>
+      <text x="597" y="264" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#777">✓ constant-length gradient paths</text>
+      <text x="597" y="280" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#777">✓ but memory cost is O(n²)</text>
+    </svg>
+    <div class="diagram-caption">FIG 1 — RNN forces information through a chain (left). Self-attention connects every position to every other in a single step (right). This is the whole reason Transformers train faster.</div>
+  </div>
+  <table>
+    <tbody>
+      <tr>
+        <th>Property</th>
+        <th>RNN + Attention</th>
+        <th>Transformer</th>
+      </tr>
+      <tr>
+        <td>Path length between any two tokens</td>
+        <td>O(n)</td>
+        <td>
+          <strong>O(1)</strong>
+        </td>
+      </tr>
+      <tr>
+        <td>Sequential operations</td>
+        <td>O(n)</td>
+        <td>
+          <strong>O(1)</strong>
+        </td>
+      </tr>
+      <tr>
+        <td>Layer complexity</td>
+        <td>O(n · d²)</td>
+        <td>O(n² · d)</td>
+      </tr>
+      <tr>
+        <td>Parallelizable over sequence?</td>
+        <td>No</td>
+        <td>
+          <strong>Yes</strong>
+        </td>
+      </tr>
+      <tr>
+        <td>Long-range dependency handling</td>
+        <td>Weak (gradient decay)</td>
+        <td>
+          <strong>Strong</strong>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    <strong>The trade-off:</strong> Transformers pay O(n²) in memory to get O(1) path length. For sentences of a few hundred tokens this is a great deal. For documents of 100k tokens it becomes the main bottleneck — which is why long-context research exists.
+  </div>
+</section>
+<!-- ═══════════════════════════════════════════════════
+     SECTION 2 — Q, K, V
+═══════════════════════════════════════════════════ -->
+<section class="section" id="s2">
+  <div class="section-eyebrow">Section 02</div>
+  <h2>Query, Key, Value — The Core Abstraction</h2>
+  <p>Every attention mechanism, from Bahdanau onwards, is doing the same three things. The Transformer just names them explicitly, borrowing vocabulary from database retrieval.</p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;display:block;margin:0 auto">
+      <text x="380" y="26" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#333" font-weight="600" letter-spacing="1.5">THE RETRIEVAL ANALOGY</text>
+      <!-- QUERY -->
+      <rect x="40" y="55" width="200" height="90" rx="10" fill="#fff3cc" stroke="#e8a020" stroke-width="2"></rect>
+      <text x="140" y="80" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#7a5000" font-weight="700">QUERY (Q)</text>
+      <text x="140" y="102" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#555">"What am I looking for?"</text>
+      <text x="140" y="122" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#7a5000">Q = X · W_Q</text>
+      <text x="140" y="137" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#999">shape: n × d_k</text>
+      <!-- KEY -->
+      <rect x="280" y="55" width="200" height="90" rx="10" fill="#eef3ff" stroke="#2255aa" stroke-width="2"></rect>
+      <text x="380" y="80" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#1a3a5c" font-weight="700">KEY (K)</text>
+      <text x="380" y="102" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#555">"What do I contain?"</text>
+      <text x="380" y="122" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a3a5c">K = X · W_K</text>
+      <text x="380" y="137" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#999">shape: n × d_k</text>
+      <!-- VALUE -->
+      <rect x="520" y="55" width="200" height="90" rx="10" fill="#edfaf3" stroke="#2a7a4b" stroke-width="2"></rect>
+      <text x="620" y="80" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#1a5c38" font-weight="700">VALUE (V)</text>
+      <text x="620" y="102" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#555">"What do I give you?"</text>
+      <text x="620" y="122" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a5c38">V = X · W_V</text>
+      <text x="620" y="137" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#999">shape: n × d_v</text>
+      <!-- match arrow Q<->K -->
+      <path d="M240 100 L278 100" stroke="#e8a020" stroke-width="2.5" marker-end="url(#a1)"></path>
+      <text x="259" y="90" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#999">match</text>
+      <path d="M480 100 L518 100" stroke="#2255aa" stroke-width="2.5" marker-end="url(#a1)"></path>
+      <text x="499" y="90" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#999">weight</text>
+      <!-- Bottom: single input X produces all three -->
+      <rect x="300" y="235" width="160" height="42" rx="8" fill="#1a3a5c"></rect>
+      <text x="380" y="253" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#fff" font-weight="600">Input X (n × d_model)</text>
+      <text x="380" y="269" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#88aacc">same tensor → three projections</text>
+      <line x1="340" y1="235" x2="150" y2="150" stroke="#e8a020" stroke-width="2" marker-end="url(#a1)"></line>
+      <line x1="380" y1="235" x2="380" y2="150" stroke="#2255aa" stroke-width="2" marker-end="url(#a1)"></line>
+      <line x1="420" y1="235" x2="610" y2="150" stroke="#2a7a4b" stroke-width="2" marker-end="url(#a1)"></line>
+      <text x="200" y="200" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#e8a020">W_Q</text>
+      <text x="393" y="200" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#2255aa">W_K</text>
+      <text x="560" y="200" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#2a7a4b">W_V</text>
+      <text x="380" y="295" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#888">↑ This is what makes it SELF-attention: Q, K, V all come from the same X</text>
+    </svg>
+    <div class="diagram-caption">FIG 2 — Q, K, V are three learned linear projections of the 
+      <em>same</em> input. Q asks, K advertises, V delivers.
+    </div>
+  </div>
+  <div class="callout callout-blue">
+    <strong>Library analogy:</strong> You walk in with a question (Query). Every book has a title on its spine (Key). You compare your question to all the spines, then read the ones that match — the contents (Value). Attention does exactly this, but softly: you read 
+    <em>every</em> book, weighted by how well its spine matched.
+  </div>
+  <div class="callout callout-green">
+    <strong>Concretely — the example we'll use for the rest of this guide:</strong> take the sentence 
+    <strong>"cat sat down"</strong> (n = 3 tokens). Once we compute real numbers in §04, token 2 ("sat") gets 
+    <strong>query</strong> q₂ = [0, 2, 0, 2] — literally the vector that says "here's what 
+    <em>sat</em> is looking for from every other token, including itself." Token 1 ("cat") gets 
+    <strong>key</strong> k₁ = [1, 0, 1, 0] — the vector that says "here's what 
+    <em>cat</em> has to offer, for anyone whose query matches this pattern." Their similarity, q₂·k₁ = 0 (computed step-by-step in §04), tells us "sat" found nothing relevant in "cat" — that's a real number falling out of real vectors, not a metaphor. Every diagram from here on refers back to this same three-word sentence, so you can trace one example end-to-end instead of re-orienting to a new one each section.
+  </div>
+  <h3>Self-attention vs Cross-attention</h3>
+  <div class="compare-grid">
+    <div class="compare-card">
+      <div class="compare-card-header" style="background:#2a7a4b;color:#fff">Self-Attention</div>
+      <div class="compare-card-body">
+        <ul>
+          <li>Q, K, V all from the 
+            <strong>same</strong> sequence
+          </li>
+          <li>Q = XW_Q, K = XW_K, V = XW_V</li>
+          <li>Tokens relate to each other within one sentence</li>
+          <li>Used in encoder layers and decoder self-attention</li>
+        </ul>
+      </div>
+    </div>
+    <div class="compare-card">
+      <div class="compare-card-header" style="background:#6b3fa0;color:#fff">Cross-Attention</div>
+      <div class="compare-card-body">
+        <ul>
+          <li>Q from decoder, K &amp; V from 
+            <strong>encoder</strong>
+          </li>
+          <li>Q = Y·W_Q, K = XW_K, V = XW_V</li>
+          <li>This is the direct descendant of Bahdanau attention</li>
+          <li>Used in the encoder–decoder bridge layer</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ═══════════════════════════════════════════════════
+     SECTION 3 — SCALED DOT-PRODUCT ATTENTION
+═══════════════════════════════════════════════════ -->
+<section class="section" id="s3">
+  <div class="section-eyebrow">Section 03</div>
+  <h2>Scaled Dot-Product Attention</h2>
+  <p>This is the single most important formula in modern deep learning. Everything else in a Transformer is scaffolding around it.</p>
+  <div class="math-box">
+    <span class="comment">// The formula</span>
+    <span class="var">Attention(Q, K, V)</span> = 
+    <span class="eq">softmax( Q·Kᵀ / √d_k ) · V</span>
+    <span class="comment">// Broken into four steps:</span>
+    <span class="comment">//  1. SCORE      S = Q·Kᵀ            (n×d_k)·(d_k×n) → n×n</span>
+    <span class="comment">//  2. SCALE      S = S / √d_k        prevents softmax saturation</span>
+    <span class="comment">//  3. NORMALIZE  A = softmax(S)      row-wise; each row sums to 1</span>
+    <span class="comment">//  4. AGGREGATE  Z = A·V             (n×n)·(n×d_v) → n×d_v</span>
+  </div>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 780 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:780px;display:block;margin:0 auto"><!-- STEP 1: MatMul QK^T -->
+      <text x="30" y="30" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700" letter-spacing="1">STEP 1 · SCORE</text>
+      <rect x="30" y="45" width="70" height="70" rx="6" fill="#fff3cc" stroke="#e8a020" stroke-width="2"></rect>
+      <text x="65" y="78" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#7a5000" font-weight="700">Q</text>
+      <text x="65" y="94" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#999">n × d_k</text>
+      <text x="115" y="85" text-anchor="middle" font-family="monospace" font-size="18" fill="#555">×</text>
+      <rect x="130" y="45" width="70" height="70" rx="6" fill="#eef3ff" stroke="#2255aa" stroke-width="2"></rect>
+      <text x="165" y="78" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#1a3a5c" font-weight="700">Kᵀ</text>
+      <text x="165" y="94" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#999">d_k × n</text>
+      <line x1="205" y1="80" x2="245" y2="80" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="250" y="45" width="70" height="70" rx="6" fill="#e8e5dd" stroke="#888" stroke-width="2"></rect>
+      <text x="285" y="72" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="12" fill="#333" font-weight="700">S</text>
+      <text x="285" y="88" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">n × n</text>
+      <text x="285" y="102" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#999">raw scores</text>
+      <!-- STEP 2: SCALE -->
+      <text x="370" y="30" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700" letter-spacing="1">STEP 2 · SCALE</text>
+      <line x1="325" y1="80" x2="365" y2="80" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="370" y="45" width="100" height="70" rx="6" fill="#b83232"></rect>
+      <text x="420" y="75" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#fff" font-weight="700">÷ √d_k</text>
+      <text x="420" y="93" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#ffcccc">critical step!</text>
+      <text x="420" y="106" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#ffcccc">see note below</text>
+      <!-- STEP 3: SOFTMAX -->
+      <text x="530" y="30" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700" letter-spacing="1">STEP 3 · NORMALIZE</text>
+      <line x1="475" y1="80" x2="520" y2="80" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="525" y="45" width="100" height="70" rx="6" fill="#e8a020"></rect>
+      <text x="575" y="72" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="12" fill="#fff" font-weight="700">softmax</text>
+      <text x="575" y="88" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#fff8ee">row-wise</text>
+      <text x="575" y="102" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#fff8ee">each row sums to 1</text>
+      <line x1="630" y1="80" x2="668" y2="80" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="673" y="45" width="70" height="70" rx="6" fill="#f5d9a0" stroke="#e8a020" stroke-width="2"></rect>
+      <text x="708" y="74" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="12" fill="#7a5000" font-weight="700">A</text>
+      <text x="708" y="90" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#7a5000">n × n</text>
+      <text x="708" y="103" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#996">weights</text>
+      <!-- STEP 4: AGGREGATE -->
+      <text x="30" y="175" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700" letter-spacing="1">STEP 4 · AGGREGATE</text>
+      <rect x="30" y="190" width="70" height="70" rx="6" fill="#f5d9a0" stroke="#e8a020" stroke-width="2"></rect>
+      <text x="65" y="222" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#7a5000" font-weight="700">A</text>
+      <text x="65" y="238" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#999">n × n</text>
+      <text x="115" y="230" text-anchor="middle" font-family="monospace" font-size="18" fill="#555">×</text>
+      <rect x="130" y="190" width="70" height="70" rx="6" fill="#edfaf3" stroke="#2a7a4b" stroke-width="2"></rect>
+      <text x="165" y="222" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#1a5c38" font-weight="700">V</text>
+      <text x="165" y="238" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#999">n × d_v</text>
+      <line x1="205" y1="225" x2="245" y2="225" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="250" y="190" width="90" height="70" rx="6" fill="#2a7a4b"></rect>
+      <text x="295" y="218" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#fff" font-weight="700">Z</text>
+      <text x="295" y="234" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#aaddbb">n × d_v</text>
+      <text x="295" y="248" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#aaddbb">output!</text>
+      <!-- WHY SCALE box -->
+      <rect x="380" y="180" width="370" height="95" rx="8" fill="#fff0f0" stroke="#e0b0b0" stroke-width="1.5"></rect>
+      <text x="565" y="203" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#b83232" font-weight="700">WHY DIVIDE BY √d_k ?</text>
+      <text x="398" y="223" font-family="Inter,sans-serif" font-size="10" fill="#444">Dot products grow with dimension. If q, k have variance 1,</text>
+      <text x="398" y="239" font-family="Inter,sans-serif" font-size="10" fill="#444">then q·k has variance d_k. For d_k = 64, scores reach ±8+.</text>
+      <text x="398" y="255" font-family="Inter,sans-serif" font-size="10" fill="#444">Softmax on large values → near one-hot → gradients vanish.</text>
+      <text x="398" y="269" font-family="IBM Plex Mono,monospace" font-size="9" fill="#b83232" font-weight="600">Dividing by √d_k restores variance ≈ 1. Gradients survive.</text>
+      <!-- Attention matrix visualization -->
+      <text x="30" y="310" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700" letter-spacing="1">WHAT THE n×n MATRIX A LOOKS LIKE</text>
+      <!-- mini heatmap 4x4 -->
+      <text x="105" y="333" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">The</text>
+      <text x="140" y="333" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">cat</text>
+      <text x="175" y="333" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">sat</text>
+      <text x="212" y="333" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">down</text>
+      <text x="82" y="352" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">The</text>
+      <rect x="88" y="340" width="34" height="16" fill="#1a3a5c" opacity="0.85"></rect>
+      <rect x="123" y="340" width="34" height="16" fill="#1a3a5c" opacity="0.20"></rect>
+      <rect x="158" y="340" width="34" height="16" fill="#1a3a5c" opacity="0.15"></rect>
+      <rect x="193" y="340" width="34" height="16" fill="#1a3a5c" opacity="0.10"></rect>
+      <text x="82" y="371" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">cat</text>
+      <rect x="88" y="359" width="34" height="16" fill="#1a3a5c" opacity="0.45"></rect>
+      <rect x="123" y="359" width="34" height="16" fill="#1a3a5c" opacity="0.80"></rect>
+      <rect x="158" y="359" width="34" height="16" fill="#1a3a5c" opacity="0.25"></rect>
+      <rect x="193" y="359" width="34" height="16" fill="#1a3a5c" opacity="0.12"></rect>
+      <text x="82" y="390" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">sat</text>
+      <rect x="88" y="378" width="34" height="16" fill="#1a3a5c" opacity="0.12"></rect>
+      <rect x="123" y="378" width="34" height="16" fill="#1a3a5c" opacity="0.70"></rect>
+      <rect x="158" y="378" width="34" height="16" fill="#1a3a5c" opacity="0.60"></rect>
+      <rect x="193" y="378" width="34" height="16" fill="#1a3a5c" opacity="0.35"></rect>
+      <text x="255" y="352" font-family="Inter,sans-serif" font-size="10" fill="#444">Each ROW = one token's query.</text>
+      <text x="255" y="368" font-family="Inter,sans-serif" font-size="10" fill="#444">Each COLUMN = the keys it attends to.</text>
+      <text x="255" y="384" font-family="Inter,sans-serif" font-size="10" fill="#444">Dark = high attention. Every row sums to exactly 1.</text>
+    </svg>
+    <div class="diagram-caption">FIG 3 — The four-step attention pipeline, plus why the √d_k scaling matters and what the resulting attention matrix means.</div>
+  </div>
+  <div class="callout callout-red">
+    <strong>Exam favourite:</strong> "Why scaled dot-product and not plain dot-product?" Answer: without scaling, dot products grow proportionally to d_k, pushing softmax into saturated regions where gradients are effectively zero. Dividing by √d_k keeps variance around 1 regardless of dimension.
+  </div>
+</section>
+<!-- ═══════════════════════════════════════════════════
+     SECTION 4 — WORKED EXAMPLE
+═══════════════════════════════════════════════════ -->
+<section class="section" id="s4">
+  <div class="section-eyebrow">Section 04</div>
+  <h2>Complete Worked Example</h2>
+  <p>Let's compute self-attention by hand for a 3-token sequence with d_k = 4. This is the calculation students are most often asked to reproduce.</p>
+  <h3>Setup — Embeddings, Then Weight Matrices, Then Q/K/V</h3>
+  <p>Every number in this walkthrough traces back to two things: token embeddings, and three weight matrices (W_Q, W_K, W_V) that section 02 named but never showed. Let's build them explicitly instead of starting from an already-projected Q/K/V.</p>
+  <div class="math-box">
+    <span class="comment">// Sequence: "cat sat down"  →  n = 3 tokens, embedding dim = d_k = d_v = 4</span>
+    <span class="comment">// Step A — token embeddings (one row per token). To keep the arithmetic fully</span>
+    <span class="comment">// transparent, we use one-hot toy embeddings here — each token "lights up"</span>
+    <span class="comment">// exactly one input dimension. Real embeddings are dense, learned vectors —</span>
+    <span class="comment">// this simplification changes nothing about HOW Q/K/V get computed, it just</span>
+    <span class="comment">// makes the matrix multiply easy to verify by hand.</span>
+    <span class="var">X</span> = [[1, 0, 0, 0],   
+    <span class="comment">// x_cat</span>
+     [0, 1, 0, 0],   
+    <span class="comment">// x_sat</span>
+     [0, 0, 1, 0]]   
+    <span class="comment">// x_down</span>
+  </div>
+  <h4 style="font-family:var(--display);font-size:1.05rem;color:var(--accent);margin:1.5rem 0 .6rem">How are W_Q, W_K, W_V actually initialized?</h4>
+  <p>Before any training happens, every weight matrix in the network — W_Q, W_K, W_V, W_O, the FFN's W₁/W₂ — starts as 
+    <strong>small random numbers</strong>, never zeros and never large values. The standard scheme is 
+    <strong>Xavier/Glorot initialization</strong>: draw each entry from a distribution whose variance is scaled to the layer's input/output size, so signal variance stays roughly constant as it passes through.
+  </p>
+  <div class="math-box">
+    <span class="comment">// Xavier/Glorot uniform initialization</span>
+    <span class="var">limit</span> = 
+    <span class="eq">√(6 / (fan_in + fan_out))</span>
+    <span class="var">W[i][j]</span> ~ 
+    <span class="eq">Uniform(−limit, +limit)</span>
+    <span class="comment">// For W_Q ∈ ℝ^(4×4): fan_in = fan_out = 4  →  limit = √(6/8) ≈ 0.87</span>
+    <span class="comment">// So every entry of a freshly-initialized W_Q would land in [−0.87, 0.87]</span>
+    <span class="comment">// WHY small and random, specifically:</span>
+    <span class="comment">//   all-zero   → every neuron computes an identical gradient — nothing differentiates (dead network)</span>
+    <span class="comment">//   too large  → activations compound layer over layer, softmax saturates (the √d_k problem from §03, but at init)</span>
+    <span class="comment">//   too small  → signal shrinks toward 0 before it reaches deep layers</span>
+    <span class="comment">//   Xavier's variance formula targets OUTPUT variance ≈ INPUT variance, layer after layer</span>
+  </div>
+  <p>For this walkthrough we don't use a fresh random draw — we 
+    <strong>fix</strong> W_Q, W_K, W_V to specific numbers so every downstream calculation is exactly reproducible by hand. Treat these as one particular initialization (equally: a snapshot partway through training) rather than the literal first random draw:
+  </p>
+  <div class="math-box">
+    <span class="var">W_Q</span> = [[1, 0, 1, 0],       
+    <span class="var">W_K</span> = [[1, 0, 1, 0],       
+    <span class="var">W_V</span> = [[2, 1, 0, 3],
+       [0, 2, 0, 2],            [0, 1, 0, 1],            [1, 4, 2, 0],
+       [1, 1, 1, 1],            [1, 1, 0, 0],            [0, 2, 5, 1],
+       [.1,-.1,.1,.1]]          [.1,.1,-.1,.1]]          [.1,-.1,.2,.1]]
+    <span class="comment">// (row 4 of each matrix never gets touched by X above — none of our three</span>
+    <span class="comment">// one-hot tokens activates input dimension 4 — so its exact values don't</span>
+    <span class="comment">// affect this example. They'd matter the moment a 4th token appeared.)</span>
+  </div>
+  <h4 style="font-family:var(--display);font-size:1.05rem;color:var(--accent);margin:1.5rem 0 .6rem">Multiply: embeddings × weight matrix = Query</h4>
+  <div class="math-box">
+    <span class="comment">// Q = X · W_Q — worked in full for row 1 ("cat"); rows 2 and 3 follow identically</span>
+    <span class="comment">// x_cat = [1, 0, 0, 0]  (one-hot → this literally SELECTS row 1 of W_Q)</span>
+    <span class="var">q₁</span> = 
+    <span class="eq">x_cat · W_Q</span> = 
+    <span class="eq">1×[1,0,1,0] + 0×[0,2,0,2] + 0×[1,1,1,1] + 0×[.1,-.1,.1,.1]</span>
+   = 
+    <span class="hi">[1, 0, 1, 0]</span>
+    <span class="comment">// Same mechanism for every row of every matrix — because X is one-hot here,</span>
+    <span class="comment">// X·W just reads off a row of W. (With dense embeddings, X·W becomes a genuine</span>
+    <span class="comment">// weighted blend of W's rows — same operation, just less visually obvious.)</span>
+    <span class="comment">// K = X·W_K and V = X·W_V work the exact same way.</span>
+  </div>
+  <p>Carrying that same row-selection out for every token and every matrix gives the Q, K, V this whole worked example is built on:</p>
+  <div class="math-box">
+    <span class="var">Q</span> = [[1, 0, 1, 0],     
+    <span class="var">K</span> = [[1, 0, 1, 0],     
+    <span class="var">V</span> = [[2, 1, 0, 3],
+     [0, 2, 0, 2],          [0, 1, 0, 1],          [1, 4, 2, 0],
+     [1, 1, 1, 1]]          [1, 1, 0, 0]]          [0, 2, 5, 1]]
+    <span class="comment">// row 1 = "cat", row 2 = "sat", row 3 = "down" — for all three matrices</span>
+  </div>
+  <div class="callout callout-blue">
+    <strong>What Query and Key actually are, now with real numbers:</strong> q₂ = [0, 2, 0, 2] is 
+    <em>literally</em> "sat"'s embedding, passed through W_Q — nothing more mystical than a matrix multiply. It exists so "sat" can ask a question of every other token. k₁ = [1, 0, 1, 0] is "cat"'s embedding passed through W_K instead — it exists so "cat" can advertise itself to every query that comes looking. The 
+    <em>only</em> structural difference between a Query and a Key is which weight matrix — W_Q vs. W_K — the same input embedding gets multiplied by. Step 1 below takes q₂·k₁ (and every other pair) and turns them into attention weights.
+  </div>
+  <h3>Step 1 — Raw scores S = Q·Kᵀ</h3>
+  <div class="math-box">
+    <span class="comment">// Row 1: q₁ · each key</span>
+q₁·k₁ = (1)(1)+(0)(0)+(1)(1)+(0)(0) = 
+    <span class="hi">2</span>
+q₁·k₂ = (1)(0)+(0)(1)+(1)(0)+(0)(1) = 
+    <span class="hi">0</span>
+q₁·k₃ = (1)(1)+(0)(1)+(1)(0)+(0)(0) = 
+    <span class="hi">1</span>
+    <span class="comment">// Row 2: q₂ · each key</span>
+q₂·k₁ = (0)(1)+(2)(0)+(0)(1)+(2)(0) = 
+    <span class="hi">0</span>
+q₂·k₂ = (0)(0)+(2)(1)+(0)(0)+(2)(1) = 
+    <span class="hi">4</span>
+q₂·k₃ = (0)(1)+(2)(1)+(0)(0)+(2)(0) = 
+    <span class="hi">2</span>
+    <span class="comment">// Row 3: q₃ · each key</span>
+q₃·k₁ = 1+0+1+0 = 
+    <span class="hi">2</span>   q₃·k₂ = 0+1+0+1 = 
+    <span class="hi">2</span>   q₃·k₃ = 1+1+0+0 = 
+    <span class="hi">2</span>
+    <span class="var">S</span> = [[2, 0, 1],
+     [0, 4, 2],
+     [2, 2, 2]]
+  </div>
+  <h3>Step 2 — Scale by √d_k = √4 = 2</h3>
+  <div class="math-box">
+    <span class="var">S/√d_k</span> = [[1.0, 0.0, 0.5],
+          [0.0, 2.0, 1.0],
+          [1.0, 1.0, 1.0]]
+  </div>
+  <h3>Step 3 — Row-wise softmax</h3>
+  <table>
+    <tbody>
+      <tr>
+        <th>Row</th>
+        <th>Scaled scores</th>
+        <th>exp( · )</th>
+        <th>Sum</th>
+        <th>Attention weights α</th>
+      </tr>
+      <tr>
+        <td>Token 1 "cat"</td>
+        <td>1.0, 0.0, 0.5</td>
+        <td>2.718, 1.000, 1.649</td>
+        <td>5.367</td>
+        <td>
+          <strong>0.506, 0.186, 0.307</strong>
+        </td>
+      </tr>
+      <tr>
+        <td>Token 2 "sat"</td>
+        <td>0.0, 2.0, 1.0</td>
+        <td>1.000, 7.389, 2.718</td>
+        <td>11.107</td>
+        <td>
+          <strong>0.090, 0.665, 0.245</strong>
+        </td>
+      </tr>
+      <tr>
+        <td>Token 3 "down"</td>
+        <td>1.0, 1.0, 1.0</td>
+        <td>2.718, 2.718, 2.718</td>
+        <td>8.155</td>
+        <td>
+          <strong>0.333, 0.333, 0.333</strong>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-green">
+    <strong>Read the result:</strong> Token 2 puts 66.5% of its attention on itself — a strong self-focus. Token 3 is perfectly uniform (all scores equal), meaning it hasn't learned any preference yet. Every row sums to 1.000 ✓
+  </div>
+  <h3>Step 4 — Output Z = A·V</h3>
+  <div class="math-box">
+    <span class="comment">// Output for token 1 = weighted blend of all value vectors</span>
+    <span class="var">z₁</span> = 0.506·[2,1,0,3] + 0.186·[1,4,2,0] + 0.307·[0,2,5,1]
+   = [1.012, 0.506, 0,     1.518]
+   + [0.186, 0.744, 0.372, 0    ]
+   + [0,     0.614, 1.535, 0.307]
+   = 
+    <span class="hi">[1.198, 1.864, 1.907, 1.825]</span>
+    <span class="comment">// Same procedure for z₂ and z₃</span>
+    <span class="var">z₂</span> = 0.090·v₁ + 0.665·v₂ + 0.245·v₃ = 
+    <span class="hi">[0.845, 3.245, 2.555, 0.515]</span>
+    <span class="var">z₃</span> = 0.333·(v₁+v₂+v₃)               = 
+    <span class="hi">[1.000, 2.331, 2.331, 1.332]</span>
+    <span class="comment">// Final output matrix Z is n × d_v = 3 × 4  ✓</span>
+  </div>
+  <div class="callout">
+    <strong>What just happened:</strong> Each output z
+    <sub>i</sub> is a 
+    <em>contextualized</em> version of token i. The word "cat" no longer has a fixed embedding — its representation now depends on which other words it attended to. This is the whole point.
+  </div>
+</section>
+<!-- ═══════════════════════════════════════════════════
+     SECTION 5 — MULTI-HEAD ATTENTION
+═══════════════════════════════════════════════════ -->
+<section class="section" id="s5">
+  <div class="section-eyebrow">Section 05</div>
+  <h2>Multi-Head Attention</h2>
+  <p>One attention operation produces one weighted average — and averaging destroys information. If a token needs to track 
+    <em>both</em> its syntactic subject 
+    <em>and</em> its semantic topic, a single head must compromise. Multi-head attention runs several attention operations in parallel, each in its own subspace.
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 780 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:780px;display:block;margin:0 auto"><!-- input -->
+      <rect x="320" y="15" width="140" height="38" rx="8" fill="#1a3a5c"></rect>
+      <text x="390" y="33" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#fff" font-weight="600">Input X</text>
+      <text x="390" y="47" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#88aacc">n × d_model (512)</text>
+      <!-- split arrows -->
+      <line x1="350" y1="53" x2="120" y2="95" stroke="#888" stroke-width="1.5" marker-end="url(#a1)"></line>
+      <line x1="370" y1="53" x2="290" y2="95" stroke="#888" stroke-width="1.5" marker-end="url(#a1)"></line>
+      <line x1="410" y1="53" x2="465" y2="95" stroke="#888" stroke-width="1.5" marker-end="url(#a1)"></line>
+      <line x1="430" y1="53" x2="640" y2="95" stroke="#888" stroke-width="1.5" marker-end="url(#a1)"></line>
+      <text x="390" y="78" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#888">split into h = 8 heads, each d_k = 512/8 = 64</text>
+      <!-- HEAD 1 -->
+      <rect x="40" y="100" width="160" height="130" rx="8" fill="#fff3cc" stroke="#e8a020" stroke-width="1.8"></rect>
+      <text x="120" y="122" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#7a5000" font-weight="700">HEAD 1</text>
+      <text x="120" y="140" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#999">Q¹=XW_Q¹, K¹, V¹</text>
+      <rect x="60" y="150" width="120" height="30" rx="5" fill="#e8a020"></rect>
+      <text x="120" y="169" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff">Attention(Q¹,K¹,V¹)</text>
+      <text x="120" y="197" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#7a5000" font-style="italic">may learn: syntax</text>
+      <text x="120" y="212" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#999">out: n × 64</text>
+      <!-- HEAD 2 -->
+      <rect x="215" y="100" width="160" height="130" rx="8" fill="#eef3ff" stroke="#2255aa" stroke-width="1.8"></rect>
+      <text x="295" y="122" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a3a5c" font-weight="700">HEAD 2</text>
+      <text x="295" y="140" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#999">Q²=XW_Q², K², V²</text>
+      <rect x="235" y="150" width="120" height="30" rx="5" fill="#2255aa"></rect>
+      <text x="295" y="169" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff">Attention(Q²,K²,V²)</text>
+      <text x="295" y="197" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#1a3a5c" font-style="italic">may learn: coreference</text>
+      <text x="295" y="212" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#999">out: n × 64</text>
+      <!-- HEAD 3 -->
+      <rect x="390" y="100" width="160" height="130" rx="8" fill="#edfaf3" stroke="#2a7a4b" stroke-width="1.8"></rect>
+      <text x="470" y="122" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a5c38" font-weight="700">HEAD 3</text>
+      <text x="470" y="140" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#999">Q³=XW_Q³, K³, V³</text>
+      <rect x="410" y="150" width="120" height="30" rx="5" fill="#2a7a4b"></rect>
+      <text x="470" y="169" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff">Attention(Q³,K³,V³)</text>
+      <text x="470" y="197" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#1a5c38" font-style="italic">may learn: position</text>
+      <text x="470" y="212" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#999">out: n × 64</text>
+      <!-- HEAD h -->
+      <rect x="565" y="100" width="160" height="130" rx="8" fill="#f5f0ff" stroke="#6b3fa0" stroke-width="1.8"></rect>
+      <text x="645" y="122" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#4a1a80" font-weight="700">HEAD h (=8)</text>
+      <text x="645" y="140" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#999">Qʰ=XW_Qʰ, Kʰ, Vʰ</text>
+      <rect x="585" y="150" width="120" height="30" rx="5" fill="#6b3fa0"></rect>
+      <text x="645" y="169" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff">Attention(Qʰ,Kʰ,Vʰ)</text>
+      <text x="645" y="197" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#4a1a80" font-style="italic">may learn: rare patterns</text>
+      <text x="645" y="212" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#999">out: n × 64</text>
+      <!-- CONCAT -->
+      <line x1="120" y1="230" x2="330" y2="270" stroke="#e8a020" stroke-width="1.8" marker-end="url(#a1)"></line>
+      <line x1="295" y1="230" x2="365" y2="270" stroke="#2255aa" stroke-width="1.8" marker-end="url(#a1)"></line>
+      <line x1="470" y1="230" x2="415" y2="270" stroke="#2a7a4b" stroke-width="1.8" marker-end="url(#a1)"></line>
+      <line x1="645" y1="230" x2="450" y2="270" stroke="#6b3fa0" stroke-width="1.8" marker-end="url(#a1)"></line>
+      <rect x="290" y="275" width="200" height="42" rx="8" fill="#333"></rect>
+      <text x="390" y="294" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#fff" font-weight="600">Concat(head₁,…,head₈)</text>
+      <text x="390" y="309" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#aaa">n × (8 × 64) = n × 512</text>
+      <!-- W_O -->
+      <line x1="390" y1="317" x2="390" y2="340" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="315" y="345" width="150" height="34" rx="8" fill="#e8a020"></rect>
+      <text x="390" y="367" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#fff" font-weight="600">× W_O  (512 × 512)</text>
+      <!-- output -->
+      <line x1="390" y1="379" x2="390" y2="393" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <text x="390" y="412" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a3a5c" font-weight="700">MultiHead output: n × d_model (512)</text>
+      <!-- annotation -->
+      <text x="120" y="290" font-family="Inter,sans-serif" font-size="9" fill="#888" font-style="italic">Total params ≈ same as</text>
+      <text x="120" y="304" font-family="Inter,sans-serif" font-size="9" fill="#888" font-style="italic">one full-width head —</text>
+      <text x="120" y="318" font-family="Inter,sans-serif" font-size="9" fill="#888" font-style="italic">multi-head is nearly free.</text>
+    </svg>
+    <div class="diagram-caption">FIG 4 — Multi-head attention. d_model is split across h heads, each attends independently in a 64-dim subspace, results are concatenated and mixed by W_O.</div>
+  </div>
+  <div class="math-box">
+    <span class="comment">// Per head</span>
+    <span class="var">headᵢ</span> = 
+    <span class="eq">Attention(Q·W_Qⁱ,  K·W_Kⁱ,  V·W_Vⁱ)</span>
+    <span class="comment">// Combine all heads</span>
+    <span class="var">MultiHead(Q,K,V)</span> = 
+    <span class="eq">Concat(head₁, …, head_h) · W_O</span>
+    <span class="comment">// Standard base-Transformer dimensions:</span>
+    <span class="comment">//   d_model = 512    h = 8    d_k = d_v = d_model / h = 64</span>
+    <span class="comment">//   W_Qⁱ, W_Kⁱ ∈ ℝ^(512×64)   W_Vⁱ ∈ ℝ^(512×64)   W_O ∈ ℝ^(512×512)</span>
+  </div>
+  <div class="callout callout-purple">
+    <strong>Why splitting is free:</strong> Because d_k = d_model/h, running 8 heads at 64 dims costs the same FLOPs as 1 head at 512 dims. You get 8 different "views" of the sequence for the price of one — this is the elegance of the design.
+  </div>
+  <div class="callout callout-green">
+    <strong>Where "cat sat down" fits in:</strong> §04's worked example used one 4-dimensional head (d_k = 4) purely so the arithmetic stayed hand-checkable. A real model with d_model = 512 and h = 8 would instead run 
+    <em>eight</em> versions of that exact same q·k computation in parallel, each in its own 64-dim slice of the embedding, each with its own W_Qⁱ/W_Kⁱ/W_Vⁱ — then concatenate the eight 4-dim-style outputs and mix with W_O. Nothing about the mechanic changes; only the number of parallel "views" of cat/sat/down does.
+  </div>
+  <table>
+    <tbody>
+      <tr>
+        <th>Head behaviour observed in trained models</th>
+        <th>What it tracks</th>
+      </tr>
+      <tr>
+        <td>Positional heads</td>
+        <td>Attend to the previous or next token — a learned local window</td>
+      </tr>
+      <tr>
+        <td>Syntactic heads</td>
+        <td>Verb → its subject, noun → its determiner</td>
+      </tr>
+      <tr>
+        <td>Coreference heads</td>
+        <td>Pronoun → the noun it refers to</td>
+      </tr>
+      <tr>
+        <td>Rare-token heads</td>
+        <td>Attend to low-frequency, high-information words</td>
+      </tr>
+      <tr>
+        <td>Null / sink heads</td>
+        <td>Dump attention on [CLS] or the first token when nothing is relevant</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+<!-- ═══════════════════════════════════════════════════
+     SECTION 6 — POSITIONAL ENCODING
+═══════════════════════════════════════════════════ -->
+<section class="section" id="s6">
+  <div class="section-eyebrow">Section 06</div>
+  <h2>Positional Encoding</h2>
+  <p>Self-attention is 
+    <strong>permutation-invariant</strong>. Shuffle the input tokens and the output set is identical — just reordered. To the model, "dog bites man" and "man bites dog" are the same bag of vectors. That is catastrophic for language.
+  </p>
+  <p>The fix: inject position information directly into the embeddings before the first layer.</p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 760 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;display:block;margin:0 auto"><!-- The problem -->
+      <rect x="20" y="15" width="330" height="115" rx="8" fill="#fff0f0" stroke="#e0b0b0" stroke-width="1.5"></rect>
+      <text x="185" y="38" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#b83232" font-weight="700">THE PROBLEM</text>
+      <text x="45" y="62" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333">"dog bites man"</text>
+      <text x="185" y="62" text-anchor="middle" font-family="monospace" font-size="12" fill="#b83232">≡</text>
+      <text x="215" y="62" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333">"man bites dog"</text>
+      <text x="185" y="85" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#555">Without position info, attention sees only a SET,</text>
+      <text x="185" y="100" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#555">not a SEQUENCE. Order carries no signal.</text>
+      <text x="185" y="120" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#b83232" font-weight="600">Attention is permutation-invariant</text>
+      <!-- The fix -->
+      <rect x="375" y="15" width="365" height="115" rx="8" fill="#f0fff6" stroke="#80c8a0" stroke-width="1.5"></rect>
+      <text x="557" y="38" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#2a7a4b" font-weight="700">THE FIX — ADD POSITIONAL ENCODING</text>
+      <!-- token embedding -->
+      <rect x="400" y="55" width="80" height="34" rx="5" fill="#c8ead6" stroke="#2a7a4b"></rect>
+      <text x="440" y="72" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a5c38">Embedding</text>
+      <text x="440" y="84" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">E(token)</text>
+      <text x="497" y="77" text-anchor="middle" font-family="monospace" font-size="18" fill="#2a7a4b">+</text>
+      <rect x="513" y="55" width="80" height="34" rx="5" fill="#fff3cc" stroke="#e8a020"></rect>
+      <text x="553" y="72" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#7a5000">Positional</text>
+      <text x="553" y="84" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#666">PE(pos)</text>
+      <line x1="598" y1="72" x2="628" y2="72" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="633" y="55" width="80" height="34" rx="5" fill="#1a3a5c"></rect>
+      <text x="673" y="72" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff">Input to</text>
+      <text x="673" y="84" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#88aacc">layer 1</text>
+      <text x="557" y="112" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#555">Same dimension (d_model), so they simply add elementwise.</text>
+      <text x="557" y="126" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#2a7a4b">No extra parameters in the sinusoidal version.</text>
+      <!-- Sinusoid visualization -->
+      <text x="30" y="165" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700" letter-spacing="1">SINUSOIDAL PATTERN ACROSS DIMENSIONS</text>
+      <!-- axes -->
+      <line x1="60" y1="300" x2="700" y2="300" stroke="#ccc" stroke-width="1"></line>
+      <line x1="60" y1="185" x2="60" y2="300" stroke="#ccc" stroke-width="1"></line>
+      <text x="380" y="322" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#888">position (pos) →</text>
+      <text x="40" y="245" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#888" transform="rotate(-90 40 245)">value</text>
+      <!-- dim 0: high freq -->
+      <path d="M60 242 Q75 195 90 242 Q105 289 120 242 Q135 195 150 242 Q165 289 180 242 Q195 195 210 242 Q225 289 240 242 Q255 195 270 242 Q285 289 300 242 Q315 195 330 242 Q345 289 360 242 Q375 195 390 242 Q405 289 420 242 Q435 195 450 242 Q465 289 480 242 Q495 195 510 242 Q525 289 540 242 Q555 195 570 242 Q585 289 600 242 Q615 195 630 242 Q645 289 660 242 Q675 195 690 242" stroke="#e8a020" stroke-width="1.8" fill="none"></path>
+      <text x="706" y="245" font-family="IBM Plex Mono,monospace" font-size="8" fill="#e8a020">i=0</text>
+      <!-- dim 2: medium freq -->
+      <path d="M60 242 Q105 200 150 242 Q195 284 240 242 Q285 200 330 242 Q375 284 420 242 Q465 200 510 242 Q555 284 600 242 Q645 200 690 242" stroke="#2255aa" stroke-width="1.8" fill="none"></path>
+      <text x="706" y="230" font-family="IBM Plex Mono,monospace" font-size="8" fill="#2255aa">i=2</text>
+      <!-- dim 4: low freq -->
+      <path d="M60 242 Q165 205 270 242 Q375 279 480 242 Q585 205 690 242" stroke="#2a7a4b" stroke-width="1.8" fill="none"></path>
+      <text x="706" y="215" font-family="IBM Plex Mono,monospace" font-size="8" fill="#2a7a4b">i=4</text>
+      <!-- very low freq -->
+      <path d="M60 260 Q225 210 390 242 Q555 274 690 250" stroke="#6b3fa0" stroke-width="1.8" fill="none" opacity="0.8"></path>
+      <text x="706" y="258" font-family="IBM Plex Mono,monospace" font-size="8" fill="#6b3fa0">i=6</text>
+      <text x="380" y="182" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#777" font-style="italic">Low dimensions oscillate fast; high dimensions oscillate slowly — like binary counting in continuous space.</text>
+    </svg>
+    <div class="diagram-caption">FIG 5 — Sinusoidal positional encoding. Each embedding dimension gets a sine/cosine wave of a different frequency, so every position receives a unique fingerprint.</div>
+  </div>
+  <div class="math-box">
+    <span class="comment">// Sinusoidal positional encoding (Vaswani et al., 2017)</span>
+    <span class="var">PE(pos, 2i)</span>   = 
+    <span class="eq">sin( pos / 10000^(2i/d_model) )</span>
+    <span class="var">PE(pos, 2i+1)</span> = 
+    <span class="eq">cos( pos / 10000^(2i/d_model) )</span>
+    <span class="comment">//   pos = token position in the sequence (0, 1, 2, …)</span>
+    <span class="comment">//   i   = dimension index within the embedding</span>
+    <span class="comment">//   Wavelengths form a geometric progression: 2π → 10000·2π</span>
+    <span class="comment">// Then simply:</span>
+    <span class="var">input</span> = 
+    <span class="eq">Embedding(token) + PE(pos)</span>
+  </div>
+  <div class="callout callout-blue">
+    <strong>Why sine and cosine?</strong> For any fixed offset k, PE(pos+k) can be written as a 
+    <em>linear function</em> of PE(pos). This means the model can learn to attend by relative position using a linear transform — a property that plain learned embeddings don't guarantee. It also extrapolates to sequence lengths never seen in training.
+  </div>
+  <div class="callout callout-green">
+    <strong>Back to "cat sat down":</strong> "cat" sits at pos = 0, "sat" at pos = 1, "down" at pos = 2. Using d_model = 4 (matching §04's toy embeddings) and the formula above with i = 0 and i = 1:
+    <div class="math-box" style="margin:0.75rem 0 0">
+      <span class="var">PE(0)</span> = [sin(0/1), cos(0/1), sin(0/100), cos(0/100)]     = 
+      <span class="hi">[0, 1, 0, 1]</span>
+      <span class="var">PE(1)</span> = [sin(1/1), cos(1/1), sin(1/100), cos(1/100)]     = 
+      <span class="hi">[0.841, 0.540, 0.010, 1.000]</span>
+      <span class="var">PE(2)</span> = [sin(2/1), cos(2/1), sin(2/100), cos(2/100)]     = 
+      <span class="hi">[0.909, -0.416, 0.020, 1.000]</span>
+      <span class="comment">// These get ADDED to x_cat, x_sat, x_down BEFORE anything in §04 happens —</span>
+      <span class="comment">// meaning the "embeddings" used to compute Q/K/V there are technically a</span>
+      <span class="comment">// simplification too: a full pipeline would use x_cat + PE(0), not x_cat alone.</span>
+    </div>
+  </div>
+  <table>
+    <tbody>
+      <tr>
+        <th>Encoding scheme</th>
+        <th>How it works</th>
+        <th>Trade-off</th>
+      </tr>
+      <tr>
+        <td>Sinusoidal (original)</td>
+        <td>Fixed sine/cosine waves</td>
+        <td>No parameters; extrapolates to longer sequences</td>
+      </tr>
+      <tr>
+        <td>Learned absolute</td>
+        <td>A trainable embedding per position</td>
+        <td>Slightly better in-distribution; fails beyond max length (used in BERT/GPT-2)</td>
+      </tr>
+      <tr>
+        <td>Relative (Shaw et al.)</td>
+        <td>Encodes distance between token pairs</td>
+        <td>Better for varying lengths; more compute per layer</td>
+      </tr>
+      <tr>
+        <td>RoPE (rotary)</td>
+        <td>Rotates Q and K by a position-dependent angle</td>
+        <td>Current standard in LLaMA, GPT-NeoX, most modern LLMs</td>
+      </tr>
+      <tr>
+        <td>ALiBi</td>
+        <td>Adds a linear distance penalty to attention scores</td>
+        <td>Very strong length extrapolation; no PE vectors at all</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+<!-- ═══════════════════════════════════════════════════
+     SECTION 7 — MASKING
+═══════════════════════════════════════════════════ -->
+<section class="section" id="s7">
+  <div class="section-eyebrow">Section 07</div>
+  <h2>Masked Self-Attention</h2>
+  <p>The decoder generates text one token at a time. During training we feed it the whole target sentence at once for speed — but then position 3 could simply 
+    <em>look ahead</em> and copy the answer from position 4. That's cheating, and it makes the model useless at inference.
+  </p>
+  <p>
+    <strong>Causal masking</strong> prevents it: set all future positions to −∞ before the softmax, so they receive exactly zero attention weight.
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 760 330" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;display:block;margin:0 auto"><!-- Left: unmasked -->
+      <text x="150" y="28" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#b83232" font-weight="700" letter-spacing="1">✗ UNMASKED (cheating)</text>
+      <!-- column labels -->
+      <text x="105" y="52" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">t₁</text>
+      <text x="140" y="52" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">t₂</text>
+      <text x="175" y="52" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">t₃</text>
+      <text x="210" y="52" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">t₄</text>
+      <!-- rows -->
+      <text x="82" y="72" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">t₁</text>
+      <rect x="88" y="60" width="34" height="18" fill="#b83232" opacity="0.7"></rect>
+      <rect x="123" y="60" width="34" height="18" fill="#b83232" opacity="0.4"></rect>
+      <rect x="158" y="60" width="34" height="18" fill="#b83232" opacity="0.5"></rect>
+      <rect x="193" y="60" width="34" height="18" fill="#b83232" opacity="0.3"></rect>
+      <text x="82" y="93" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">t₂</text>
+      <rect x="88" y="81" width="34" height="18" fill="#b83232" opacity="0.4"></rect>
+      <rect x="123" y="81" width="34" height="18" fill="#b83232" opacity="0.7"></rect>
+      <rect x="158" y="81" width="34" height="18" fill="#b83232" opacity="0.5"></rect>
+      <rect x="193" y="81" width="34" height="18" fill="#b83232" opacity="0.4"></rect>
+      <text x="82" y="114" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">t₃</text>
+      <rect x="88" y="102" width="34" height="18" fill="#b83232" opacity="0.3"></rect>
+      <rect x="123" y="102" width="34" height="18" fill="#b83232" opacity="0.5"></rect>
+      <rect x="158" y="102" width="34" height="18" fill="#b83232" opacity="0.7"></rect>
+      <rect x="193" y="102" width="34" height="18" fill="#b83232" opacity="0.6"></rect>
+      <text x="82" y="135" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">t₄</text>
+      <rect x="88" y="123" width="34" height="18" fill="#b83232" opacity="0.3"></rect>
+      <rect x="123" y="123" width="34" height="18" fill="#b83232" opacity="0.4"></rect>
+      <rect x="158" y="123" width="34" height="18" fill="#b83232" opacity="0.5"></rect>
+      <rect x="193" y="123" width="34" height="18" fill="#b83232" opacity="0.8"></rect>
+      <text x="150" y="163" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#b83232">t₁ can see t₂, t₃, t₄ — the future!</text>
+      <text x="150" y="178" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#777">Model learns to copy, not predict.</text>
+      <!-- Middle: the mask -->
+      <text x="380" y="28" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700" letter-spacing="1">THE CAUSAL MASK</text>
+      <text x="335" y="52" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">t₁</text>
+      <text x="370" y="52" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">t₂</text>
+      <text x="405" y="52" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">t₃</text>
+      <text x="440" y="52" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">t₄</text>
+      <g font-family="IBM Plex Mono,monospace" font-size="9" text-anchor="middle"><!-- row 1 -->
+        <rect x="318" y="60" width="34" height="18" fill="#ddd" stroke="#bbb"></rect>
+        <text x="335" y="73" fill="#333">0</text>
+        <rect x="353" y="60" width="34" height="18" fill="#333"></rect>
+        <text x="370" y="73" fill="#fff">-∞</text>
+        <rect x="388" y="60" width="34" height="18" fill="#333"></rect>
+        <text x="405" y="73" fill="#fff">-∞</text>
+        <rect x="423" y="60" width="34" height="18" fill="#333"></rect>
+        <text x="440" y="73" fill="#fff">-∞</text>
+        <!-- row 2 -->
+        <rect x="318" y="81" width="34" height="18" fill="#ddd" stroke="#bbb"></rect>
+        <text x="335" y="94" fill="#333">0</text>
+        <rect x="353" y="81" width="34" height="18" fill="#ddd" stroke="#bbb"></rect>
+        <text x="370" y="94" fill="#333">0</text>
+        <rect x="388" y="81" width="34" height="18" fill="#333"></rect>
+        <text x="405" y="94" fill="#fff">-∞</text>
+        <rect x="423" y="81" width="34" height="18" fill="#333"></rect>
+        <text x="440" y="94" fill="#fff">-∞</text>
+        <!-- row 3 -->
+        <rect x="318" y="102" width="34" height="18" fill="#ddd" stroke="#bbb"></rect>
+        <text x="335" y="115" fill="#333">0</text>
+        <rect x="353" y="102" width="34" height="18" fill="#ddd" stroke="#bbb"></rect>
+        <text x="370" y="115" fill="#333">0</text>
+        <rect x="388" y="102" width="34" height="18" fill="#ddd" stroke="#bbb"></rect>
+        <text x="405" y="115" fill="#333">0</text>
+        <rect x="423" y="102" width="34" height="18" fill="#333"></rect>
+        <text x="440" y="115" fill="#fff">-∞</text>
+        <!-- row 4 -->
+        <rect x="318" y="123" width="34" height="18" fill="#ddd" stroke="#bbb"></rect>
+        <text x="335" y="136" fill="#333">0</text>
+        <rect x="353" y="123" width="34" height="18" fill="#ddd" stroke="#bbb"></rect>
+        <text x="370" y="136" fill="#333">0</text>
+        <rect x="388" y="123" width="34" height="18" fill="#ddd" stroke="#bbb"></rect>
+        <text x="405" y="136" fill="#333">0</text>
+        <rect x="423" y="123" width="34" height="18" fill="#ddd" stroke="#bbb"></rect>
+        <text x="440" y="136" fill="#333">0</text>
+      </g>
+      <text x="380" y="163" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#555">Added to scores BEFORE softmax.</text>
+      <text x="380" y="178" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#333">exp(-∞) = 0 → weight becomes 0</text>
+      <!-- Right: masked result -->
+      <text x="610" y="28" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#2a7a4b" font-weight="700" letter-spacing="1">✓ MASKED (correct)</text>
+      <text x="565" y="52" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">t₁</text>
+      <text x="600" y="52" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">t₂</text>
+      <text x="635" y="52" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">t₃</text>
+      <text x="670" y="52" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">t₄</text>
+      <text x="542" y="72" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">t₁</text>
+      <rect x="548" y="60" width="34" height="18" fill="#2a7a4b" opacity="1"></rect>
+      <rect x="583" y="60" width="34" height="18" fill="#f5f5f5" stroke="#eee"></rect>
+      <rect x="618" y="60" width="34" height="18" fill="#f5f5f5" stroke="#eee"></rect>
+      <rect x="653" y="60" width="34" height="18" fill="#f5f5f5" stroke="#eee"></rect>
+      <text x="542" y="93" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">t₂</text>
+      <rect x="548" y="81" width="34" height="18" fill="#2a7a4b" opacity="0.4"></rect>
+      <rect x="583" y="81" width="34" height="18" fill="#2a7a4b" opacity="0.8"></rect>
+      <rect x="618" y="81" width="34" height="18" fill="#f5f5f5" stroke="#eee"></rect>
+      <rect x="653" y="81" width="34" height="18" fill="#f5f5f5" stroke="#eee"></rect>
+      <text x="542" y="114" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">t₃</text>
+      <rect x="548" y="102" width="34" height="18" fill="#2a7a4b" opacity="0.3"></rect>
+      <rect x="583" y="102" width="34" height="18" fill="#2a7a4b" opacity="0.5"></rect>
+      <rect x="618" y="102" width="34" height="18" fill="#2a7a4b" opacity="0.75"></rect>
+      <rect x="653" y="102" width="34" height="18" fill="#f5f5f5" stroke="#eee"></rect>
+      <text x="542" y="135" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">t₄</text>
+      <rect x="548" y="123" width="34" height="18" fill="#2a7a4b" opacity="0.25"></rect>
+      <rect x="583" y="123" width="34" height="18" fill="#2a7a4b" opacity="0.35"></rect>
+      <rect x="618" y="123" width="34" height="18" fill="#2a7a4b" opacity="0.5"></rect>
+      <rect x="653" y="123" width="34" height="18" fill="#2a7a4b" opacity="0.85"></rect>
+      <text x="610" y="163" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#2a7a4b">Lower-triangular: only past + present.</text>
+      <text x="610" y="178" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#777">Rows still sum to 1 after softmax.</text>
+      <!-- Bottom: types of masks -->
+      <rect x="20" y="205" width="720" height="110" rx="8" fill="#fafaf7" stroke="#ddd"></rect>
+      <text x="380" y="228" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700">TWO KINDS OF MASK USED IN PRACTICE</text>
+      <rect x="45" y="242" width="325" height="58" rx="6" fill="#fff" stroke="#ccc"></rect>
+      <text x="60" y="262" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a3a5c" font-weight="700">1 · CAUSAL / LOOK-AHEAD MASK</text>
+      <text x="60" y="278" font-family="Inter,sans-serif" font-size="9" fill="#555">Blocks future positions. Used in decoder self-attention</text>
+      <text x="60" y="292" font-family="Inter,sans-serif" font-size="9" fill="#555">and in all GPT-style autoregressive models.</text>
+      <rect x="390" y="242" width="325" height="58" rx="6" fill="#fff" stroke="#ccc"></rect>
+      <text x="405" y="262" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a3a5c" font-weight="700">2 · PADDING MASK</text>
+      <text x="405" y="278" font-family="Inter,sans-serif" font-size="9" fill="#555">Blocks &lt;pad&gt; tokens added to equalize batch lengths.</text>
+      <text x="405" y="292" font-family="Inter,sans-serif" font-size="9" fill="#555">Used in both encoder and decoder, all model types.</text>
+    </svg>
+    <div class="diagram-caption">FIG 6 — Causal masking. Adding −∞ to future positions before softmax zeroes their attention weights, producing a lower-triangular attention pattern.</div>
+  </div>
+  <div class="math-box">
+    <span class="comment">// Masked attention</span>
+    <span class="var">MaskedAttention(Q,K,V)</span> = 
+    <span class="eq">softmax( (Q·Kᵀ / √d_k) + M ) · V</span>
+    <span class="comment">// where M is the mask matrix:</span>
+    <span class="var">M[i][j]</span> = 
+    <span class="eq">0     if j ≤ i    (allowed — past and present)</span>
+    <span class="eq">-∞    if j &gt; i    (blocked — future)</span>
+    <span class="comment">// In code, -∞ is usually -1e9 to stay numerically stable</span>
+  </div>
+  <div class="callout callout-green">
+    <strong>Applied to "cat sat down":</strong> §04 computed S/√d_k = [[1.0, 0.0, 0.5], [0.0, 2.0, 1.0], [1.0, 1.0, 1.0]] with no masking — appropriate there, because that example was an 
+    <em>encoder</em> self-attention (every token may see every other token). If "cat sat down" were being generated by a 
+    <em>decoder</em> instead, the causal mask would zero out the upper triangle first:
+    <div class="math-box" style="margin:0.75rem 0 0">
+      <span class="var">masked S/√d_k</span> = [[1.0,  -∞,   -∞ ],   
+      <span class="comment">// "cat" can only see "cat"</span>
+                [0.0, 2.0,  -∞ ],   
+      <span class="comment">// "sat" can see "cat","sat"</span>
+                [1.0, 1.0, 1.0]]   
+      <span class="comment">// "down" can see all three</span>
+      <span class="comment">// Softmax row 1 would then collapse to [1.0, 0.0, 0.0] — "cat" gets no</span>
+      <span class="comment">// choice but to attend entirely to itself, since nothing else exists yet.</span>
+    </div>
+  </div>
+</section>
+<!-- ═══════════════════════════════════════════════════
+     SECTION 8 — FULL TRANSFORMER BLOCK
+═══════════════════════════════════════════════════ -->
+<section class="section" id="s8">
+  <div class="section-eyebrow">Section 08</div>
+  <h2>Anatomy of a Transformer Block</h2>
+  <p>Attention alone isn't a network. A Transformer block wraps it in three supporting components: a feed-forward network, residual connections, and layer normalization. Each solves a specific problem.</p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 700 470" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;display:block;margin:0 auto"><!-- Block outline -->
+      <rect x="150" y="45" width="300" height="380" rx="12" fill="#fafaf7" stroke="#1a3a5c" stroke-width="2" stroke-dasharray="6,4"></rect>
+      <text x="300" y="32" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a3a5c" font-weight="700" letter-spacing="1.5">ONE ENCODER BLOCK  (× N = 6)</text>
+      <!-- Input -->
+      <rect x="230" y="60" width="140" height="32" rx="7" fill="#1a3a5c"></rect>
+      <text x="300" y="81" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="600">Input  x  (n × 512)</text>
+      <!-- Multi-head attention -->
+      <line x1="300" y1="92" x2="300" y2="110" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="200" y="115" width="200" height="46" rx="8" fill="#e8a020"></rect>
+      <text x="300" y="136" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#fff" font-weight="700">Multi-Head Attention</text>
+      <text x="300" y="152" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#fff8ee">mixes information ACROSS tokens</text>
+      <!-- Add & Norm 1 -->
+      <line x1="300" y1="161" x2="300" y2="180" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="220" y="185" width="160" height="36" rx="8" fill="#555"></rect>
+      <text x="300" y="202" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="600">Add &amp; LayerNorm</text>
+      <text x="300" y="215" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#bbb">LN(x + Attn(x))</text>
+      <!-- Residual arrow 1 -->
+      <path d="M230 76 L175 76 L175 203 L218 203" stroke="#2a7a4b" stroke-width="2" fill="none" marker-end="url(#a-grn)"></path>
+      <text x="140" y="140" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#2a7a4b" font-weight="600" transform="rotate(-90 140 140)">residual</text>
+      <!-- Feed forward -->
+      <line x1="300" y1="221" x2="300" y2="245" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="200" y="250" width="200" height="60" rx="8" fill="#2a7a4b"></rect>
+      <text x="300" y="270" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#fff" font-weight="700">Feed-Forward Network</text>
+      <text x="300" y="285" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#c8ead6">max(0, xW₁+b₁)W₂+b₂</text>
+      <text x="300" y="300" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#c8ead6">512 → 2048 → 512  ·  per-token</text>
+      <!-- Add & Norm 2 -->
+      <line x1="300" y1="310" x2="300" y2="330" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="220" y="335" width="160" height="36" rx="8" fill="#555"></rect>
+      <text x="300" y="352" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="600">Add &amp; LayerNorm</text>
+      <text x="300" y="365" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#bbb">LN(h + FFN(h))</text>
+      <!-- Residual arrow 2 -->
+      <path d="M220 203 L175 203 L175 353 L218 353" stroke="#2a7a4b" stroke-width="2" fill="none" marker-end="url(#a-grn)"></path>
+      <!-- Output -->
+      <line x1="300" y1="371" x2="300" y2="390" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="230" y="395" width="140" height="32" rx="7" fill="#1a3a5c"></rect>
+      <text x="300" y="416" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="600">Output  (n × 512)</text>
+      <!-- Stack loop arrow -->
+      <path d="M450 411 L490 411 L490 76 L455 76" stroke="#6b3fa0" stroke-width="2" fill="none" stroke-dasharray="5,4" marker-end="url(#a1)"></path>
+      <text x="530" y="240" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#6b3fa0" font-weight="600">stack N times</text>
+      <text x="530" y="255" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#999">shape unchanged</text>
+      <text x="530" y="269" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#999">so blocks compose</text>
+      <!-- Left annotations -->
+      <text x="75" y="290" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#2a7a4b" font-weight="600" transform="rotate(-90 75 290)">skip connection</text>
+      <!-- Right side explanations -->
+      <text x="475" y="130" font-family="Inter,sans-serif" font-size="9" fill="#7a5000" font-weight="600">↤ token mixing</text>
+      <text x="475" y="145" font-family="Inter,sans-serif" font-size="8" fill="#888">the only place tokens talk</text>
+      <text x="475" y="278" font-family="Inter,sans-serif" font-size="9" fill="#1a5c38" font-weight="600">↤ feature mixing</text>
+      <text x="475" y="293" font-family="Inter,sans-serif" font-size="8" fill="#888">applied identically to each</text>
+      <text x="475" y="305" font-family="Inter,sans-serif" font-size="8" fill="#888">token, independently</text>
+    </svg>
+    <div class="diagram-caption">FIG 7 — A single encoder block. Attention mixes information 
+      <em>across</em> tokens; the FFN transforms each token 
+      <em>independently</em>. Residuals and LayerNorm keep deep stacks trainable.
+    </div>
+  </div>
+  <h3>What each component does</h3>
+  <table>
+    <tbody>
+      <tr>
+        <th>Component</th>
+        <th>Purpose</th>
+        <th>What breaks without it</th>
+      </tr>
+      <tr>
+        <td>
+          <strong>Multi-Head Attention</strong>
+        </td>
+        <td>Lets tokens exchange information; the only cross-token operation in the block</td>
+        <td>Tokens are processed in isolation — no context at all</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Feed-Forward Network</strong>
+        </td>
+        <td>Adds non-linear capacity per token; 512→2048→512 expansion. Holds ~2/3 of all parameters</td>
+        <td>Model becomes nearly linear; representational power collapses</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Residual connections</strong>
+        </td>
+        <td>Gradient highway — lets signal skip past layers unchanged</td>
+        <td>Deep stacks (6–96 layers) fail to train; vanishing gradients</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Layer Normalization</strong>
+        </td>
+        <td>Normalizes each token's features to mean 0, variance 1</td>
+        <td>Activations drift in scale; training destabilizes</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Dropout</strong>
+        </td>
+        <td>Applied after attention and FFN (p ≈ 0.1)</td>
+        <td>Overfitting on smaller datasets</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="math-box">
+    <span class="comment">// Full block, post-norm (original paper)</span>
+    <span class="var">h</span>  = 
+    <span class="eq">LayerNorm( x + MultiHead(x, x, x) )</span>
+    <span class="var">z</span>  = 
+    <span class="eq">LayerNorm( h + FFN(h) )</span>
+    <span class="comment">// FFN expands then contracts</span>
+    <span class="var">FFN(h)</span> = 
+    <span class="eq">max(0, h·W₁ + b₁) · W₂ + b₂</span>
+    <span class="comment">// W₁ ∈ ℝ^(512×2048),  W₂ ∈ ℝ^(2048×512)</span>
+    <span class="comment">// Modern variant — PRE-norm (used in GPT-2 onward, more stable)</span>
+    <span class="var">h</span>  = 
+    <span class="eq">x + MultiHead( LayerNorm(x) )</span>
+    <span class="var">z</span>  = 
+    <span class="eq">h + FFN( LayerNorm(h) )</span>
+  </div>
+  <div class="callout callout-purple">
+    <strong>Post-norm vs Pre-norm:</strong> The original paper normalized 
+    <em>after</em> the residual add. Modern models normalize 
+    <em>before</em> the sublayer instead, because it gives a cleaner gradient path and trains without a learning-rate warmup. If you're implementing from scratch today, use pre-norm.
+  </div>
+</section>
+<!-- ═══════════════════════════════════════════════════
+     SECTION 9 — FULL ARCHITECTURE
+═══════════════════════════════════════════════════ -->
+<section class="section" id="s9">
+  <div class="section-eyebrow">Section 09</div>
+  <h2>The Complete Encoder–Decoder Architecture</h2>
+  <p>Now we assemble everything. The original Transformer has 6 encoder blocks and 6 decoder blocks. The decoder block has 
+    <strong>three</strong> sublayers instead of two — the extra one is cross-attention to the encoder.
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 740 560" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:740px;display:block;margin:0 auto"><!-- ══ ENCODER SIDE ══ -->
+      <rect x="30" y="60" width="270" height="420" rx="12" fill="#f7f9ff" stroke="#2255aa" stroke-width="2"></rect>
+      <text x="165" y="46" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#2255aa" font-weight="700" letter-spacing="1.5">ENCODER  (× 6)</text>
+      <!-- input embedding -->
+      <rect x="70" y="430" width="190" height="34" rx="7" fill="#1a3a5c"></rect>
+      <text x="165" y="446" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff">Input Embedding</text>
+      <text x="165" y="458" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#88aacc">source tokens</text>
+      <!-- + PE -->
+      <circle cx="165" cy="408" r="12" fill="#e8a020"></circle>
+      <text x="165" y="413" text-anchor="middle" font-family="monospace" font-size="14" fill="#fff" font-weight="700">+</text>
+      <text x="230" y="412" font-family="IBM Plex Mono,monospace" font-size="8" fill="#e8a020">Positional Enc.</text>
+      <line x1="165" y1="430" x2="165" y2="422" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <!-- self attention -->
+      <line x1="165" y1="396" x2="165" y2="378" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="60" y="330" width="210" height="46" rx="8" fill="#e8a020"></rect>
+      <text x="165" y="350" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">Multi-Head Self-Attention</text>
+      <text x="165" y="366" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#fff8ee">Q, K, V all from source · unmasked</text>
+      <!-- add norm -->
+      <line x1="165" y1="330" x2="165" y2="315" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="90" y="280" width="150" height="30" rx="7" fill="#555"></rect>
+      <text x="165" y="299" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff">Add &amp; Norm</text>
+      <!-- FFN -->
+      <line x1="165" y1="280" x2="165" y2="263" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="70" y="222" width="190" height="38" rx="8" fill="#2a7a4b"></rect>
+      <text x="165" y="240" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">Feed Forward</text>
+      <text x="165" y="253" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#c8ead6">512 → 2048 → 512</text>
+      <!-- add norm 2 -->
+      <line x1="165" y1="222" x2="165" y2="207" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="90" y="172" width="150" height="30" rx="7" fill="#555"></rect>
+      <text x="165" y="191" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff">Add &amp; Norm</text>
+      <!-- encoder output -->
+      <line x1="165" y1="172" x2="165" y2="140" stroke="#2255aa" stroke-width="2.5" marker-end="url(#a-blu)"></line>
+      <rect x="75" y="100" width="180" height="38" rx="8" fill="#2255aa"></rect>
+      <text x="165" y="118" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">Encoder Output</text>
+      <text x="165" y="131" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#cce0ff">memory: K &amp; V for decoder</text>
+      <!-- ══ DECODER SIDE ══ -->
+      <rect x="380" y="60" width="290" height="420" rx="12" fill="#f5f0ff" stroke="#6b3fa0" stroke-width="2"></rect>
+      <text x="525" y="46" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#6b3fa0" font-weight="700" letter-spacing="1.5">DECODER  (× 6)</text>
+      <!-- output embedding -->
+      <rect x="425" y="430" width="200" height="34" rx="7" fill="#1a3a5c"></rect>
+      <text x="525" y="446" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff">Output Embedding</text>
+      <text x="525" y="458" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#88aacc">target tokens, shifted right</text>
+      <circle cx="525" cy="408" r="12" fill="#e8a020"></circle>
+      <text x="525" y="413" text-anchor="middle" font-family="monospace" font-size="14" fill="#fff" font-weight="700">+</text>
+      <line x1="525" y1="430" x2="525" y2="422" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <!-- MASKED self attention -->
+      <line x1="525" y1="396" x2="525" y2="378" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="410" y="330" width="230" height="46" rx="8" fill="#b83232"></rect>
+      <text x="525" y="350" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">MASKED Multi-Head Self-Attn</text>
+      <text x="525" y="366" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#ffdddd">causal mask blocks future tokens</text>
+      <line x1="525" y1="330" x2="525" y2="315" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="450" y="285" width="150" height="28" rx="7" fill="#555"></rect>
+      <text x="525" y="303" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff">Add &amp; Norm</text>
+      <!-- CROSS attention -->
+      <line x1="525" y1="285" x2="525" y2="270" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="410" y="222" width="230" height="46" rx="8" fill="#6b3fa0"></rect>
+      <text x="525" y="242" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">CROSS-Attention</text>
+      <text x="525" y="258" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#e0d0ff">Q from decoder · K,V from encoder</text>
+      <!-- Encoder → cross attention connection -->
+      <path d="M255 119 L330 119 L330 245 L406 245" stroke="#2255aa" stroke-width="2.5" fill="none" marker-end="url(#a-blu)"></path>
+      <text x="330" y="110" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#2255aa" font-weight="600">K, V</text>
+      <text x="330" y="182" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#2255aa" transform="rotate(-90 330 182)">encoder memory</text>
+      <line x1="525" y1="222" x2="525" y2="207" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="450" y="177" width="150" height="28" rx="7" fill="#555"></rect>
+      <text x="525" y="195" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff">Add &amp; Norm</text>
+      <!-- FFN -->
+      <line x1="525" y1="177" x2="525" y2="163" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="435" y="128" width="180" height="34" rx="8" fill="#2a7a4b"></rect>
+      <text x="525" y="149" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">Feed Forward + Norm</text>
+      <!-- Linear + softmax -->
+      <line x1="525" y1="128" x2="525" y2="105" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="435" y="68" width="180" height="34" rx="8" fill="#e8a020"></rect>
+      <text x="525" y="83" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">Linear → Softmax</text>
+      <text x="525" y="96" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#fff8ee">over vocabulary |V|</text>
+      <!-- final output -->
+      <line x1="525" y1="68" x2="525" y2="40" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <text x="525" y="30" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a3a5c" font-weight="700">P(next token)</text>
+      <!-- flow direction labels -->
+      <text x="20" y="270" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#999" transform="rotate(-90 20 270)">flow: bottom → top</text>
+      <!-- three sublayers note -->
+      <text x="690" y="270" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#6b3fa0" font-weight="600" transform="rotate(-90 690 270)">3 sublayers (encoder has 2)</text>
+    </svg>
+    <div class="diagram-caption">FIG 8 — The full architecture. Note the three key differences in the decoder: masked self-attention, an extra cross-attention sublayer fed by encoder K/V, and a final vocabulary projection.</div>
+  </div>
+  <h3>The three attention types side by side</h3>
+  <table>
+    <tbody>
+      <tr>
+        <th>Where</th>
+        <th>Q from</th>
+        <th>K, V from</th>
+        <th>Masked?</th>
+        <th>Job</th>
+      </tr>
+      <tr>
+        <td>Encoder self-attention</td>
+        <td>Source</td>
+        <td>Source</td>
+        <td>No</td>
+        <td>Build contextual source representations</td>
+      </tr>
+      <tr>
+        <td>Decoder self-attention</td>
+        <td>Target</td>
+        <td>Target</td>
+        <td>
+          <strong>Yes (causal)</strong>
+        </td>
+        <td>Build target context without seeing the future</td>
+      </tr>
+      <tr>
+        <td>Cross-attention</td>
+        <td>Target</td>
+        <td>
+          <strong>Encoder output</strong>
+        </td>
+        <td>No</td>
+        <td>Ground each target token in the source — direct heir of Bahdanau</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3>Three families derived from this architecture</h3>
+  <div class="steps">
+    <div class="step-card">
+      <div class="step-num" style="color:#2255aa">E</div>
+      <h4>Encoder-only</h4>
+      <p>
+        <strong>BERT, RoBERTa.</strong> Bidirectional, no mask. Best for classification, NER, retrieval.
+      </p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#b83232">D</div>
+      <h4>Decoder-only</h4>
+      <p>
+        <strong>GPT, LLaMA, Claude.</strong> Causal mask, no cross-attention. Best for generation.
+      </p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#6b3fa0">ED</div>
+      <h4>Encoder–Decoder</h4>
+      <p>
+        <strong>T5, BART, original Transformer.</strong> Best for translation and seq2seq tasks.
+      </p>
+    </div>
+  </div>
+</section>
+<!-- ═══════════════════════════════════════════════════
+     SECTION 10 — COMPLEXITY & TAKEAWAYS
+═══════════════════════════════════════════════════ -->
+<section class="section" id="s10">
+  <div class="section-eyebrow">Section 10</div>
+  <h2>Complexity, Parameters &amp; Takeaways</h2>
+  <h3>Computational complexity per layer</h3>
+  <table>
+    <tbody>
+      <tr>
+        <th>Layer type</th>
+        <th>Complexity per layer</th>
+        <th>Sequential ops</th>
+        <th>Max path length</th>
+      </tr>
+      <tr>
+        <td>
+          <strong>Self-attention</strong>
+        </td>
+        <td>O(n² · d)</td>
+        <td>
+          <strong>O(1)</strong>
+        </td>
+        <td>
+          <strong>O(1)</strong>
+        </td>
+      </tr>
+      <tr>
+        <td>Recurrent (RNN/LSTM)</td>
+        <td>O(n · d²)</td>
+        <td>O(n)</td>
+        <td>O(n)</td>
+      </tr>
+      <tr>
+        <td>Convolutional</td>
+        <td>O(k · n · d²)</td>
+        <td>O(1)</td>
+        <td>O(log_k n)</td>
+      </tr>
+      <tr>
+        <td>Restricted self-attention</td>
+        <td>O(r · n · d)</td>
+        <td>O(1)</td>
+        <td>O(n/r)</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-blue">
+    <strong>When is self-attention faster than an RNN?</strong> When n &lt; d — i.e. the sequence is shorter than the model dimension. With d = 512 and typical sentences under 100 tokens, self-attention wins comfortably. For very long documents the n² term dominates, which is exactly what sparse attention, FlashAttention, and linear-attention variants attack.
+  </div>
+  <h3>Parameter budget — base Transformer</h3>
+  <div class="math-box">
+    <span class="comment">// Per encoder block (d_model=512, d_ff=2048, h=8)</span>
+Multi-head attention:  4 × (512 × 512)        = 
+    <span class="hi">1,048,576</span>   
+    <span class="comment">// W_Q,W_K,W_V,W_O</span>
+Feed-forward:          512×2048 + 2048×512    = 
+    <span class="hi">2,097,152</span>
+LayerNorm ×2:          2 × (2 × 512)          = 
+    <span class="hi">2,048</span>
+                                          ─────────────────
+Per block total                              ≈ 
+    <span class="hi">3.15 M</span> params
+    <span class="comment">// Full base model</span>
+6 encoder blocks + 6 decoder blocks + embeddings ≈ 
+    <span class="hi">65 M parameters</span>
+    <span class="comment">// Key observation: the FFN holds ~2/3 of all parameters,</span>
+    <span class="comment">// even though attention gets all the attention.</span>
+  </div>
+  <h3>Key takeaways</h3>
+  <div class="steps">
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Attention is retrieval</h4>
+      <p>Query matches keys, softmax normalizes, values get blended. Everything else is packaging.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>√d_k is not optional</h4>
+      <p>Without scaling, softmax saturates and gradients die. This one division makes deep attention trainable.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Heads are subspaces</h4>
+      <p>Splitting d_model across h heads costs nothing extra but gives h independent relational views.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Position must be injected</h4>
+      <p>Attention is permutation-invariant. Without PE, the model cannot distinguish word order.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Masking enables generation</h4>
+      <p>The causal mask is what makes parallel training compatible with sequential inference.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Residual + LN enable depth</h4>
+      <p>They are why you can stack 6, 24, or 96 blocks without the gradient collapsing.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>O(1) path length</h4>
+      <p>Any token can reach any other in one hop. This is the structural advantage over RNNs.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>n² is the frontier</h4>
+      <p>Quadratic memory is the limiting factor for long context — the active research battleground.</p>
+    </div>
+  </div>
+  <h3>Common exam questions</h3>
+  <table>
+    <tbody>
+      <tr>
+        <th>Question</th>
+        <th>Short answer</th>
+      </tr>
+      <tr>
+        <td>Why divide by √d_k?</td>
+        <td>Dot products scale with d_k; without normalization softmax saturates and gradients vanish</td>
+      </tr>
+      <tr>
+        <td>Why multi-head instead of one big head?</td>
+        <td>A single softmax-weighted average collapses information; multiple heads attend to different relations simultaneously at the same total cost</td>
+      </tr>
+      <tr>
+        <td>Why is positional encoding needed?</td>
+        <td>Self-attention is permutation-invariant — without it, word order carries no signal</td>
+      </tr>
+      <tr>
+        <td>Why mask the decoder?</td>
+        <td>Prevents position t from attending to t+1…n, which would let the model copy the answer during training</td>
+      </tr>
+      <tr>
+        <td>Where does cross-attention get K and V?</td>
+        <td>From the final encoder layer's output (the "memory"); Q comes from the decoder</td>
+      </tr>
+      <tr>
+        <td>What is the complexity of self-attention?</td>
+        <td>O(n²·d) time and O(n²) memory for the attention matrix</td>
+      </tr>
+      <tr>
+        <td>Which holds more parameters, attention or FFN?</td>
+        <td>The FFN — roughly twice as many as the attention sublayer per block</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout" style="margin-top:2rem">
+    <strong>References:</strong>
+    <br>
+    Vaswani et al. (2017) — Attention Is All You Need. NeurIPS.
+    <br>
+    Devlin et al. (2018) — BERT: Pre-training of Deep Bidirectional Transformers.
+    <br>
+    Shaw, Uszkoreit &amp; Vaswani (2018) — Self-Attention with Relative Position Representations.
+    <br>
+    Su et al. (2021) — RoFormer: Enhanced Transformer with Rotary Position Embedding.
+    <br>
+    Press, Smith &amp; Lewis (2021) — Train Short, Test Long (ALiBi).
+    <br>
+    Dao et al. (2022) — FlashAttention: Fast and Memory-Efficient Exact Attention.
+  </div>
+</section>
+<footer style="text-align:center;padding:2rem;font-family:var(--mono);font-size:0.75rem;color:#aaa;border-top:1px solid var(--rule)">Module 1 · Part 6B · Part 3 — Transformers &amp; Self-Attention · Companion to Part 2 (RNN with Attention)</footer>

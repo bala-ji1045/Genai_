@@ -1,0 +1,9 @@
+# Packages needed for NN_RNN_Attention_Demo.ipynb
+# Install with:  pip install -r requirements.txt
+# No GPU required — everything trains on CPU in under a minute.
+
+torch>=2.0
+numpy>=1.24
+matplotlib>=3.7
+scikit-learn>=1.3
+notebook>=7.0

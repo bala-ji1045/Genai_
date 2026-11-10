@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Production Systems for GenAI — Study Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Fraunces:ital,wght@0,300;0,700;1,300&family=Inter:wght@400;500;600&display=swap');
+  :root {
+    --ink: #0f1117; --paper: #f7f6f2; --mid: #e8e5dd; --rule: #c9c4b8; --accent: #1a3a5c;
+    --highlight: #e8a020; --green: #2a7a4b; --red: #b83232; --blue: #2255aa; --purple: #6b3fa0; --teal: #0d7a7a;
+    --mono: 'IBM Plex Mono', monospace; --display: 'Fraunces', Georgia, serif; --body: 'Inter', system-ui, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--body); background: var(--paper); color: var(--ink); line-height: 1.7; font-size: 16px; }
+  .hero { background: linear-gradient(160deg, #0f1117 0%, #1a3a5c 100%); color: #fff; padding: 4rem 2rem 3rem; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 20% 30%, rgba(232,160,32,0.10), transparent 40%), radial-gradient(circle at 80% 70%, rgba(42,122,75,0.12), transparent 40%); }
+  .hero-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--highlight); margin-bottom: 1rem; position: relative; }
+  .hero h1 { font-family: var(--display); font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; line-height: 1.1; margin-bottom: 1rem; position: relative; }
+  .hero p { font-size: 1.1rem; opacity: 0.82; max-width: 640px; margin: 0 auto; position: relative; }
+  .toc { background: var(--ink); color: #fff; padding: 1.2rem 2rem; display: flex; gap: 1.2rem; flex-wrap: wrap; justify-content: center; position: sticky; top: 0; z-index: 100; }
+  .toc a { color: rgba(255,255,255,0.7); text-decoration: none; font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.03em; transition: color 0.2s; }
+  .toc a:hover { color: var(--highlight); }
+  .section { max-width: 900px; margin: 0 auto; padding: 4rem 2rem; border-bottom: 1px solid var(--rule); }
+  .section-eyebrow { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.5rem; }
+  .section h2 { font-family: var(--display); font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 700; margin-bottom: 1.5rem; color: var(--ink); }
+  .section h3 { font-family: var(--display); font-size: 1.25rem; font-weight: 700; margin: 2rem 0 0.8rem; color: var(--accent); }
+  .section p { margin-bottom: 1rem; color: #333; }
+  .callout { border-left: 4px solid var(--highlight); background: #fff8ee; padding: 1rem 1.25rem; border-radius: 0 6px 6px 0; margin: 1.5rem 0; font-size: 0.95rem; }
+  .callout strong { color: var(--accent); }
+  .callout-blue  { border-left-color: var(--blue);   background: #eef3ff; }
+  .callout-green { border-left-color: var(--green);  background: #edfaf3; }
+  .callout-red   { border-left-color: var(--red);    background: #fff0f0; }
+  .callout-purple{ border-left-color: var(--purple); background: #f5f0ff; }
+  .math-box { background: var(--ink); color: #e8e8e8; font-family: var(--mono); font-size: 0.86rem; line-height: 1.9; padding: 1.5rem; border-radius: 8px; margin: 1.5rem 0; overflow-x: auto; white-space: pre; }
+  .math-box .comment { color: #6a9f6a; } .math-box .var { color: #f0b060; } .math-box .eq { color: #7ab8f5; } .math-box .hi { color: #ff9090; }
+  table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.88rem; }
+  th { background: var(--accent); color: #fff; padding: 0.6rem 0.9rem; text-align: left; font-family: var(--mono); font-size: 0.76rem; letter-spacing: 0.04em; }
+  td { padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--mid); vertical-align: top; }
+  tr:nth-child(even) td { background: #fafaf7; }
+  .diagram-wrap { background: #fff; border: 1px solid var(--rule); border-radius: 10px; padding: 1.5rem; margin: 2rem 0; overflow-x: auto; }
+  .diagram-caption { text-align: center; font-family: var(--mono); font-size: 0.74rem; color: #777; margin-top: 0.75rem; letter-spacing: 0.04em; line-height: 1.6; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+  .step-card { background: #fff; border: 1px solid var(--rule); border-radius: 8px; padding: 1.1rem; }
+  .step-num { font-family: var(--mono); font-size: 1.9rem; font-weight: 600; color: var(--mid); line-height: 1; margin-bottom: 0.4rem; }
+  .step-card h4 { font-size: 0.88rem; font-weight: 600; color: var(--accent); margin-bottom: 0.35rem; }
+  .step-card p { font-size: 0.82rem; margin: 0; color: #444; }
+  .codebox { background: #1c2333; color: #d8dee9; font-family: var(--mono); font-size: 0.8rem; line-height: 1.75; padding: 1.25rem 1.5rem; border-radius: 8px; margin: 1.5rem 0; overflow-x: auto; white-space: pre; }
+  .codebox .kw { color: #c792ea; } .codebox .str { color: #c3e88d; } .codebox .cm { color: #6a80a4; } .codebox .fn { color: #82aaff; } .codebox .num { color: #f78c6c; }
+  @media (max-width: 620px) { .steps { grid-template-columns: 1fr 1fr; } .section { padding: 2.5rem 1.2rem; } }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-label">Module 6 · Part 4 — Study Guide</div>
+  <h1>Production Systems</h1>
+  <p>Getting a GenAI application from a working notebook to a monitored, servable, debuggable production system — LangSmith tracing, observability, and high-throughput LLM serving with vLLM.</p>
+</div>
+
+<nav class="toc">
+  <a href="#s1">01 LangSmith</a>
+  <a href="#s2">02 Observability</a>
+  <a href="#s3">03 Serving LLMs (vLLM)</a>
+  <a href="#s4">04 The Rest of the Stack</a>
+  <a href="#s5">05 Takeaways</a>
+</nav>
+
+<section class="section" id="s1">
+  <div class="section-eyebrow">Section 01</div>
+  <h2>LangSmith</h2>
+
+  <p>Module 4 Part 4's agent architectures involve many chained LLM calls, tool invocations, and routing decisions (the Supervisor pattern, Part 4 §04). When something goes wrong, "which step failed, and why" is genuinely hard to answer without tooling. <strong>LangSmith</strong> is a tracing and observability platform built for exactly this — every call in a LangChain/LangGraph pipeline (Module 4 Part 3 §04) is automatically logged as a structured trace.</p>
+
+  <div class="codebox"><span class="cm"># Tracing is often just an environment variable away for LangChain/LangGraph pipelines</span>
+<span class="kw">import</span> os
+os.environ[<span class="str">"LANGCHAIN_TRACING_V2"</span>] = <span class="str">"true"</span>
+os.environ[<span class="str">"LANGCHAIN_API_KEY"</span>] = <span class="str">"..."</span>
+
+<span class="cm"># Every chain/agent run in this session now appears in LangSmith as a full trace:</span>
+<span class="cm"># prompt in -> each LLM call -> each tool call -> final output, with latency and cost per step</span></div>
+
+  <table>
+    <tr><th>What a trace shows</th><th>Why it matters</th></tr>
+    <tr><td>Exact prompt sent to the LLM at each step</td><td>Debugging "why did the model do that" without guessing at what it actually saw</td></tr>
+    <tr><td>Each tool call's arguments and return value</td><td>Diagnosing tool abuse (Module 6 Part 2 §05) or a mis-routed decision (Module 4 Part 3 §05) after the fact</td></tr>
+    <tr><td>Per-step latency and token cost</td><td>Finding the actual bottleneck in a multi-agent pipeline (Module 4 Part 4 §04), not guessing</td></tr>
+  </table>
+
+  <div class="callout callout-blue">
+    <strong>Why this matters specifically for agentic systems:</strong> Module 4's multi-agent supervisor pattern means a single user request can trigger many LLM calls across several specialist agents (Module 4's lab notebook). Without tracing, debugging a wrong final answer means re-running the whole pipeline with print statements; with tracing, you inspect the exact recorded path the request actually took.
+  </div>
+</section>
+
+<section class="section" id="s2">
+  <div class="section-eyebrow">Section 02</div>
+  <h2>Observability</h2>
+
+  <p><strong>Observability</strong> generalizes LangSmith's tracing (SS01) into the full discipline of understanding a running system's internal state from its external outputs — logs, metrics, and traces, the three pillars carried over from general software observability practice and adapted for GenAI's specific failure modes.</p>
+
+  <table>
+    <tr><th>Pillar</th><th>What it captures for a GenAI system</th></tr>
+    <tr><td><strong>Logs</strong></td><td>Every request/response pair, tool call, retrieval result — the raw record of what happened</td></tr>
+    <tr><td><strong>Metrics</strong></td><td>Aggregate numbers over time: latency percentiles, token cost per request, RAGAS scores (Module 6 Part 1 §04) tracked continuously in production, not just at evaluation time</td></tr>
+    <tr><td><strong>Traces</strong></td><td>The full step-by-step path one specific request took (SS01's LangSmith traces are exactly this)</td></tr>
+  </table>
+
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;display:block;margin:0 auto">
+      <defs><marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#555"/></marker></defs>
+      <text x="360" y="22" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="600" letter-spacing="1.5">EVALUATION IS PERIODIC; OBSERVABILITY IS CONTINUOUS</text>
+
+      <rect x="40" y="45" width="280" height="100" rx="8" fill="#eef3ff" stroke="#2255aa" stroke-width="1.5"/>
+      <text x="180" y="68" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a3a5c" font-weight="700">Module 6 Part 1 — Evaluation</text>
+      <text x="60" y="90" font-family="Inter,sans-serif" font-size="9" fill="#444">RAGAS/BERTScore run against a</text>
+      <text x="60" y="105" font-family="Inter,sans-serif" font-size="9" fill="#444">held-out test set, offline,</text>
+      <text x="60" y="120" font-family="Inter,sans-serif" font-size="9" fill="#444">before/at deploy time</text>
+
+      <rect x="400" y="45" width="280" height="100" rx="8" fill="#edfaf3" stroke="#2a7a4b" stroke-width="1.5"/>
+      <text x="540" y="68" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a5c38" font-weight="700">Observability</text>
+      <text x="420" y="90" font-family="Inter,sans-serif" font-size="9" fill="#444">The same metrics, computed on</text>
+      <text x="420" y="105" font-family="Inter,sans-serif" font-size="9" fill="#444">LIVE traffic, continuously,</text>
+      <text x="420" y="120" font-family="Inter,sans-serif" font-size="9" fill="#444">catching drift after deploy</text>
+
+      <text x="360" y="175" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666">A model that passed evaluation can still degrade in production --</text>
+      <text x="360" y="190" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666">real user queries drift from the test set; observability is what catches that.</text>
+    </svg>
+    <div class="diagram-caption">FIG 1 — Evaluation (Part 1) answers "is this good enough to ship"; observability answers "is it still good, right now, on real traffic" — the same metrics, applied at a different cadence and to different data.</div>
+  </div>
+
+  <div class="callout callout-red">
+    <strong>Exam favourite:</strong> "If a RAG system passed RAGAS evaluation before launch, why would you still need observability?" — evaluation runs against a fixed held-out test set that may not reflect the actual distribution of live user queries, and that distribution can drift over time (Module 3 §10's knowledge-freshness problem is one specific cause). Observability is what detects that drift in production, which offline evaluation structurally cannot see.
+  </div>
+</section>
+
+<section class="section" id="s3">
+  <div class="section-eyebrow">Section 03</div>
+  <h2>Serving LLMs — vLLM</h2>
+
+  <p>Module 1 Part 4 §05's KV cache explained why naive token-by-token generation is wasteful. At production scale — many concurrent users, not one notebook cell — a further problem appears: requests arrive at different times with different lengths, and naively serving them one at a time (or in fixed batches) wastes enormous GPU capacity. <strong>vLLM</strong> is an inference-serving engine built specifically to solve this.</p>
+
+  <table>
+    <tr><th>vLLM technique</th><th>Problem it solves</th></tr>
+    <tr><td><strong>PagedAttention</strong></td><td>Standard KV cache allocation reserves a fixed contiguous memory block per sequence, wasting memory on unused space; PagedAttention manages the KV cache in fixed-size, non-contiguous "pages" (directly analogous to OS virtual memory paging), eliminating that waste</td></tr>
+    <tr><td><strong>Continuous batching</strong></td><td>Instead of waiting for a fixed batch to fully finish before starting the next, new requests join an in-flight batch as soon as a GPU slot frees up — no request has to wait for the slowest one in its batch to finish</td></tr>
+    <tr><td><strong>Efficient KV cache sharing</strong></td><td>Requests sharing a common prefix (e.g. the same system prompt, Module 6 Part 2 §04) can share the same cached computation instead of recomputing it per request</td></tr>
+  </table>
+
+  <div class="callout callout-purple">
+    <strong>Why this matters at the scale this course has been building toward:</strong> Module 4's multi-agent systems and Module 3's RAG pipelines both mean many LLM calls per user request. A serving layer that wastes GPU memory or serializes requests unnecessarily multiplies that cost directly — vLLM-style serving is what makes agentic and RAG-heavy architectures economically viable at real user volume, not just functionally correct in a single-user notebook.
+  </div>
+</section>
+
+<section class="section" id="s4">
+  <div class="section-eyebrow">Section 04</div>
+  <h2>The Rest of the Production Stack</h2>
+
+  <p>The remaining tools this module names complete the path from a notebook to a deployed, usable system:</p>
+
+  <table>
+    <tr><th>Tool</th><th>Role</th></tr>
+    <tr><td><strong>FastAPI</strong></td><td>Wraps the GenAI pipeline (RAG, an agent, whatever this module's lab evaluates) behind an HTTP API — the standard interface other systems and frontends call</td></tr>
+    <tr><td><strong>Streamlit</strong></td><td>Rapid UI construction for internal tools, demos, and evaluation dashboards — often the fastest path from "a working pipeline" to "something a non-engineer can click through"</td></tr>
+    <tr><td><strong>Docker</strong></td><td>Packages the application (code, dependencies, model weights or serving config) into a reproducible container — the same environment runs identically in development and production</td></tr>
+    <tr><td><strong>Ollama</strong></td><td>Runs open-weight LLMs locally with a simple interface — useful for development, cost-controlled prototyping, or fully on-premises deployment without a cloud API</td></tr>
+  </table>
+
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 720 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;display:block;margin:0 auto">
+      <defs><marker id="a2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#555"/></marker></defs>
+      <text x="360" y="22" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="600" letter-spacing="1.5">HOW THE PIECES FIT TOGETHER</text>
+
+      <rect x="20" y="45" width="130" height="40" rx="6" fill="#eef3ff" stroke="#2255aa"/><text x="85" y="70" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a3a5c">RAG / Agent pipeline</text>
+      <line x1="150" y1="65" x2="185" y2="65" stroke="#555" stroke-width="2" marker-end="url(#a2)"/>
+      <rect x="190" y="45" width="110" height="40" rx="6" fill="#fff3cc" stroke="#e8a020"/><text x="245" y="70" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#7a5000">FastAPI</text>
+      <line x1="300" y1="65" x2="335" y2="65" stroke="#555" stroke-width="2" marker-end="url(#a2)"/>
+      <rect x="340" y="45" width="130" height="40" rx="6" fill="#edfaf3" stroke="#2a7a4b"/><text x="405" y="70" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a5c38">vLLM (model serving)</text>
+
+      <rect x="20" y="100" width="450" height="50" rx="6" fill="#fafaf7" stroke="#ccc" stroke-dasharray="4,3"/>
+      <text x="245" y="130" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#666">all of the above, packaged in a Docker container</text>
+
+      <rect x="500" y="45" width="180" height="105" rx="6" fill="#f5f0ff" stroke="#6b3fa0"/>
+      <text x="590" y="68" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#4a1a80" font-weight="700">Observability layer</text>
+      <text x="512" y="90" font-family="Inter,sans-serif" font-size="8" fill="#4a1a80">LangSmith traces (SS01)</text>
+      <text x="512" y="105" font-family="Inter,sans-serif" font-size="8" fill="#4a1a80">RAGAS metrics (Part 1)</text>
+      <text x="512" y="120" font-family="Inter,sans-serif" font-size="8" fill="#4a1a80">logs + latency metrics</text>
+      <text x="512" y="135" font-family="Inter,sans-serif" font-size="8" fill="#4a1a80">Streamlit dashboard</text>
+    </svg>
+    <div class="diagram-caption">FIG 2 — A typical production shape: the pipeline itself, served via FastAPI and vLLM, containerized with Docker, with an observability layer watching everything continuously — this module's lab notebook builds a scaled-down version of the evaluation + monitoring layer specifically.</div>
+  </div>
+</section>
+
+<section class="section" id="s5">
+  <div class="section-eyebrow">Section 05</div>
+  <h2>Key Takeaways &amp; Exam Prep</h2>
+
+  <div class="steps">
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Tracing debugs multi-step pipelines</h4><p>LangSmith records the exact prompt, tool call, and output at every step — essential once agents chain many calls.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Observability is continuous; evaluation is periodic</h4><p>The same metrics, applied to live traffic instead of a fixed test set, catch drift evaluation structurally can't see.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>vLLM solves memory waste and serialized requests</h4><p>PagedAttention and continuous batching make concurrent LLM serving actually efficient.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>The rest of the stack turns a pipeline into a product</h4><p>FastAPI for the API, Streamlit for the UI, Docker for reproducibility, Ollama for local/on-prem serving.</p></div>
+  </div>
+
+  <h3>Common exam questions</h3>
+  <table>
+    <tr><th>Question</th><th>Short answer</th></tr>
+    <tr><td>What problem does vLLM's PagedAttention solve?</td><td>Standard KV cache allocation reserves fixed contiguous memory per sequence, wasting space; PagedAttention manages the cache in non-contiguous pages, closely analogous to OS virtual memory, eliminating that waste</td></tr>
+    <tr><td>Why is observability necessary even after a system passes offline evaluation?</td><td>Offline evaluation runs against a fixed test set that may not reflect the live traffic distribution, which can drift over time; observability monitors the same quality signals continuously on real production traffic</td></tr>
+    <tr><td>What specifically does a LangSmith trace let you inspect that a final output alone doesn't?</td><td>The exact prompt sent at each step, every tool call's arguments and result, and per-step latency/cost — the full path one specific request took through a multi-step pipeline</td></tr>
+  </table>
+
+  <div class="callout" style="margin-top:2rem">
+    <strong>References:</strong><br>
+    Kwon et al. (2023) — Efficient Memory Management for Large Language Model Serving with PagedAttention (vLLM).<br>
+    LangChain — LangSmith documentation.<br>
+    Es et al. (2023) — RAGAS: Automated Evaluation of Retrieval Augmented Generation (Module 6 Part 1 §04).
+  </div>
+
+  <div class="callout callout-blue" style="margin-top:1.5rem">
+    <strong>Companion notebook:</strong> <code>1_Evaluate_and_Monitor_Lab.ipynb</code> implements a working evaluation + monitoring pipeline over a real GenAI system — the syllabus lab for this module.
+  </div>
+</section>
+
+<footer style="text-align:center;padding:2rem;font-family:var(--mono);font-size:0.75rem;color:#aaa;border-top:1px solid var(--rule)">
+  Module 6 · Part 4 — Production Systems · Companion to Part 3 (Responsible AI) and 1_Evaluate_and_Monitor_Lab.ipynb
+</footer>
+
+</body>
+</html>

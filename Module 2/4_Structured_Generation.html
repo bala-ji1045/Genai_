@@ -1,0 +1,477 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Structured Generation — Study Guide</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Fraunces:ital,wght@0,300;0,700;1,300&family=Inter:wght@400;500;600&display=swap');
+  :root {
+    --ink: #0f1117; --paper: #f7f6f2; --mid: #e8e5dd; --rule: #c9c4b8; --accent: #1a3a5c;
+    --highlight: #e8a020; --green: #2a7a4b; --red: #b83232; --blue: #2255aa; --purple: #6b3fa0; --teal: #0d7a7a;
+    --mono: 'IBM Plex Mono', monospace; --display: 'Fraunces', Georgia, serif; --body: 'Inter', system-ui, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--body); background: var(--paper); color: var(--ink); line-height: 1.7; font-size: 16px; }
+  .hero { background: linear-gradient(160deg, #0f1117 0%, #1a3a5c 100%); color: #fff; padding: 4rem 2rem 3rem; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 20% 30%, rgba(232,160,32,0.10), transparent 40%), radial-gradient(circle at 80% 70%, rgba(42,122,75,0.12), transparent 40%); }
+  .hero-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--highlight); margin-bottom: 1rem; position: relative; }
+  .hero h1 { font-family: var(--display); font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; line-height: 1.1; margin-bottom: 1rem; position: relative; }
+  .hero p { font-size: 1.1rem; opacity: 0.82; max-width: 640px; margin: 0 auto; position: relative; }
+  .toc { background: var(--ink); color: #fff; padding: 1.2rem 2rem; display: flex; gap: 1.3rem; flex-wrap: wrap; justify-content: center; position: sticky; top: 0; z-index: 100; }
+  .toc a { color: rgba(255,255,255,0.7); text-decoration: none; font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.04em; transition: color 0.2s; }
+  .toc a:hover { color: var(--highlight); }
+  .section { max-width: 900px; margin: 0 auto; padding: 4rem 2rem; border-bottom: 1px solid var(--rule); }
+  .section-eyebrow { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.5rem; }
+  .section h2 { font-family: var(--display); font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 700; margin-bottom: 1.5rem; color: var(--ink); }
+  .section h3 { font-family: var(--display); font-size: 1.25rem; font-weight: 700; margin: 2rem 0 0.8rem; color: var(--accent); }
+  .section p { margin-bottom: 1rem; color: #333; }
+  .callout { border-left: 4px solid var(--highlight); background: #fff8ee; padding: 1rem 1.25rem; border-radius: 0 6px 6px 0; margin: 1.5rem 0; font-size: 0.95rem; }
+  .callout strong { color: var(--accent); }
+  .callout-blue  { border-left-color: var(--blue);   background: #eef3ff; }
+  .callout-green { border-left-color: var(--green);  background: #edfaf3; }
+  .callout-red   { border-left-color: var(--red);    background: #fff0f0; }
+  .callout-purple{ border-left-color: var(--purple); background: #f5f0ff; }
+  .math-box { background: var(--ink); color: #e8e8e8; font-family: var(--mono); font-size: 0.86rem; line-height: 1.9; padding: 1.5rem; border-radius: 8px; margin: 1.5rem 0; overflow-x: auto; white-space: pre; }
+  .math-box .comment { color: #6a9f6a; } .math-box .var { color: #f0b060; } .math-box .eq { color: #7ab8f5; } .math-box .hi { color: #ff9090; }
+  table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.88rem; }
+  th { background: var(--accent); color: #fff; padding: 0.6rem 0.9rem; text-align: left; font-family: var(--mono); font-size: 0.76rem; letter-spacing: 0.04em; }
+  td { padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--mid); vertical-align: top; }
+  tr:nth-child(even) td { background: #fafaf7; }
+  .diagram-wrap { background: #fff; border: 1px solid var(--rule); border-radius: 10px; padding: 1.5rem; margin: 2rem 0; overflow-x: auto; }
+  .diagram-caption { text-align: center; font-family: var(--mono); font-size: 0.74rem; color: #777; margin-top: 0.75rem; letter-spacing: 0.04em; line-height: 1.6; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+  .step-card { background: #fff; border: 1px solid var(--rule); border-radius: 8px; padding: 1.1rem; }
+  .step-num { font-family: var(--mono); font-size: 1.9rem; font-weight: 600; color: var(--mid); line-height: 1; margin-bottom: 0.4rem; }
+  .step-card h4 { font-size: 0.88rem; font-weight: 600; color: var(--accent); margin-bottom: 0.35rem; }
+  .step-card p { font-size: 0.82rem; margin: 0; color: #444; }
+  .codebox { background: #1c2333; color: #d8dee9; font-family: var(--mono); font-size: 0.8rem; line-height: 1.75; padding: 1.25rem 1.5rem; border-radius: 8px; margin: 1.5rem 0; overflow-x: auto; white-space: pre; }
+  .codebox .kw { color: #c792ea; } .codebox .str { color: #c3e88d; } .codebox .cm { color: #6a80a4; } .codebox .fn { color: #82aaff; } .codebox .num { color: #f78c6c; }
+  @media (max-width: 620px) { .steps { grid-template-columns: 1fr 1fr; } .section { padding: 2.5rem 1.2rem; } }</style>
+<div class="hero">
+  <div class="hero-label">Module 2 · Part 4 — Study Guide</div>
+  <h1>Structured Generation</h1>
+  <p>Getting an LLM to reliably produce JSON, call tools and functions, and — with DSPy — treat prompts as optimizable programs instead of hand-tuned strings. Tools: DSPy, LangChain.</p>
+</div>
+<nav class="toc">
+  <a href="#s1">01 Why Structure</a>
+  <a href="#s2">02 JSON Outputs</a>
+  <a href="#s3">03 Tool/Function Calling</a>
+  <a href="#s4">04 LangChain</a>
+  <a href="#s5">05 DSPy Intro</a>
+  <a href="#s6">06 Prompt Optimization</a>
+  <a href="#s7">07 Takeaways</a>
+</nav>
+<section class="section" id="s1">
+  <div class="section-eyebrow">Section 01</div>
+  <h2>Why Structure?</h2>
+  <p>An LLM is, at its core, a next-token sampler over free-form text (Module 1 §01). But almost every real system built on top of one needs the output to be 
+    <em>parseable</em> — a downstream function that expects a specific field, a database row, an API call with named arguments. "Structured generation" is the umbrella term for techniques that make an LLM's raw text output reliably conform to a schema.
+  </p>
+  <div class="callout callout-red">
+    <strong>The naive approach fails silently.</strong> Just asking nicely — "please respond in JSON" — usually works most of the time, and that's exactly the problem: "most of the time" means a production system needs a parser that can crash, retry logic, or silent data corruption on the failures. Structured generation techniques exist to convert "usually correct" into "guaranteed correct by construction."
+  </div>
+</section>
+<section class="section" id="s2">
+  <div class="section-eyebrow">Section 02</div>
+  <h2>JSON Outputs</h2>
+  <p>There are two fundamentally different ways to get JSON out of an LLM, and they give very different guarantees.</p>
+  <table>
+    <tbody>
+      <tr>
+        <th>Approach</th>
+        <th>Mechanism</th>
+        <th>Guarantee</th>
+      </tr>
+      <tr>
+        <td>
+          <strong>Prompted JSON</strong>
+        </td>
+        <td>Ask for JSON in the instruction, maybe show an example</td>
+        <td>None — the model can still emit malformed JSON, extra prose, or a wrong schema</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Constrained decoding</strong>
+        </td>
+        <td>At each generation step, mask out any token that would make the output invalid against a grammar/schema — only valid next-tokens are ever sampled</td>
+        <td>Syntactically valid JSON matching the schema, by construction</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 740 240" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:740px;display:block;margin:0 auto">
+      <text x="370" y="24" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#333" font-weight="600" letter-spacing="1.5">CONSTRAINED DECODING — MASKING INVALID TOKENS</text>
+      <text x="60" y="60" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333">Schema requires: {"name": string, "age": number}</text>
+      <text x="60" y="80" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333">Generated so far: {"name": "Ana", "age":</text>
+      <text x="60" y="115" font-family="IBM Plex Mono,monospace" font-size="9" fill="#888">Next-token candidates, BEFORE masking (normal softmax over full vocabulary):</text>
+      <rect x="60" y="125" width="80" height="26" fill="#eee" stroke="#ccc"></rect>
+      <text x="100" y="142" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9">"twenty"</text>
+      <rect x="150" y="125" width="60" height="26" fill="#edfaf3" stroke="#2a7a4b"></rect>
+      <text x="180" y="142" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9">28</text>
+      <rect x="220" y="125" width="60" height="26" fill="#eee" stroke="#ccc"></rect>
+      <text x="250" y="142" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9">"28"</text>
+      <rect x="290" y="125" width="60" height="26" fill="#eee" stroke="#ccc"></rect>
+      <text x="320" y="142" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9">null</text>
+      <text x="60" y="180" font-family="IBM Plex Mono,monospace" font-size="9" fill="#888">AFTER masking against the JSON grammar (only a numeral is valid here):</text>
+      <rect x="60" y="190" width="80" height="26" fill="#fff0f0" stroke="#b83232"></rect>
+      <text x="100" y="207" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#b83232">✗ masked</text>
+      <rect x="150" y="190" width="60" height="26" fill="#2a7a4b"></rect>
+      <text x="180" y="207" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff" font-weight="700">✓ 28</text>
+      <rect x="220" y="190" width="60" height="26" fill="#fff0f0" stroke="#b83232"></rect>
+      <text x="250" y="207" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#b83232">✗ masked</text>
+      <rect x="290" y="190" width="60" height="26" fill="#fff0f0" stroke="#b83232"></rect>
+      <text x="320" y="207" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#b83232">✗ masked</text>
+      <text x="410" y="207" font-family="Inter,sans-serif" font-size="9" fill="#555">"28" (string) and null are both grammatically</text>
+      <text x="410" y="222" font-family="Inter,sans-serif" font-size="9" fill="#555">invalid for a number field — masked to −∞ before softmax</text>
+    </svg>
+    <div class="diagram-caption">FIG 1 — Constrained decoding intersects the model's normal probability distribution with the set of tokens a formal grammar (the JSON schema) allows at this position — the same −∞-masking mechanism as causal masking (Module 1 §05), applied to schema validity instead of future position.</div>
+  </div>
+  <div class="callout callout-blue">
+    <strong>What this costs you:</strong> constrained decoding guarantees valid 
+    <em>syntax</em>, not valid 
+    <em>content</em> — a schema can force 
+    <code>"age"</code> to be a number, but can't force it to be the 
+    <em>correct</em> age. It also requires infrastructure support (a grammar-aware sampler, e.g. via 
+    <code>outlines</code>, 
+    <code>guidance</code>, or a provider's native "JSON mode"/"structured outputs" feature) — not every deployment has this available, especially for closed models accessed only via a plain text API.
+  </div>
+</section>
+<section class="section" id="s3">
+  <div class="section-eyebrow">Section 03</div>
+  <h2>Tool Calling &amp; Function Calling</h2>
+  <p>"Function calling" is JSON-structured output applied to a specific purpose: instead of (or alongside) a text answer, the model emits a structured request to invoke a named function with specific arguments — which your application code actually executes, then feeds the result back in (this is the plumbing underneath ReAct's Action step, Module 2 Part 2 §04).</p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 740 240" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:740px;display:block;margin:0 auto">
+      <defs>
+        <marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#555"></polygon>
+        </marker>
+      </defs>
+      <rect x="30" y="30" width="170" height="50" rx="8" fill="#1a3a5c"></rect>
+      <text x="115" y="52" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">User message</text>
+      <text x="115" y="67" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#cce">"What's the weather in Delhi?"</text>
+      <line x1="200" y1="55" x2="245" y2="55" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="250" y="30" width="230" height="50" rx="8" fill="#eef3ff" stroke="#2255aa" stroke-width="1.5"></rect>
+      <text x="365" y="52" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a3a5c" font-weight="700">Model + tool schemas</text>
+      <text x="365" y="67" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#1a3a5c">decides: call get_weather(city)</text>
+      <line x1="480" y1="55" x2="525" y2="55" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="530" y="30" width="180" height="50" rx="8" fill="#fff3cc" stroke="#e8a020" stroke-width="1.5"></rect>
+      <text x="620" y="52" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#7a5000" font-weight="700">Structured call</text>
+      <text x="620" y="67" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#7a5000">{"tool":"get_weather","city":"Delhi"}</text>
+      <line x1="620" y1="80" x2="620" y2="115" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="530" y="120" width="180" height="50" rx="8" fill="#edfaf3" stroke="#2a7a4b" stroke-width="1.5"></rect>
+      <text x="620" y="142" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a5c38" font-weight="700">Your app code</text>
+      <text x="620" y="157" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#1a5c38">actually executes get_weather()</text>
+      <line x1="530" y1="145" x2="480" y2="180" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="250" y="155" width="230" height="50" rx="8" fill="#eef3ff" stroke="#2255aa" stroke-width="1.5"></rect>
+      <text x="365" y="177" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a3a5c" font-weight="700">Model, again</text>
+      <text x="365" y="192" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#1a3a5c">given tool result → writes final reply</text>
+      <line x1="250" y1="180" x2="205" y2="180" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="30" y="155" width="170" height="50" rx="8" fill="#1a3a5c"></rect>
+      <text x="115" y="185" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">"It's 31°C and sunny."</text>
+    </svg>
+    <div class="diagram-caption">FIG 2 — Function calling as a full round trip: the model never executes anything itself — it only ever emits a structured 
+      <em>request</em>; your application code is what actually runs the function and returns a real result.
+    </div>
+  </div>
+  <div class="codebox">
+    <span class="cm"># The tool "schema" the model is given — a JSON Schema describing the function signature</span>
+tools = [{
+    <span class="str">"name"</span>: 
+    <span class="str">"get_weather"</span>,
+    <span class="str">"description"</span>: 
+    <span class="str">"Get current weather for a city"</span>,
+    <span class="str">"parameters"</span>: {
+    <span class="str">"type"</span>: 
+    <span class="str">"object"</span>,
+    <span class="str">"properties"</span>: {
+    <span class="str">"city"</span>: {
+    <span class="str">"type"</span>: 
+    <span class="str">"string"</span>}},
+    <span class="str">"required"</span>: [
+    <span class="str">"city"</span>]
+    }
+}]
+    <span class="cm"># The model returns a tool_call, not free text, when it decides to use this tool —</span>
+    <span class="cm"># your code is responsible for matching the name, executing it, and returning the result.</span>
+  </div>
+  <div class="callout callout-purple">
+    <strong>"Tool calling" and "function calling" are the same mechanism</strong>, just named differently by convention — "function calling" for calling a specific named function (as above), "tool calling" as the more general umbrella that also covers things like a code interpreter or a retrieval system exposed the same way. Neither name implies a different underlying protocol.
+  </div>
+</section>
+<section class="section" id="s4">
+  <div class="section-eyebrow">Section 04</div>
+  <h2>LangChain — Composing Prompts, Tools, and Models</h2>
+  <p>
+    <strong>LangChain</strong> is a framework for wiring together the pieces a real LLM application needs: prompts, models, tools, memory, and multi-step control flow — as composable objects instead of hand-written glue code.
+  </p>
+  <table>
+    <tbody>
+      <tr>
+        <th>Concept</th>
+        <th>What it is</th>
+      </tr>
+      <tr>
+        <td>
+          <strong>Chain</strong>
+        </td>
+        <td>A fixed sequence of steps (prompt → model → parser → next prompt → ...) — the pipeline is defined ahead of time</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Agent</strong>
+        </td>
+        <td>A loop where the model itself decides, at each step, which tool to call next (this is exactly the ReAct pattern from Module 2 Part 2 §04, implemented as reusable infrastructure)</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Tool</strong>
+        </td>
+        <td>Any callable — a search API, a calculator, a database query — wrapped with a description the model can read and decide to invoke</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Memory</strong>
+        </td>
+        <td>Carries conversation history or intermediate state across chain/agent steps</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="codebox">
+    <span class="kw">from</span> langchain.agents 
+    <span class="kw">import</span> initialize_agent, Tool
+    <span class="kw">from</span> langchain_openai 
+    <span class="kw">import</span> ChatOpenAI
+tools = [Tool(name=
+    <span class="str">"search"</span>, func=web_search, description=
+    <span class="str">"search the web"</span>)]
+llm = ChatOpenAI(model=
+    <span class="str">"gpt-4o"</span>)
+agent = initialize_agent(tools, llm, agent=
+    <span class="str">"react"</span>)
+    <span class="fn">agent.run</span>(
+    <span class="str">"Who directed the highest-grossing film of 2023?"</span>)
+    <span class="cm"># Internally runs exactly the Thought/Action/Observation loop from Module 2 Part 2 §04</span>
+  </div>
+  <div class="callout callout-green">
+    <strong>What LangChain is really buying you:</strong> not new capability — everything it does is expressible as raw prompts and API calls — but standardized, reusable plumbing for patterns (agents, memory, retrieval, tool schemas) that would otherwise be reimplemented, slightly differently and slightly buggily, in every project.
+  </div>
+</section>
+<section class="section" id="s5">
+  <div class="section-eyebrow">Section 05</div>
+  <h2>DSPy — Prompts as Optimizable Programs</h2>
+  <p>Hand-writing and tweaking prompt strings ("prompt engineering" as trial-and-error string editing) doesn't scale well, and a prompt tuned for one base model often breaks when swapped for another. 
+    <strong>DSPy</strong> (Khattab et al., 2023) reframes the problem: instead of writing prompt strings, you declare 
+    <em>what transformation you want</em> (a 
+    <strong>signature</strong> — input fields → output fields), and DSPy compiles that declaration into an actual prompt, which can then be automatically optimized.
+  </p>
+  <div class="codebox">
+    <span class="kw">import</span> dspy
+    <span class="cm"># A signature: declare the transformation, not the prompt wording</span>
+    <span class="kw">class</span> 
+    <span class="fn">AnswerQuestion</span>(dspy.Signature):
+    <span class="str">"""Answer the question using the given context."""</span>
+    context = dspy.InputField()
+    question = dspy.InputField()
+    answer = dspy.OutputField()
+    <span class="cm"># A module: how the signature gets EXECUTED (here, with chain-of-thought)</span>
+qa = dspy.ChainOfThought(AnswerQuestion)
+result = qa(context=
+    <span class="str">"Paris is the capital of France."</span>, question=
+    <span class="str">"What is the capital of France?"</span>)
+    <span class="fn">print</span>(result.answer)  
+    <span class="cm"># DSPy generated and ran the actual prompt behind the scenes</span>
+  </div>
+  <table>
+    <tbody>
+      <tr>
+        <th>DSPy concept</th>
+        <th>Role</th>
+      </tr>
+      <tr>
+        <td>
+          <strong>Signature</strong>
+        </td>
+        <td>Declares input/output fields and a task description — the "what," not the "how"</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Module</strong>
+        </td>
+        <td>A strategy for executing a signature — 
+          <code>Predict</code> (direct), 
+          <code>ChainOfThought</code> (adds reasoning, Module 2 Part 1 §03), 
+          <code>ReAct</code> (tool use, Module 2 Part 2 §04) — swap strategies without rewriting the task
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Program</strong>
+        </td>
+        <td>A composition of modules — multi-step pipelines built like ordinary code, not string concatenation</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Metric</strong>
+        </td>
+        <td>A function scoring whether a program's output on a training example was good — the objective §06's optimizer maximizes</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-blue">
+    <strong>The reframe, in one sentence:</strong> classic prompt engineering treats the prompt string as the artifact you hand-tune; DSPy treats the prompt string as a 
+    <em>compiled output</em> — you write the program (signatures + modules) and a metric, and let an optimizer generate/select the actual wording.
+  </div>
+</section>
+<section class="section" id="s6">
+  <div class="section-eyebrow">Section 06</div>
+  <h2>Prompt Optimization with DSPy</h2>
+  <p>DSPy's optimizers (called 
+    <strong>teleprompters</strong>) automatically improve a program's prompts against a training set and a metric — without you hand-editing wording. The most common one, 
+    <code>BootstrapFewShot</code>, automates exactly the example-selection problem from Module 2 Part 1 §02.
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;display:block;margin:0 auto">
+      <defs>
+        <marker id="a2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#555"></polygon>
+        </marker>
+      </defs>
+      <rect x="20" y="30" width="160" height="50" rx="8" fill="#1a3a5c"></rect>
+      <text x="100" y="52" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">Training examples</text>
+      <text x="100" y="67" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#cce">(input, gold output) pairs</text>
+      <line x1="180" y1="55" x2="225" y2="55" stroke="#555" stroke-width="2" marker-end="url(#a2)"></line>
+      <rect x="230" y="30" width="180" height="50" rx="8" fill="#fff3cc" stroke="#e8a020" stroke-width="1.5"></rect>
+      <text x="320" y="52" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#7a5000" font-weight="700">Run program, self-generate CoT</text>
+      <text x="320" y="67" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#7a5000">on each training example</text>
+      <line x1="410" y1="55" x2="455" y2="55" stroke="#555" stroke-width="2" marker-end="url(#a2)"></line>
+      <rect x="460" y="30" width="180" height="50" rx="8" fill="#edfaf3" stroke="#2a7a4b" stroke-width="1.5"></rect>
+      <text x="550" y="52" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a5c38" font-weight="700">Keep traces that score well</text>
+      <text x="550" y="67" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#1a5c38">per the metric (§05)</text>
+      <line x1="550" y1="80" x2="550" y2="115" stroke="#555" stroke-width="2" marker-end="url(#a2)"></line>
+      <rect x="380" y="120" width="340" height="60" rx="8" fill="#f5f0ff" stroke="#6b3fa0" stroke-width="1.5"></rect>
+      <text x="550" y="145" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#4a1a80" font-weight="700">Compiled prompt</text>
+      <text x="550" y="163" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#4a1a80">instruction + auto-selected, self-verified few-shot examples with reasoning</text>
+    </svg>
+    <div class="diagram-caption">FIG 3 — BootstrapFewShot: run the un-optimized program on training examples, keep only the self-generated reasoning traces whose final answer scores well against the metric, and use those as the few-shot examples in the compiled prompt — automating what Module 2 Part 1 §02 does by hand.</div>
+  </div>
+  <div class="codebox">
+    <span class="kw">from</span> dspy.teleprompt 
+    <span class="kw">import</span> BootstrapFewShot
+    <span class="kw">def</span> 
+    <span class="fn">exact_match_metric</span>(example, prediction, trace=
+    <span class="kw">None</span>):
+    <span class="kw">return</span> example.answer.lower() == prediction.answer.lower()
+optimizer = BootstrapFewShot(metric=exact_match_metric)
+compiled_qa = optimizer.compile(qa, trainset=train_examples)
+    <span class="cm"># compiled_qa now has automatically-selected few-shot examples baked in —</span>
+    <span class="cm"># no prompt string was ever hand-written or hand-tuned</span>
+  </div>
+  <table>
+    <tbody>
+      <tr>
+        <th>Teleprompter</th>
+        <th>Strategy</th>
+      </tr>
+      <tr>
+        <td>
+          <code>BootstrapFewShot</code>
+        </td>
+        <td>Self-generate and filter few-shot examples by the metric (above)</td>
+      </tr>
+      <tr>
+        <td>
+          <code>BootstrapFewShotWithRandomSearch</code>
+        </td>
+        <td>Try multiple candidate example sets, keep the best on a validation split</td>
+      </tr>
+      <tr>
+        <td>
+          <code>MIPRO</code>
+        </td>
+        <td>Jointly optimizes both the instruction wording 
+          <em>and</em> the few-shot examples
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-purple">
+    <strong>Why this matters for the "prompt optimization" lab:</strong> manually iterating on prompt wording is slow, subjective, and doesn't transfer between models. Declaring a signature + metric + training set turns prompt quality into something you can measure and automatically search over — the same generate → evaluate → keep-the-best loop that shows up throughout Module 2 (self-consistency's voting, ToT's pruning, reflection's critique), applied here to the prompt itself rather than to an individual answer.
+  </div>
+</section>
+<section class="section" id="s7">
+  <div class="section-eyebrow">Section 07</div>
+  <h2>Key Takeaways &amp; Exam Prep</h2>
+  <div class="steps">
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Structure needs guarantees, not requests</h4>
+      <p>"Please respond in JSON" is a request; constrained decoding is a guarantee.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Constrained decoding masks invalid tokens</h4>
+      <p>Same −∞-before-softmax mechanism as causal masking, applied to grammar validity.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Function calling is a round trip</h4>
+      <p>The model only ever requests a call; your application code executes it and returns the real result.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>LangChain standardizes agent/tool plumbing</h4>
+      <p>No new capability — reusable infrastructure for patterns like ReAct.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>DSPy treats prompts as compiled artifacts</h4>
+      <p>Declare a signature + metric; let an optimizer generate and select the actual wording.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Prompt optimization is generate-evaluate-keep-best</h4>
+      <p>The same loop pattern as self-consistency and ToT, applied to the prompt itself.</p>
+    </div>
+  </div>
+  <h3>Common exam questions</h3>
+  <table>
+    <tbody>
+      <tr>
+        <th>Question</th>
+        <th>Short answer</th>
+      </tr>
+      <tr>
+        <td>What's the difference between prompted JSON and constrained decoding?</td>
+        <td>Prompted JSON asks the model to produce valid JSON with no guarantee; constrained decoding masks out any next-token that would violate the schema, guaranteeing syntactic validity by construction</td>
+      </tr>
+      <tr>
+        <td>Does the model ever actually execute a tool/function itself?</td>
+        <td>No — it only emits a structured request (name + arguments); the calling application executes the real function and returns the result</td>
+      </tr>
+      <tr>
+        <td>What is a DSPy "signature"?</td>
+        <td>A declaration of a task's input and output fields plus a description — what transformation is wanted, independent of any specific prompt wording</td>
+      </tr>
+      <tr>
+        <td>How does BootstrapFewShot choose its few-shot examples?</td>
+        <td>It runs the program on training examples, keeps the self-generated reasoning traces whose final answer scores well against a metric, and uses those as the compiled prompt's examples</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout" style="margin-top:2rem">
+    <strong>References:</strong>
+    <br>
+    OpenAI (2023) — Function calling and other API updates.
+    <br>
+    Willard &amp; Louf (2023) — Efficient Guided Generation for Large Language Models (Outlines / constrained decoding).
+    <br>
+    Chase, H. (2022) — LangChain (framework documentation).
+    <br>
+    Khattab et al. (2023) — DSPy: Compiling Declarative Language Model Calls into Self-Improving Pipelines.
+    <br>
+    Opsahl-Ong et al. (2024) — Optimizing Instructions and Demonstrations for Multi-Stage Language Model Programs (MIPRO).
+  </div>
+  <div class="callout callout-blue" style="margin-top:1.5rem">
+    <strong>Companion notebook:</strong> 
+    <code>4_Structured_Generation_Lab.ipynb</code> implements the syllabus lab — prompt optimization and structured output generation — end to end.
+  </div>
+</section>
+<footer style="text-align:center;padding:2rem;font-family:var(--mono);font-size:0.75rem;color:#aaa;border-top:1px solid var(--rule)">Module 2 · Part 4 — Structured Generation · Companion to Part 3 (Test-Time Scaling) and 4_Structured_Generation_Lab.ipynb</footer>

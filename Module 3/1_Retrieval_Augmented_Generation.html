@@ -1,0 +1,1415 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retrieval-Augmented Generation — Study Guide</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Fraunces:ital,wght@0,300;0,700;1,300&family=Inter:wght@400;500;600&display=swap');
+  :root {
+    --ink: #0f1117; --paper: #f7f6f2; --mid: #e8e5dd; --rule: #c9c4b8; --accent: #1a3a5c;
+    --highlight: #e8a020; --green: #2a7a4b; --red: #b83232; --blue: #2255aa; --purple: #6b3fa0; --teal: #0d7a7a;
+    --mono: 'IBM Plex Mono', monospace; --display: 'Fraunces', Georgia, serif; --body: 'Inter', system-ui, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--body); background: var(--paper); color: var(--ink); line-height: 1.7; font-size: 16px; }
+  .hero { background: linear-gradient(160deg, #0f1117 0%, #1a3a5c 100%); color: #fff; padding: 4rem 2rem 3rem; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 20% 30%, rgba(232,160,32,0.10), transparent 40%), radial-gradient(circle at 80% 70%, rgba(42,122,75,0.12), transparent 40%); }
+  .hero-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--highlight); margin-bottom: 1rem; position: relative; }
+  .hero h1 { font-family: var(--display); font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; line-height: 1.1; margin-bottom: 1rem; position: relative; }
+  .hero p { font-size: 1.1rem; opacity: 0.82; max-width: 640px; margin: 0 auto; position: relative; }
+  .toc { background: var(--ink); color: #fff; padding: 1.2rem 2rem; display: flex; gap: 1.1rem; flex-wrap: wrap; justify-content: center; position: sticky; top: 0; z-index: 100; }
+  .toc a { color: rgba(255,255,255,0.7); text-decoration: none; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.03em; transition: color 0.2s; }
+  .toc a:hover { color: var(--highlight); }
+  .section { max-width: 900px; margin: 0 auto; padding: 4rem 2rem; border-bottom: 1px solid var(--rule); }
+  .section-eyebrow { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.5rem; }
+  .section h2 { font-family: var(--display); font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 700; margin-bottom: 1.5rem; color: var(--ink); }
+  .section h3 { font-family: var(--display); font-size: 1.25rem; font-weight: 700; margin: 2rem 0 0.8rem; color: var(--accent); }
+  .section p { margin-bottom: 1rem; color: #333; }
+  .callout { border-left: 4px solid var(--highlight); background: #fff8ee; padding: 1rem 1.25rem; border-radius: 0 6px 6px 0; margin: 1.5rem 0; font-size: 0.95rem; }
+  .callout strong { color: var(--accent); }
+  .callout-blue  { border-left-color: var(--blue);   background: #eef3ff; }
+  .callout-green { border-left-color: var(--green);  background: #edfaf3; }
+  .callout-red   { border-left-color: var(--red);    background: #fff0f0; }
+  .callout-purple{ border-left-color: var(--purple); background: #f5f0ff; }
+  .math-box { background: var(--ink); color: #e8e8e8; font-family: var(--mono); font-size: 0.86rem; line-height: 1.9; padding: 1.5rem; border-radius: 8px; margin: 1.5rem 0; overflow-x: auto; white-space: pre; }
+  .math-box .comment { color: #6a9f6a; } .math-box .var { color: #f0b060; } .math-box .eq { color: #7ab8f5; } .math-box .hi { color: #ff9090; }
+  table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.88rem; }
+  th { background: var(--accent); color: #fff; padding: 0.6rem 0.9rem; text-align: left; font-family: var(--mono); font-size: 0.76rem; letter-spacing: 0.04em; }
+  td { padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--mid); vertical-align: top; }
+  tr:nth-child(even) td { background: #fafaf7; }
+  .diagram-wrap { background: #fff; border: 1px solid var(--rule); border-radius: 10px; padding: 1.5rem; margin: 2rem 0; overflow-x: auto; }
+  .diagram-caption { text-align: center; font-family: var(--mono); font-size: 0.74rem; color: #777; margin-top: 0.75rem; letter-spacing: 0.04em; line-height: 1.6; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+  .step-card { background: #fff; border: 1px solid var(--rule); border-radius: 8px; padding: 1.1rem; }
+  .step-num { font-family: var(--mono); font-size: 1.9rem; font-weight: 600; color: var(--mid); line-height: 1; margin-bottom: 0.4rem; }
+  .step-card h4 { font-size: 0.88rem; font-weight: 600; color: var(--accent); margin-bottom: 0.35rem; }
+  .step-card p { font-size: 0.82rem; margin: 0; color: #444; }
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+  .compare-card { border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; background: #fff; }
+  .compare-card-header { padding: 0.6rem 1rem; font-family: var(--mono); font-size: 0.76rem; font-weight: 600; letter-spacing: 0.04em; }
+  .compare-card-body { padding: 1rem; font-size: 0.86rem; }
+  .compare-card-body ul { list-style: none; }
+  .compare-card-body li { margin-bottom: 0.4rem; padding-left: 1.1rem; position: relative; }
+  .compare-card-body li::before { content: '→'; position: absolute; left: 0; color: var(--highlight); }
+  @media (max-width: 620px) { .compare-grid { grid-template-columns: 1fr; } .steps { grid-template-columns: 1fr 1fr; } .section { padding: 2.5rem 1.2rem; } }</style>
+<div class="hero">
+  <div class="hero-label">Module 3 — Study Guide</div>
+  <h1>Retrieval-Augmented Generation</h1>
+  <p>From embeddings and vector search to a full production RAG pipeline: chunking, hybrid retrieval, re-ranking, evaluation, and the failure modes, freshness problems, and security risks that only show up once it's running.</p>
+</div>
+<nav class="toc">
+  <a href="#s1">01 Embeddings</a>
+  <a href="#s2">02 Semantic Search</a>
+  <a href="#s3">03 FAISS</a>
+  <a href="#s4">04 RAG Pipeline</a>
+  <a href="#s5">05 Chunking</a>
+  <a href="#s6">06 Hybrid Retrieval</a>
+  <a href="#s7">07 Re-ranking</a>
+  <a href="#s8">08 Evaluation</a>
+  <a href="#s9">09 Failures</a>
+  <a href="#s10">10 Freshness</a>
+  <a href="#s11">11 Security</a>
+  <a href="#s12">12 Takeaways</a>
+</nav>
+<section class="section" id="s1">
+  <div class="section-eyebrow">Section 01</div>
+  <h2>Introduction to Embeddings, Revisited for Retrieval</h2>
+  <p>Module 1 §03 introduced embeddings as a token-level lookup table inside an LLM. RAG uses a related but distinct idea: a 
+    <strong>sentence/document embedding</strong> — one dense vector representing the meaning of an entire passage, produced by a model specifically trained so that semantically similar texts land close together in vector space, regardless of shared vocabulary.
+  </p>
+  <table>
+    <tbody>
+      <tr>
+        <th></th>
+        <th>Token embedding (Module 1 §03)</th>
+        <th>Sentence/document embedding (this module)</th>
+      </tr>
+      <tr>
+        <td>Granularity</td>
+        <td>One vector per token</td>
+        <td>One vector per chunk/sentence/document</td>
+      </tr>
+      <tr>
+        <td>Produced by</td>
+        <td>The LLM's own embedding layer, as part of the model</td>
+        <td>A dedicated embedding model (e.g. Sentence-Transformers), used standalone</td>
+      </tr>
+      <tr>
+        <td>Trained for</td>
+        <td>Whatever helps next-token prediction</td>
+        <td>Similarity: "these two texts mean the same thing" → close vectors</td>
+      </tr>
+      <tr>
+        <td>Used for</td>
+        <td>Feeding a Transformer's attention layers</td>
+        <td>Nearest-neighbor search over a corpus (§02)</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3>Cosine similarity — the standard way to compare two embeddings</h3>
+  <div class="math-box">
+    <span class="comment">// Cosine similarity between two vectors — measures ANGLE, not magnitude</span>
+    <span class="var">cos_sim(a, b)</span> = 
+    <span class="eq">(a · b) / (‖a‖ × ‖b‖)</span>
+    <span class="comment">// Range: -1 (opposite meaning) to 1 (identical meaning); 0 = unrelated</span>
+    <span class="comment">// Why angle, not raw distance? Two embeddings can point the same direction</span>
+    <span class="comment">// (same meaning) but have different lengths (e.g. one text is longer) —</span>
+    <span class="comment">// cosine similarity ignores magnitude entirely, comparing only direction.</span>
+  </div>
+  <div class="callout callout-blue">
+    <strong>Why a dedicated embedding model, not the LLM's own embeddings?</strong> An LLM's internal token embeddings are optimized for next-token prediction, not for "which two documents mean the same thing" — using them directly for retrieval works poorly. Sentence-embedding models (e.g. 
+    <code>sentence-transformers/all-MiniLM-L6-v2</code>) are trained with a contrastive objective specifically to pull similar-meaning texts together and push dissimilar ones apart in vector space.
+  </div>
+</section>
+<section class="section" id="s2">
+  <div class="section-eyebrow">Section 02</div>
+  <h2>Semantic Search</h2>
+  <p>
+    <strong>Semantic search</strong> retrieves documents by meaning rather than exact keyword overlap: embed the query, embed every candidate document, and return the documents whose embeddings are closest (by cosine similarity) to the query's embedding.
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 700 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;display:block;margin:0 auto">
+      <text x="350" y="24" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#333" font-weight="600" letter-spacing="1.5">KEYWORD SEARCH VS. SEMANTIC SEARCH</text>
+      <text x="175" y="50" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#666">Query: "how to reduce fever in kids"</text>
+      <rect x="30" y="65" width="290" height="190" rx="8" fill="#fff0f0" stroke="#b83232" stroke-width="1.5"></rect>
+      <text x="175" y="88" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#7a0000" font-weight="700">KEYWORD (exact terms)</text>
+      <text x="45" y="112" font-family="Inter,sans-serif" font-size="9" fill="#444">✓ "fever reduction methods for children"</text>
+      <text x="45" y="130" font-family="Inter,sans-serif" font-size="9" fill="#444">(shares "fever", "children"≈"kids")</text>
+      <text x="45" y="155" font-family="Inter,sans-serif" font-size="9" fill="#b83232">✗ "bringing down a child's temperature"</text>
+      <text x="45" y="173" font-family="Inter,sans-serif" font-size="9" fill="#b83232">(missed — zero shared keywords,</text>
+      <text x="45" y="188" font-family="Inter,sans-serif" font-size="9" fill="#b83232">same meaning)</text>
+      <text x="45" y="215" font-family="Inter,sans-serif" font-size="9" fill="#666">Fast, exact, cheap — but blind to</text>
+      <text x="45" y="230" font-family="Inter,sans-serif" font-size="9" fill="#666">paraphrase and synonyms.</text>
+      <rect x="380" y="65" width="290" height="190" rx="8" fill="#edfaf3" stroke="#2a7a4b" stroke-width="1.5"></rect>
+      <text x="525" y="88" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a5c38" font-weight="700">SEMANTIC (embedding distance)</text>
+      <text x="395" y="112" font-family="Inter,sans-serif" font-size="9" fill="#444">✓ "fever reduction methods for children"</text>
+      <text x="395" y="135" font-family="Inter,sans-serif" font-size="9" fill="#444">✓ "bringing down a child's temperature"</text>
+      <text x="395" y="150" font-family="Inter,sans-serif" font-size="9" fill="#1a5c38">(found — close in vector space</text>
+      <text x="395" y="165" font-family="Inter,sans-serif" font-size="9" fill="#1a5c38">despite zero shared words)</text>
+      <text x="395" y="200" font-family="Inter,sans-serif" font-size="9" fill="#666">Catches paraphrase and synonyms —</text>
+      <text x="395" y="215" font-family="Inter,sans-serif" font-size="9" fill="#666">but can miss exact identifiers</text>
+      <text x="395" y="230" font-family="Inter,sans-serif" font-size="9" fill="#666">(product codes, names) — see §06.</text>
+    </svg>
+    <div class="diagram-caption">FIG 1 — Keyword search matches literal terms; semantic search matches meaning. Neither is strictly better — §06 (Hybrid Retrieval) combines both because each catches what the other misses.</div>
+  </div>
+  <div class="callout callout-red">
+    <strong>Exam favourite:</strong> "Why can semantic search sometimes perform worse than keyword search?" — dense embeddings compress meaning into a fixed-size vector and can blur exact tokens that matter precisely for retrieval — product SKUs, error codes, proper nouns, numbers. This is precisely why hybrid retrieval (§06) exists.
+  </div>
+  <h3>Worked example: cosine similarity by hand</h3>
+  <p>Real embeddings have hundreds of dimensions, but the mechanics are identical in two: represent each text as a unit-length vector at some angle, and cosine similarity reduces to 
+    <code>cos(angle between them)</code> — the same dot-product formula above, just easy to see.
+  </p>
+  <div class="math-box">
+    <span class="comment">// Toy 2D embeddings, illustrative only — real ones are 384-dim (e.g. all-MiniLM-L6-v2)</span>
+    <span class="var">query</span>  "how to reduce fever in kids"          → angle  30°  → ( 0.866, 0.500)
+    <span class="var">doc A</span>  "fever reduction methods for children" → angle  25°  → ( 0.906, 0.423)
+    <span class="var">doc B</span>  "bringing down a child's temperature"  → angle  40°  → ( 0.766, 0.643)
+    <span class="var">doc C</span>  "quarterly financial report"           → angle 120°  → (-0.500, 0.866)
+    <span class="comment">// For unit vectors, cos_sim(a, b) = cos(angle_a − angle_b) — no division needed</span>
+    <span class="eq">cos_sim(query, A)</span> = cos(30° − 25°)  = cos(5°)   = 
+    <span class="hi">0.996</span>
+    <span class="eq">cos_sim(query, B)</span> = cos(30° − 40°)  = cos(−10°) = 
+    <span class="hi">0.985</span>
+    <span class="eq">cos_sim(query, C)</span> = cos(30° − 120°) = cos(−90°) = 
+    <span class="hi">0.000</span>
+    <span class="comment">// Ranking: A (0.996) &gt; B (0.985) ≫ C (0.000)</span>
+  </div>
+  <div class="callout callout-blue">
+    <strong>Doc B still beats doc C despite sharing zero words with the query</strong> ("bringing down a child's temperature" vs. "reduce fever in kids"). This is FIG 1 made numeric: the embedding model placed both phrasings of the same underlying meaning at nearly the same angle, so cosine similarity ranks them almost identically — while the genuinely unrelated document lands at a right angle (90°) and scores exactly zero, by definition of what cosine similarity measures.
+  </div>
+</section>
+<section class="section" id="s3">
+  <div class="section-eyebrow">Section 03</div>
+  <h2>Vector Databases — FAISS</h2>
+  <p>Comparing a query embedding against every document embedding one-by-one (brute force) is O(n) per query — fine for thousands of documents, too slow for millions. 
+    <strong>FAISS</strong> (Facebook AI Similarity Search) is a library of 
+    <strong>approximate nearest-neighbor (ANN)</strong> index structures that trade a small amount of recall for large speedups.
+  </p>
+  <table>
+    <tbody>
+      <tr>
+        <th>Index type</th>
+        <th>How it works</th>
+        <th>Trade-off</th>
+      </tr>
+      <tr>
+        <td>
+          <strong>Flat (brute force)</strong>
+        </td>
+        <td>Compares the query against every vector, exactly</td>
+        <td>100% recall, but O(n) — fine up to ~100k vectors</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>IVF (Inverted File)</strong>
+        </td>
+        <td>Clusters vectors into buckets (via k-means); only searches the nearest bucket(s)</td>
+        <td>Much faster; recall depends on how many buckets are probed</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>HNSW (Hierarchical Navigable Small World)</strong>
+        </td>
+        <td>Builds a multi-layer graph of vectors; search "walks" the graph toward the query</td>
+        <td>Very fast, high recall; more memory, slower to build</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>PQ (Product Quantization)</strong>
+        </td>
+        <td>Compresses each vector into a short code; distances computed approximately on the codes</td>
+        <td>Massive memory savings; some recall loss — often combined with IVF (IVF-PQ)</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="math-box">
+    <span class="comment">// Minimal FAISS usage — the mechanics behind §s2 &amp; the lab notebook</span>
+    <span class="kw">import</span> faiss
+    <span class="var">index</span> = faiss.IndexFlatIP(embedding_dim)   
+    <span class="comment">// IP = inner product (~cosine, if vectors are normalized)</span>
+index.add(document_embeddings)              
+    <span class="comment">// shape: [n_docs, embedding_dim]</span>
+    <span class="var">D, I</span> = index.search(query_embedding, k=5)   
+    <span class="comment">// D = similarity scores, I = indices of top-5 docs</span>
+  </div>
+  <div class="callout callout-purple">
+    <strong>Why "vector database" rather than just "an index in memory"?</strong> A vector database (FAISS itself is a library, not a full database — Pinecone, Weaviate, Qdrant, pgvector are full databases built on similar ANN principles) adds what a raw index lacks: persistence, metadata filtering (search only documents where 
+    <code>category="finance"</code>), incremental updates, and horizontal scaling. FAISS is the right choice for local/embedded use or as the ANN engine underneath a larger system; a managed vector DB is the right choice when you need those extra operational features.
+  </div>
+  <h3>Worked example: all four index types, same corpus, same query</h3>
+  <p>Real, computed results — same 16-document corpus and query as the lab notebook (
+    <code>"What is the rate limit for endpoint /v2/limits?"</code>), each index type actually built and searched with FAISS.
+  </p>
+  <h3>1. Flat (exact, brute-force)</h3>
+  <div class="math-box">
+    <span class="var">index</span> = faiss.IndexFlatIP(384); index.add(vecs)  
+    <span class="comment">// vecs = 16 x 384</span>
+    <span class="var">D, I</span> = index.search(query_vec, k=3)
+    <span class="comment">// Ground truth — compares the query against all 16 vectors, exactly:</span>
+    <span class="eq">top-3</span> = doc 15 (sim 0.634), doc 7 (sim 0.270), doc 13 (sim 0.251)
+  </div>
+  <h3>2. IVF (Inverted File), nlist = 4 clusters</h3>
+  <p>The 16 vectors get k-means-clustered into 4 buckets; a search only compares the query against vectors in the 
+    <code>nprobe</code> nearest bucket(s) instead of all 16:
+  </p>
+  <div class="math-box">
+    <span class="comment">// Real cluster assignment for all 16 docs (cluster id per doc, in order 0-15):</span>
+[3, 1, 3, 0, 3, 1, 3, 0, 3, 1, 1, 0, 2, 3, 3, 3]
+    <span class="comment">// The query embeds into cluster 3 — an 8-document bucket</span>
+    <span class="eq">nprobe=1</span> (search only cluster 3): top-3 = doc 15, doc 13, doc 
+    <span class="hi">4</span>   
+    <span class="hi">← WRONG, misses doc 7</span>
+    <span class="eq">nprobe=2</span> (search 2 nearest clusters): top-3 = doc 15, doc 13, doc 
+    <span class="hi">4</span>   
+    <span class="hi">← still wrong</span>
+    <span class="eq">nprobe=4</span> (search ALL clusters, = nlist): top-3 = doc 15, doc 7, doc 13   ← matches Flat exactly
+  </div>
+  <div class="callout callout-red">
+    <strong>Doc 7 ("Support ticket priority levels...") lives in a different cluster than the query</strong> — cluster 1, not cluster 3 — so with 
+    <code>nprobe=1</code> or 
+    <code>nprobe=2</code>, IVF never even looks at it, and doc 4 (a worse match) takes its place in the results. This is a real recall failure caused entirely by clustering, on a corpus of just 16 documents — the same failure mode, at any scale, is why 
+    <code>nprobe</code> is the parameter you tune to trade search speed against how often this happens.
+  </div>
+  <h3>3. PQ (Product Quantization), 8 subquantizers × 2 bits</h3>
+  <p>Each 384-dim, 1536-byte (float32) vector gets compressed into a short code — split into 8 sub-vectors of 48 dimensions each, and each sub-vector replaced by the id of its nearest of 4 trained centroids:</p>
+  <div class="math-box">
+    <span class="comment">// Real compression ratio and reconstruction error, computed on this corpus:</span>
+    <span class="eq">code size</span> = 8 subquantizers × 2 bits = 16 bits = 
+    <span class="hi">2 bytes per vector</span>
+    <span class="eq">compression</span> = 1536 bytes → 2 bytes = 
+    <span class="hi">768x smaller</span>
+    <span class="eq">reconstruction L2 error</span> (doc 0, decompressed vs. original) = 
+    <span class="hi">0.747</span>
+    <span class="comment">// Search on the COMPRESSED codes:</span>
+    <span class="eq">top-3</span> = doc 15, doc 7, doc 
+    <span class="hi">4</span>   
+    <span class="hi">← misses doc 13 this time</span>  (vs. Flat's doc 15, 7, 13)
+  </div>
+  <div class="callout callout-purple">
+    <strong>768x smaller, and it still gets the #1 result right</strong> — but the compression is lossy enough that doc 13 (a legitimate 3rd-place match) gets replaced by doc 4. This is the direct trade PQ makes: at billion-vector scale, holding every vector as raw float32 simply doesn't fit in memory, so a few percentage points of recall are traded for a dataset that fits at all.
+  </div>
+  <h3>4. HNSW (graph-based)</h3>
+  <p>Builds a multi-layer graph where each vector links to its approximate nearest neighbors; a search starts at an entry point in the top (sparse) layer and greedily walks toward the query, descending layers as it converges:</p>
+  <div class="math-box">
+    <span class="var">index</span> = faiss.IndexHNSWFlat(384, M=16, metric=faiss.METRIC_INNER_PRODUCT)
+index.hnsw.efConstruction = 40; index.add(vecs)
+index.hnsw.efSearch = 8
+    <span class="eq">top-3</span> = doc 15 (0.634), doc 7 (0.270), doc 13 (0.251)   ← matches Flat EXACTLY
+  </div>
+  <div class="callout callout-blue">
+    <strong>A real, easy-to-hit FAISS gotcha:</strong> 
+    <code>faiss.IndexHNSWFlat(d, M)</code> defaults to 
+    <strong>L2 distance</strong>, not inner product/cosine — passing 
+    <code>metric=faiss.METRIC_INNER_PRODUCT</code> explicitly (as above) is required to match the metric used everywhere else in this pipeline. Build it with the default constructor and you'll get silently different (though often still plausible-looking) rankings, with no error raised anywhere.
+  </div>
+</section>
+<section class="section" id="s4">
+  <div class="section-eyebrow">Section 04</div>
+  <h2>The RAG Pipeline, End to End</h2>
+  <p>
+    <strong>RAG</strong> grounds an LLM's answer in retrieved documents instead of relying purely on what's baked into its weights — the same core idea as ReAct's grounding (Module 2 Part 2 §04), specialized to one specific tool: a retriever over your own document corpus.
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 780 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:780px;display:block;margin:0 auto">
+      <defs>
+        <marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#555"></polygon>
+        </marker>
+      </defs>
+      <text x="200" y="24" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700" letter-spacing="1">INDEX-TIME (once, offline)</text>
+      <rect x="30" y="40" width="120" height="40" rx="6" fill="#1a3a5c"></rect>
+      <text x="90" y="65" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff">Raw documents</text>
+      <line x1="150" y1="60" x2="185" y2="60" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="190" y="40" width="120" height="40" rx="6" fill="#e8a020"></rect>
+      <text x="250" y="60" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff" font-weight="700">Chunk</text>
+      <text x="250" y="73" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="7" fill="#fff8ee">§05</text>
+      <line x1="310" y1="60" x2="345" y2="60" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="350" y="40" width="120" height="40" rx="6" fill="#2a7a4b"></rect>
+      <text x="410" y="60" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff" font-weight="700">Embed</text>
+      <text x="410" y="73" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="7" fill="#c8ead6">§01</text>
+      <line x1="470" y1="60" x2="505" y2="60" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="510" y="40" width="140" height="40" rx="6" fill="#6b3fa0"></rect>
+      <text x="580" y="60" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff" font-weight="700">Store in FAISS</text>
+      <text x="580" y="73" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="7" fill="#e0d0ff">§03</text>
+      <text x="300" y="130" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700" letter-spacing="1">QUERY-TIME (every request)</text>
+      <rect x="30" y="150" width="130" height="40" rx="6" fill="#1a3a5c"></rect>
+      <text x="95" y="175" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff">User question</text>
+      <line x1="160" y1="170" x2="195" y2="170" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="200" y="150" width="120" height="40" rx="6" fill="#2a7a4b"></rect>
+      <text x="260" y="170" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff" font-weight="700">Embed query</text>
+      <line x1="320" y1="170" x2="355" y2="170" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="360" y="150" width="130" height="40" rx="6" fill="#6b3fa0"></rect>
+      <text x="425" y="170" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff" font-weight="700">Retrieve top-k</text>
+      <text x="425" y="183" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="7" fill="#e0d0ff">§06</text>
+      <line x1="490" y1="170" x2="525" y2="170" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="530" y="150" width="110" height="40" rx="6" fill="#e8a020"></rect>
+      <text x="585" y="170" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff" font-weight="700">Re-rank</text>
+      <text x="585" y="183" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="7" fill="#fff8ee">§07</text>
+      <line x1="580" y1="80" x2="580" y2="145" stroke="#6b3fa0" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#a1)"></line>
+      <text x="640" y="115" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#6b3fa0">searched</text>
+      <text x="640" y="128" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#6b3fa0">against</text>
+      <line x1="585" y1="190" x2="585" y2="220" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="230" y="225" width="350" height="50" rx="6" fill="#1a3a5c"></rect>
+      <text x="405" y="247" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff" font-weight="700">Prompt = question + retrieved chunks</text>
+      <text x="405" y="262" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#cce">fed to the LLM as context</text>
+      <line x1="405" y1="275" x2="405" y2="300" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="300" y="305" width="210" height="34" rx="6" fill="#2a7a4b"></rect>
+      <text x="405" y="326" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff" font-weight="700">Grounded answer</text>
+    </svg>
+    <div class="diagram-caption">FIG 2 — Two distinct phases: index-time runs once (or periodically — see §10) over the whole corpus; query-time runs on every single user question. Confusing the two is the single most common RAG design mistake.</div>
+  </div>
+  <div class="callout callout-green">
+    <strong>The core mental model for the whole module:</strong> RAG doesn't make the LLM smarter — it changes what's in the LLM's context window. Every section from here on (chunking, hybrid retrieval, re-ranking) is really answering one question: 
+    <em>how do we make sure the right information ends up in that context window, and the wrong information doesn't?</em>
+  </div>
+</section>
+<section class="section" id="s5">
+  <div class="section-eyebrow">Section 05</div>
+  <h2>Chunking Strategies</h2>
+  <p>Documents are too long to embed and retrieve as a single unit — a 50-page PDF embedded as one vector loses almost all specific detail. 
+    <strong>Chunking</strong> splits documents into retrieval-sized pieces before embedding.
+  </p>
+  <table>
+    <tbody>
+      <tr>
+        <th>Strategy</th>
+        <th>How it splits</th>
+        <th>Trade-off</th>
+      </tr>
+      <tr>
+        <td>
+          <strong>Fixed-size (character)</strong>
+        </td>
+        <td>Every N characters, regardless of content</td>
+        <td>Simplest possible; frequently cuts mid-word or mid-sentence — see the worked example below</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Fixed-size (token)</strong>
+        </td>
+        <td>Every N tokens, counted with the target embedding/LLM's own tokenizer</td>
+        <td>Aligns chunk size with the model's actual context budget rather than raw characters; still content-blind</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Recursive character splitting</strong>
+        </td>
+        <td>Tries paragraph breaks first, falls back to sentences, then words, then raw characters, until chunks fit the size budget</td>
+        <td>Respects natural boundaries far better than fixed-size; still somewhat arbitrary at the chosen size</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Sentence-based splitting</strong>
+        </td>
+        <td>Splits strictly on sentence boundaries (via a sentence tokenizer), then packs whole sentences into each chunk up to the size budget</td>
+        <td>Never breaks a sentence in half; resulting chunk sizes vary more than fixed-size methods</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Structure-aware splitting</strong>
+        </td>
+        <td>Splits on the document's own structural markers — Markdown headers, HTML tags, code fences, table rows</td>
+        <td>Keeps a genuine logical unit (a subsection, a function, a list) intact; needs a parser tailored to each document format</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Sliding window</strong>
+        </td>
+        <td>Fixed-size chunks advanced by a stride smaller than the chunk size, so consecutive chunks overlap heavily</td>
+        <td>Guarantees boundary content is never isolated in just one chunk; multiplies index size, since most text gets embedded more than once</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Semantic chunking</strong>
+        </td>
+        <td>Embeds individual sentences, then splits where the similarity between consecutive sentences drops sharply — i.e. where the 
+          <em>topic</em> actually changes
+        </td>
+        <td>Chunks align with real conceptual units, not an arbitrary size; needs an extra embedding pass just to build the index</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Parent-document (hierarchical)</strong>
+        </td>
+        <td>Small child chunks are embedded and searched for precision, but retrieval returns each match's larger parent chunk or section for generation</td>
+        <td>Combines precise matching with complete surrounding context; requires maintaining a child→parent mapping</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-purple">
+    <strong>Two further techniques worth knowing by name:</strong> 
+    <strong>agentic chunking</strong> has an LLM read the document and propose chunk boundaries directly, based on where it judges ideas to actually begin and end — often the most semantically coherent result, at the cost of an LLM call (and non-determinism) per document. 
+    <strong>Late chunking</strong> inverts the usual order: embed the 
+    <em>entire</em> document at once with a long-context embedding model, then pool the resulting token embeddings into chunks afterward — so each chunk's vector still carries context from the whole document, rather than only from its own short span.
+  </div>
+  <h3>Overlap — why chunks usually share a border</h3>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 700 140" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;display:block;margin:0 auto">
+      <text x="350" y="20" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="600" letter-spacing="1">CHUNK OVERLAP</text>
+      <rect x="40" y="40" width="220" height="36" rx="5" fill="#eef3ff" stroke="#2255aa" stroke-width="1.3"></rect>
+      <text x="150" y="62" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a3a5c">Chunk 1 (tokens 0-200)</text>
+      <rect x="220" y="40" width="220" height="36" rx="5" fill="#edfaf3" stroke="#2a7a4b" stroke-width="1.3" fill-opacity="0.85"></rect>
+      <text x="330" y="62" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a5c38">Chunk 2 (tokens 150-350)</text>
+      <rect x="220" y="40" width="40" height="36" fill="#6b3fa0" fill-opacity="0.35"></rect>
+      <text x="240" y="100" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#4a1a80">50-token overlap</text>
+      <text x="240" y="114" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#4a1a80">(tokens 150-200, shared)</text>
+    </svg>
+    <div class="diagram-caption">FIG 3 — Without overlap, a sentence spanning the exact chunk boundary can end up split across two chunks, with neither chunk containing the complete idea. A small overlap (10-20% of chunk size) ensures boundary content is fully present in at least one chunk.</div>
+  </div>
+  <table>
+    <tbody>
+      <tr>
+        <th>Chunk size</th>
+        <th>Retrieval precision</th>
+        <th>Context completeness</th>
+      </tr>
+      <tr>
+        <td>Small (e.g. 128 tokens)</td>
+        <td>Higher — less irrelevant content per chunk</td>
+        <td>Lower — may miss surrounding context needed to interpret the chunk</td>
+      </tr>
+      <tr>
+        <td>Large (e.g. 1024 tokens)</td>
+        <td>Lower — more irrelevant content dilutes the match</td>
+        <td>Higher — more surrounding context included</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-blue">
+    <strong>There's no universally correct chunk size.</strong> It's a genuine hyperparameter to tune against your own evaluation set (§08) — dense, fact-heavy documents (legal text, API docs) often favor smaller chunks; narrative or explanatory content often favors larger ones.
+  </div>
+  <h3>Worked example: the same source material, chunked eight ways</h3>
+  <p>Take this 408-character policy paragraph — the exact kind of sentence the lab notebook's corpus is built from — and run it through every strategy in the table above. Every result below is a real, computed output (fixed-size and recursive via character offsets, token-based via the actual 
+    <code>Qwen2.5-0.5B-Instruct</code> tokenizer, semantic via real 
+    <code>all-MiniLM-L6-v2</code> embeddings) — not hand-approximated.
+  </p>
+  <div class="math-box">
+    <span class="comment">// Sample text (408 characters)</span>
+"Acme Corp's return policy allows customers to return any unopened product
+within 30 days of purchase for a full refund. Opened electronics may be
+returned within 14 days if all original accessories and packaging are
+included. Refunds are issued to the original payment method and typically
+appear within 5 to 7 business days. Items marked 'final sale' cannot be
+returned or exchanged under any circumstances."
+  </div>
+  <h3>1. Fixed-size (character), chunk_size = 120, no overlap</h3>
+  <p>Splits blindly every 120 characters, with no regard for words or sentences:</p>
+  <div class="math-box">
+    <span class="var">Chunk 1</span> (chars   0-120): "Acme Corp's return policy allows customers to return any unopened product within 30 days of purchase for a full refund. "
+    <span class="var">Chunk 2</span> (chars 120-240): "Opened electronics may be returned within 14 days if all original accessories and packaging are included. Refunds are 
+    <span class="hi">is</span>"
+    <span class="var">Chunk 3</span> (chars 240-360): "
+    <span class="hi">sued</span> to the original payment method and typically appear within 5 to 7 business days. Items marked 'final sale' cannot 
+    <span class="hi">b</span>"
+    <span class="var">Chunk 4</span> (chars 360-408): "
+    <span class="hi">e</span> returned or exchanged under any circumstances."
+    <span class="comment">// Chunks 2/3 split the word "issued" into "is" + "sued"</span>
+    <span class="comment">// Chunks 3/4 split the word "be" into "b" + "e" — the textbook failure fixed-size chunking is known for</span>
+  </div>
+  <div class="callout callout-red">
+    <strong>This is not a contrived worst case</strong> — it's the literal output of splitting this real paragraph every 120 characters. A retriever asked "how quickly are refunds issued?" could easily be pointed at chunk 2, which ends mid-word on "is", or chunk 3, which is missing the word "be" from the sentence it opens with. An embedding computed over a chunk with a severed word is measurably worse than one computed over the whole word.
+  </div>
+  <h3>2. Fixed-size (token), chunk_size = 30 tokens, no overlap</h3>
+  <p>The same text, split every 30 tokens using the actual 
+    <code>Qwen2.5-0.5B-Instruct</code> tokenizer (82 tokens total) — decoded back to text so the boundaries are visible:
+  </p>
+  <div class="math-box">
+    <span class="var">Chunk 1</span> (tokens  0-30, 30 tok): "Acme Corp's return policy allows customers to return any unopened product within 30 days of purchase for a full refund. Opened electronics may"
+    <span class="var">Chunk 2</span> (tokens 30-60, 30 tok): " be returned within 14 days if all original accessories and packaging are included. Refunds are issued to the original payment method and typically appear within "
+    <span class="var">Chunk 3</span> (tokens 60-82, 22 tok): "5 to 7 business days. Items marked 'final sale' cannot be returned or exchanged under any circumstances."
+    <span class="comment">// Chunk boundaries land at different CHARACTER positions than the character-based</span>
+    <span class="comment">// version above (e.g. chunk 1 now includes "Opened electronics may") — because a</span>
+    <span class="comment">// token is a subword unit, not a fixed number of characters. This is why token-based</span>
+    <span class="comment">// counting is the version that actually matches an embedding model's real input limit.</span>
+  </div>
+  <h3>3. Recursive character splitting, chunk_size = 120, overlap = 20</h3>
+  <p>The identical text, run through LangChain's 
+    <code>RecursiveCharacterTextSplitter</code> (the exact call the lab notebook uses):
+  </p>
+  <div class="math-box">
+    <span class="var">Chunk 1</span> (119 chars): "Acme Corp's return policy allows customers to return any unopened product within 30 days of purchase for a full refund."
+    <span class="var">Chunk 2</span> (114 chars): "
+    <span class="hi">for a full refund.</span> Opened electronics may be returned within 14 days if all original accessories and packaging are"
+    <span class="var">Chunk 3</span> (112 chars): "
+    <span class="hi">and packaging are</span> included. Refunds are issued to the original payment method and typically appear within 5 to 7"
+    <span class="var">Chunk 4</span> (111 chars): "
+    <span class="hi">within 5 to 7</span> business days. Items marked 'final sale' cannot be returned or exchanged under any circumstances."
+    <span class="comment">// Highlighted text = the overlap carried over from the end of the previous chunk.</span>
+    <span class="comment">// Every word stays intact — the splitter backed off from a mid-word cut to the</span>
+    <span class="comment">// nearest word/sentence boundary the size budget would allow.</span>
+  </div>
+  <h3>4. Sentence-based splitting</h3>
+  <p>One chunk per sentence, with no fixed size budget at all:</p>
+  <div class="math-box">
+    <span class="var">Chunk 1</span> (119 chars): "Acme Corp's return policy allows customers to return any unopened product within 30 days of purchase for a full refund."
+    <span class="var">Chunk 2</span> (105 chars): "Opened electronics may be returned within 14 days if all original accessories and packaging are included."
+    <span class="var">Chunk 3</span> ( 99 chars): "Refunds are issued to the original payment method and typically appear within 5 to 7 business days."
+    <span class="var">Chunk 4</span> ( 82 chars): "Items marked 'final sale' cannot be returned or exchanged under any circumstances."
+  </div>
+  <div class="callout callout-green">
+    <strong>Which is "correct" so far?</strong> All three non-fixed-size methods above happen to preserve every sentence intact for this text — a property of where the chosen sizes land relative to sentence length 
+    <em>here</em>, not a guarantee. Shrink the character budget to 60 and even the recursive splitter starts breaking sentences, just far less often than fixed-size does. Sentence-based splitting is the only one that 
+    <em>structurally cannot</em> sever a sentence, at the cost of giving up any fixed chunk-size guarantee.
+  </div>
+  <h3>5. Structure-aware splitting</h3>
+  <p>The same content, but authored with Markdown headers (a very common real case — knowledge-base articles, READMEs, wikis). A structure-aware splitter cuts on the headers themselves, keeping each section whole regardless of character count:</p>
+  <div class="math-box">
+    <span class="comment">// Source Markdown</span>
+## Returns
+Acme Corp's return policy allows customers to return any unopened product
+within 30 days of purchase for a full refund. Opened electronics may be
+returned within 14 days if all original accessories and packaging are
+included.
+## Refunds
+Refunds are issued to the original payment method and typically appear
+within 5 to 7 business days.
+## Final Sale Items
+Items marked 'final sale' cannot be returned or exchanged under any
+circumstances.
+    <span class="comment">// Split on "## " boundaries -&gt; 3 chunks, each a complete section:</span>
+    <span class="var">Chunk 1</span> "## Returns\n" + the returns paragraph
+    <span class="var">Chunk 2</span> "## Refunds\n" + the refunds sentence
+    <span class="var">Chunk 3</span> "## Final Sale Items\n" + the final-sale sentence
+  </div>
+  <div class="callout callout-blue">
+    <strong>Notice chunk 2 is only one sentence</strong> — far shorter than a fixed 120-character budget would produce, and chunk 1 spans two sentences. A structure-aware splitter doesn't care: it trusts that whoever wrote the document already marked out the logical units with headers, and respects that boundary over any size target.
+  </div>
+  <h3>6. Sliding window, chunk_size = 150 chars, stride = 100 chars</h3>
+  <p>Fixed windows that advance by less than their own size, so every chunk overlaps the next by 50 characters:</p>
+  <div class="math-box">
+    <span class="var">Chunk 1</span> (chars   0-150): "Acme Corp's return policy allows customers to return any unopened product within 30 days of purchase for a full refund. Opened electronics may be retu"
+    <span class="var">Chunk 2</span> (chars 100-250): "
+    <span class="hi">for a full refund. Opened electronics may be retu</span>rned within 14 days if all original accessories and packaging are included. Refunds are issued to th"
+    <span class="var">Chunk 3</span> (chars 200-350): "
+    <span class="hi">d packaging are included. Refunds are issued to th</span>e original payment method and typically appear within 5 to 7 business days. Items marked 'final sale"
+    <span class="var">Chunk 4</span> (chars 300-408): "
+    <span class="hi">hin 5 to 7 business days. Items marked 'final sale</span>' cannot be returned or exchanged under any circumstances."
+    <span class="comment">// Every 50-character span appears in TWO chunks — more redundant than the 20-char</span>
+    <span class="comment">// overlap in method 3, but it guarantees no boundary content is ever isolated,</span>
+    <span class="comment">// at the cost of embedding roughly 1.5x more text than the source contains.</span>
+  </div>
+  <h3>7. Semantic chunking</h3>
+  <p>Semantic chunking needs more than one topic to show its actual value — so extend the example with two unrelated sentences appended, and embed each sentence individually with 
+    <code>all-MiniLM-L6-v2</code> to measure how similar each one is to the sentence right after it:
+  </p>
+  <div class="math-box">
+    <span class="comment">// 5 real sentences, real consecutive-sentence cosine similarities</span>
+S1 "The company's return policy allows returns within 30 days..."
+S2 "Refunds are processed within 5-7 business days after..."
+S3 "Items marked 'final sale' cannot be returned or exchanged..."
+S4 "The API rate limit is 1000 requests per minute per API key..."
+S5 "Support ticket priority levels are P1 (critical, 1hr)..."
+    <span class="eq">sim(S1, S2)</span> = 
+    <span class="hi">0.695</span>   
+    <span class="comment">// both about returns/refunds — stay together</span>
+    <span class="eq">sim(S2, S3)</span> = 
+    <span class="hi">0.370</span>   
+    <span class="comment">// still policy-related, but a smaller dip</span>
+    <span class="eq">sim(S3, S4)</span> = 
+    <span class="hi">0.053</span>   
+    <span class="comment">// the topic changes entirely — the real split point</span>
+    <span class="eq">sim(S4, S5)</span> = 
+    <span class="hi">0.264</span>   
+    <span class="comment">// both about the support/API topic — stay together</span>
+    <span class="comment">// Split at the single largest similarity DROP (0.053, far below the others):</span>
+    <span class="var">Chunk A</span> = [S1, S2, S3]   (return/refund policy)
+    <span class="var">Chunk B</span> = [S4, S5]        (API/support reference)
+  </div>
+  <div class="callout callout-purple">
+    <strong>This is the one method that used the actual meaning of the text, not its position or size.</strong> A fixed-size or recursive splitter has no way to know that S3 and S4 are unrelated — it would just as happily place the cut between S2 and S3 (also a plausible-looking sentence boundary) as between S3 and S4. Semantic chunking finds the real seam because it's the only method that measures the content on both sides of every candidate cut.
+  </div>
+  <h3>8. Parent-document (hierarchical) chunking</h3>
+  <p>Index each sentence of the original paragraph individually as a small, precise 
+    <strong>child chunk</strong> — but map every child back to the full paragraph as its 
+    <strong>parent</strong>, and return the parent (not just the matched sentence) at generation time:
+  </p>
+  <table>
+    <tbody>
+      <tr>
+        <th>Child chunk (searched)</th>
+        <th>Parent returned (used for generation)</th>
+      </tr>
+      <tr>
+        <td>"Acme Corp's return policy allows customers to return any unopened product within 30 days of purchase for a full refund."</td>
+        <td rowspan="4">The full 408-character paragraph (all 4 sentences)</td>
+      </tr>
+      <tr>
+        <td>"Opened electronics may be returned within 14 days if all original accessories and packaging are included."</td>
+      </tr>
+      <tr>
+        <td>"Refunds are issued to the original payment method and typically appear within 5 to 7 business days."</td>
+      </tr>
+      <tr>
+        <td>"Items marked 'final sale' cannot be returned or exchanged under any circumstances."</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-green">
+    <strong>Why this matters for a question like "how long do refunds take?"</strong> The child sentence "Refunds are issued... within 5 to 7 business days" is the single best-matching chunk — precise retrieval. But answered from that sentence alone, the model has no way to also mention the final-sale exception or the 14-day electronics window. Returning the parent paragraph gives the LLM the complete surrounding context that made the precise match possible in the first place, without diluting the search index with oversized chunks.
+  </div>
+</section>
+<section class="section" id="s6">
+  <div class="section-eyebrow">Section 06</div>
+  <h2>Retrieval — Hybrid Retrieval &amp; BM25</h2>
+  <p>
+    <strong>BM25</strong> is a classic sparse, keyword-based ranking function (a statistical refinement of TF-IDF) — it scores documents by term frequency, downweighted for common words and document length. Unlike dense embeddings, it matches exact tokens.
+  </p>
+  <div class="math-box">
+    <span class="comment">// BM25 score, conceptually (full formula has 2 tuning constants k1, b)</span>
+    <span class="var">score(D, Q)</span> = 
+    <span class="eq">Σ_term IDF(term) × [ TF(term, D) saturating with frequency, normalized by doc length ]</span>
+    <span class="comment">// Key properties:</span>
+    <span class="comment">//   - rare terms across the corpus score higher (IDF)</span>
+    <span class="comment">//   - repeating a term helps, but with DIMINISHING returns (saturation)</span>
+    <span class="comment">//   - longer documents are penalized relative to their length</span>
+  </div>
+  <h3>Hybrid retrieval: dense + sparse, combined</h3>
+  <div class="compare-grid">
+    <div class="compare-card">
+      <div class="compare-card-header" style="background:#2255aa;color:#fff">Dense (embeddings, §01-§03)</div>
+      <div class="compare-card-body">
+        <ul>
+          <li>Catches paraphrase, synonyms, meaning</li>
+          <li>Weak on exact identifiers, rare tokens, numbers</li>
+        </ul>
+      </div>
+    </div>
+    <div class="compare-card">
+      <div class="compare-card-header" style="background:#b83232;color:#fff">Sparse (BM25)</div>
+      <div class="compare-card-body">
+        <ul>
+          <li>Exact keyword/identifier matching, cheap, no training needed</li>
+          <li>Blind to paraphrase — zero overlap means zero score</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="math-box">
+    <span class="comment">// Reciprocal Rank Fusion (RRF) — a common way to combine two ranked lists</span>
+    <span class="var">RRF_score(doc)</span> = 
+    <span class="eq">Σ_retriever  1 / (k + rank_in_that_retriever(doc))</span>   
+    <span class="comment">// k ~ 60, a smoothing constant</span>
+    <span class="comment">// A document ranked #1 by BOTH dense and sparse retrieval scores much higher</span>
+    <span class="comment">// than one ranked #1 by only one — this is what "hybrid" actually computes.</span>
+  </div>
+  <div class="callout callout-green">
+    <strong>Why hybrid, not "pick the better one":</strong> §02's FIG 1 showed dense search missing nothing lexically similar and sparse search missing paraphrase — the failure modes are close to disjoint. Running both and fusing the rankings (RRF above, or a learned combination) recovers documents either retriever alone would have missed.
+  </div>
+  <h3>Worked example: hybrid retrieval on the lab notebook's corpus</h3>
+  <p>These are the actual numbers 
+    <code>1_RAG_Pipeline_Lab.ipynb</code> produces over its 16-document corpus (its Section 1) — reproducible by re-running the notebook's Sections 3-5 yourself.
+  </p>
+  <p>
+    <strong>Query:</strong> 
+    <code>"What is the rate limit for endpoint /v2/limits?"</code> — chosen because it contains a rare literal token (
+    <code>limits</code>) that only one document contains.
+  </p>
+  <table>
+    <tbody>
+      <tr>
+        <th>Rank</th>
+        <th>Dense retrieval (FAISS)</th>
+        <th>Sparse retrieval (BM25)</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>[15] "...API rate limit is 1000 requests..."</td>
+        <td>[15] score = 
+          <strong>11.94</strong>
+        </td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>[7] "Support ticket priority levels are P1..."</td>
+        <td>[11] score = 2.85</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>[13] "Model X-450 is IP68 rated..."</td>
+        <td>[13] score = 2.13</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>[4] "Model X-450 supports fast charging..."</td>
+        <td>[6] score = 1.23</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td>[12] "Remote employees receive a one-time..."</td>
+        <td>[3] score = 0.72</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-purple">
+    <strong>Why is BM25's score for doc 15 so much larger than everything else?</strong> The tokens 
+    <code>limit</code> and 
+    <code>limits</code> each appear in exactly one document out of sixteen — an extremely rare term earns an extremely high IDF weight in BM25's formula (above), so any document containing it dominates the ranking. Dense retrieval finds the same top document, but by meaning rather than a lucky token match — its 2nd/3rd-place picks ([7], [13]) are topically related "support/spec" documents rather than lexical near-misses.
+  </div>
+  <p>Fusing both lists with RRF (
+    <code>k_const = 60</code>):
+  </p>
+  <div class="math-box">
+    <span class="comment">// doc 15: rank 1 in BOTH lists</span>
+    <span class="eq">RRF(15)</span> = 1/(60+1) + 1/(60+1) = 1/61 + 1/61 = 
+    <span class="hi">0.0328</span>
+    <span class="comment">// doc 13: rank 3 in BOTH lists</span>
+    <span class="eq">RRF(13)</span> = 1/(60+3) + 1/(60+3) = 1/63 + 1/63 = 
+    <span class="hi">0.0317</span>
+    <span class="comment">// doc 7: rank 2 in dense ONLY — never appears in BM25's top-5 at all</span>
+    <span class="eq">RRF(7)</span>  = 1/(60+2) + 0            = 1/62         = 
+    <span class="hi">0.0161</span>
+    <span class="comment">// Final fused top-3: [15] 0.0328  &gt;  [13] 0.0317  &gt;  [7] 0.0161</span>
+    <span class="comment">// — exactly what the notebook's hybrid_retrieve() prints for this query.</span>
+  </div>
+  <p>
+    <strong>Now the opposite case — a paraphrase query:</strong> 
+    <code>"How much time off do new hires get each year?"</code>, which shares almost no words with the document that actually answers it.
+  </p>
+  <table>
+    <tbody>
+      <tr>
+        <th>Rank</th>
+        <th>Dense retrieval (FAISS)</th>
+        <th>Sparse retrieval (BM25)</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>[1] "Employees are entitled to 15 days of paid annual leave..."</td>
+        <td>[12] score = 2.62</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>[9] "New employees complete a 90-day probationary period..."</td>
+        <td>[9] score = 2.53</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>[12] "Remote employees receive a one-time $500 stipend..."</td>
+        <td>[1] score = 2.30</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>[14] "Price matching is honored within 14 days..."</td>
+        <td>[15] score = 0.00</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td>[0] "The company's return policy allows returns..."</td>
+        <td>[14] score = 0.00</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-red">
+    <strong>BM25 isn't wrong here, it's just working from the wrong signal.</strong> "new", "employees", and "days" are literal words the query and several documents share, so BM25 ranks [12] and [9] highly — by 
+    <em>coincidence</em> of vocabulary, not because it understood "time off" means "annual leave." Dense retrieval ranks [1] (the actual leave policy) first precisely because it never relied on shared words in the first place.
+  </div>
+  <div class="math-box">
+    <span class="comment">// doc 1: rank 1 dense, rank 3 BM25</span>
+    <span class="eq">RRF(1)</span>  = 1/61 + 1/63 = 0.01639 + 0.01587 = 
+    <span class="hi">0.0323</span>
+    <span class="comment">// doc 12: rank 3 dense, rank 1 BM25 — the same two rank VALUES as doc 1, just swapped</span>
+    <span class="eq">RRF(12)</span> = 1/63 + 1/61 = 0.01587 + 0.01639 = 
+    <span class="hi">0.0323</span>
+    <span class="comment">// doc 9: rank 2 in BOTH lists</span>
+    <span class="eq">RRF(9)</span>  = 1/62 + 1/62 = 0.01613 + 0.01613 = 
+    <span class="hi">0.0323</span>
+    <span class="comment">// All three round to the same fused score — this is exactly what the notebook</span>
+    <span class="comment">// prints: three results, all rrf_score=0.0323</span>
+  </div>
+  <div class="callout callout-green">
+    <strong>RRF rewards the SET of ranks a document collects, not which retriever produced them.</strong> Doc 1 and doc 12 land on exactly the same fused score despite disagreeing about which one deserves rank 1 — because RRF sums 
+    <code>1/(k+rank)</code> across retrievers, and {1,3} sums to the same total as {3,1}. This is why re-ranking (§07) still matters after fusion: RRF settles disagreements about ordering, but doesn't itself judge relevance the way a cross-encoder does.
+  </div>
+</section>
+<section class="section" id="s7">
+  <div class="section-eyebrow">Section 07</div>
+  <h2>Re-ranking</h2>
+  <p>Retrieval (dense, sparse, or hybrid) is optimized to be 
+    <em>fast</em> across potentially millions of documents — it uses cheap similarity computations. A 
+    <strong>re-ranker</strong> is a second, slower, more accurate stage: take the top-k candidates retrieval already narrowed things down to, and score each one properly against the query.
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;display:block;margin:0 auto">
+      <text x="360" y="22" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="600" letter-spacing="1">BI-ENCODER (retrieval) VS. CROSS-ENCODER (re-rank)</text>
+      <rect x="30" y="45" width="300" height="150" rx="8" fill="#eef3ff" stroke="#2255aa" stroke-width="1.5"></rect>
+      <text x="180" y="68" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a3a5c" font-weight="700">BI-ENCODER</text>
+      <rect x="50" y="80" width="100" height="30" rx="5" fill="#c7d9f2"></rect>
+      <text x="100" y="99" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8">encode(query)</text>
+      <rect x="190" y="80" width="100" height="30" rx="5" fill="#c7d9f2"></rect>
+      <text x="240" y="99" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8">encode(doc)</text>
+      <text x="180" y="130" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a3a5c">cosine_sim(q_vec, d_vec)</text>
+      <text x="180" y="155" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#444">Doc vectors precomputed ONCE,</text>
+      <text x="180" y="170" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#444">reused for every future query — fast</text>
+      <rect x="390" y="45" width="300" height="150" rx="8" fill="#fff0f0" stroke="#b83232" stroke-width="1.5"></rect>
+      <text x="540" y="68" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#7a0000" font-weight="700">CROSS-ENCODER</text>
+      <rect x="420" y="80" width="240" height="30" rx="5" fill="#f2c7c7"></rect>
+      <text x="540" y="99" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8">encode(query + doc, TOGETHER)</text>
+      <text x="540" y="130" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#7a0000">relevance_score directly</text>
+      <text x="540" y="155" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#444">Must run fresh for every (query, doc)</text>
+      <text x="540" y="170" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#444">pair — accurate, but too slow at scale</text>
+    </svg>
+    <div class="diagram-caption">FIG 4 — Retrieval's bi-encoder embeds query and document separately (allowing documents to be pre-embedded once); a cross-encoder re-ranker embeds them together, letting query and document tokens attend to each other directly — more accurate, but only affordable on a small top-k shortlist, not the whole corpus.</div>
+  </div>
+  <div class="callout callout-red">
+    <strong>Exam favourite:</strong> "Why not just use a cross-encoder for retrieval directly, since it's more accurate?" — a cross-encoder has no way to precompute anything; every document would need to be re-encoded jointly with every new query, at query time, across the entire corpus. That's computationally infeasible past a few thousand documents — hence the two-stage design: cheap bi-encoder retrieval narrows millions down to dozens, then the expensive cross-encoder only has to score that small shortlist.
+  </div>
+  <h3>Worked example: cross-encoder re-ranking corrects a false positive</h3>
+  <p>Continuing the paraphrase-query example from §06 — hybrid retrieval's top 3 were docs [1], [12], [9]. Casting a slightly wider net (top 6 candidates) and re-ranking with a cross-encoder (
+    <code>cross-encoder/ms-marco-MiniLM-L-6-v2</code>) gives:
+  </p>
+  <table>
+    <tbody>
+      <tr>
+        <th></th>
+        <th>Before re-ranking (hybrid RRF order)</th>
+        <th>After cross-encoder re-ranking</th>
+      </tr>
+      <tr>
+        <td>1st</td>
+        <td>[1] "Employees are entitled to 15 days of paid annual leave..."</td>
+        <td>[1] relevance = 
+          <strong>−0.909</strong>
+        </td>
+      </tr>
+      <tr>
+        <td>2nd</td>
+        <td>[12] "Remote employees receive a one-time $500 stipend..."</td>
+        <td>[9] relevance = 
+          <strong>−0.964</strong>
+        </td>
+      </tr>
+      <tr>
+        <td>3rd</td>
+        <td>[9] "New employees complete a 90-day probationary period..."</td>
+        <td>[0] relevance = 
+          <strong>−8.505</strong>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-purple">
+    <strong>Doc [12] — the $500 stipend document — got demoted out of the top 3 entirely.</strong> It shares surface vocabulary with the query ("employees", "new hires"-adjacent phrasing), which is why hybrid retrieval ranked it 2nd — but a stipend has nothing to do with "how much time off." The cross-encoder, which actually reads the query and document together instead of comparing pre-computed vectors, correctly judges it far less relevant than [9] (the probationary-period document, which really is about a new-hire timeline).
+  </div>
+  <div class="callout callout-blue">
+    <strong>Notice the score gap:</strong> [1] and [9] land close together (−0.909 vs. −0.964), but [0] (the general return-policy document, pulled in only because the wider net of 6 candidates included it) scores 
+    <strong>−8.505</strong> — nearly 8 points lower. The absolute magnitude isn't meaningful on its own (these are raw, uncalibrated logits), but a gap this large is the cross-encoder saying, in effect: "the first two are genuinely about the question; this third one isn't — it's just the best of a weak remaining field."
+  </div>
+</section>
+<section class="section" id="s8">
+  <div class="section-eyebrow">Section 08</div>
+  <h2>RAG Evaluation</h2>
+  <p>RAG has two components that can each independently fail — retrieval and generation — so evaluation needs metrics for both, plus metrics for how well they work 
+    <em>together</em>.
+  </p>
+  <table>
+    <tbody>
+      <tr>
+        <th>Layer</th>
+        <th>Metric</th>
+        <th>Question it answers</th>
+      </tr>
+      <tr>
+        <td rowspan="2">Retrieval</td>
+        <td>
+          <strong>Recall@k</strong>
+        </td>
+        <td>Is the relevant document among the top k retrieved?</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>MRR (Mean Reciprocal Rank)</strong>
+        </td>
+        <td>How high does the first relevant document rank, on average? (1/rank, averaged)</td>
+      </tr>
+      <tr>
+        <td rowspan="2">Generation</td>
+        <td>
+          <strong>Faithfulness / groundedness</strong>
+        </td>
+        <td>Is every claim in the answer actually supported by the retrieved context?</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Answer relevance</strong>
+        </td>
+        <td>Does the answer actually address the question asked?</td>
+      </tr>
+      <tr>
+        <td>End-to-end</td>
+        <td>
+          <strong>Context precision/recall</strong>
+        </td>
+        <td>Of the retrieved chunks, how many were actually needed — and were any needed ones missing?</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-purple">
+    <strong>Why "faithfulness" is checked separately from correctness:</strong> an answer can be factually true but 
+    <em>unfaithful</em> — right by coincidence, not because the retrieved context actually supported it (the LLM's own parametric knowledge answered it instead). RAG evaluation frameworks (e.g. RAGAS) specifically test this by checking whether each generated claim can be traced back to a sentence in the retrieved context, independent of whether the claim happens to be true.
+  </div>
+  <h3>1. Recall@k, worked on 10 real labeled queries</h3>
+  <p>The lab notebook's 10-query labeled set, run through BM25 with 
+    <code>k=3</code>. Real per-query hit/miss:
+  </p>
+  <div class="math-box">
+    <span class="comment">// query → gold doc id → BM25's actual top-3 → hit?</span>
+"How long is the return window?"                       → gold=0  → top3=[0,6,15]   → HIT
+"How much vacation time do I get?"                      → gold=1  → top3=[12,15,14] → 
+    <span class="hi">MISS</span>
+"What's the battery size on the X-450?"                 → gold=2  → top3=[11,2,8]   → HIT
+"How do I change my password?"                          → gold=3  → top3=[3,15,14]  → HIT
+"How fast does the X-450 charge?"                       → gold=4  → top3=[4,5,8]    → HIT
+"Does sick leave need advance notice?"                  → gold=5  → top3=[5,1,15]   → HIT
+"How long do refunds take to process?"                  → gold=6  → top3=[6,3,4]    → HIT
+"What's the response time for a critical support ticket?" → gold=7 → top3=[7,12,11] → HIT
+"What resolution is the X-450 screen?"                  → gold=8  → top3=[8,13,2]   → HIT
+"How long is the probation period for new hires?"       → gold=9  → top3=[9,11,13]  → HIT
+    <span class="eq">Recall@3</span> = 9 hits / 10 queries = 
+    <span class="hi">90.0%</span>   ← exactly what the notebook prints
+  </div>
+  <div class="callout callout-red">
+    <strong>The one miss is instructive:</strong> "vacation time" retrieves docs about remote-work stipends and price matching — zero mention of the actual annual-leave document (id 1) anywhere in the top 3. This is BM25's paraphrase blind spot from §02/§06 showing up directly in a hard metric, not just an anecdotal example.
+  </div>
+  <h3>2. MRR, worked on the same 10 queries</h3>
+  <p>Recall@3 only asks "did it appear in the top 3", treating rank 1 and rank 3 as equally good. MRR keeps the rank information:</p>
+  <div class="math-box">
+    <span class="comment">// reciprocal rank per query (using top-5, so the miss above still gets 0 since it's absent even at k=5)</span>
+rank 1 → 1/1 = 1.000   (7 of the 10 queries land the gold doc at rank 1)
+rank 2 → 1/2 = 0.500   ("battery size" — BM25 ranks doc 11 above doc 2)
+not found in top-5 → 0.000   ("vacation time")
+    <span class="eq">MRR</span> = (1.000×8 + 0.500×1 + 0.000×1) / 10 = 8.500 / 10 = 
+    <span class="hi">0.850</span>   ← matches the notebook exactly
+  </div>
+  <div class="callout callout-blue">
+    <strong>Recall@3 (90%) and MRR (0.850) tell related but different stories from the same data.</strong> Recall@3 says "1 total failure out of 10." MRR additionally docks a fraction of a point for the "battery size" query, which technically succeeded (doc 2 is in the top 3) but only at rank 2 — a real, if smaller, quality gap that Recall@3 is blind to.
+  </div>
+  <h3>3. Faithfulness / groundedness</h3>
+  <p>The lab notebook's actual LCEL chain answer for 
+    <code>"How much time off do new hires get each year?"</code>, checked claim-by-claim against its retrieved context (doc 1: 
+    <em>"Employees are entitled to 15 days of paid annual leave per calendar year, accruing monthly."</em>):
+  </p>
+  <div class="math-box">
+    <span class="comment">// Real generated answer:</span>
+"New employees receive 15 days of paid annual leave per calendar year."
+    <span class="eq">Claim 1</span>: "15 days"                → traceable to context → 
+    <span class="hi">faithful</span>
+    <span class="eq">Claim 2</span>: "paid annual leave"      → traceable to context → 
+    <span class="hi">faithful</span>
+    <span class="eq">Claim 3</span>: "per calendar year"      → traceable to context → 
+    <span class="hi">faithful</span>
+    <span class="comment">// Every claim traces back to the retrieved sentence -&gt; fully faithful</span>
+    <span class="comment">// A hypothetical UNFAITHFUL variant of the same answer:</span>
+"New employees receive 15 days of paid annual leave per calendar year,
+and up to 5 unused days carry over into the following year."
+    <span class="eq">Claim 4</span>: "5 unused days carry over" → 
+    <span class="hi">NOT in any retrieved chunk</span> → unfaithful
+  </div>
+  <div class="callout callout-purple">
+    <strong>Claim 4 might even be true</strong> (plenty of real leave policies do allow carryover) — faithfulness doesn't check truth, it checks provenance. An answer scores low on faithfulness the moment it asserts something the retrieved context never said, regardless of whether that assertion happens to be correct.
+  </div>
+  <h3>4. Answer relevance</h3>
+  <p>Same question, three candidate answers — each grounded in a 
+    <em>real</em> document from the corpus, which is exactly what makes this metric necessary:
+  </p>
+  <table>
+    <tbody>
+      <tr>
+        <th>Candidate answer</th>
+        <th>Faithful?</th>
+        <th>Relevant?</th>
+      </tr>
+      <tr>
+        <td>A: "New employees receive 15 days of paid annual leave per calendar year."</td>
+        <td>Yes (doc 1)</td>
+        <td>
+          <strong>Yes</strong> — directly answers the question
+        </td>
+      </tr>
+      <tr>
+        <td>B: "Refunds are processed within 5-7 business days after the item is received."</td>
+        <td>Yes (doc 6)</td>
+        <td>
+          <strong>No</strong> — perfectly faithful to a real document, but about refunds, not leave
+        </td>
+      </tr>
+      <tr>
+        <td>C: "I don't have that information."</td>
+        <td>Yes (vacuously)</td>
+        <td>
+          <strong>No</strong> — safe, ungrounded-in-nothing-wrong, but answers nothing
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-green">
+    <strong>Answer B is the case faithfulness alone cannot catch.</strong> It is 100% traceable to a real retrieved chunk — a retrieval bug (the wrong document got pulled in) rather than a generation bug produced it, and faithfulness checking would score it perfectly. Only answer relevance, which compares the answer against the 
+    <em>question</em> rather than against the context, catches that it's simply off-topic.
+  </div>
+  <h3>5. Context precision &amp; recall</h3>
+  <p>For the same query, hybrid retrieval + re-ranking (§06-§07) returned three chunks: 
+    <code>[1]</code> (annual leave — actually used to generate the answer), 
+    <code>[9]</code> (90-day probation — topically close, but not used), 
+    <code>[0]</code> (general return policy — pulled in only by the wider candidate net, not used):
+  </p>
+  <div class="math-box">
+    <span class="comment">// Of the 3 retrieved chunks, only 1 was actually necessary to produce the answer</span>
+    <span class="eq">Context precision</span> = necessary chunks retrieved / total chunks retrieved = 1 / 3 = 
+    <span class="hi">0.33</span>
+    <span class="comment">// Of the 1 chunk actually necessary to fully answer this question, all 1 were retrieved</span>
+    <span class="eq">Context recall</span>    = necessary chunks retrieved / total necessary chunks that exist = 1 / 1 = 
+    <span class="hi">1.00</span>
+  </div>
+  <div class="callout callout-blue">
+    <strong>Perfect recall, mediocre precision — a very common real pattern.</strong> Nothing needed for the answer was missed (recall = 1.0), but two-thirds of the context budget spent on this question was, in retrospect, unnecessary. This is precisely the "over-retrieval dilution" failure mode in §09 — a context window can score perfectly on recall while still being 67% noise.
+  </div>
+</section>
+<section class="section" id="s9">
+  <div class="section-eyebrow">Section 09</div>
+  <h2>Retrieval Failures</h2>
+  <table>
+    <tbody>
+      <tr>
+        <th>Failure mode</th>
+        <th>What happens</th>
+        <th>Mitigation</th>
+      </tr>
+      <tr>
+        <td>
+          <strong>Missing context</strong>
+        </td>
+        <td>The answer requires information that was never indexed at all</td>
+        <td>Corpus coverage audit; explicit "I don't know" fallback rather than guessing</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Irrelevant retrieval</strong>
+        </td>
+        <td>Top-k chunks look similar by embedding but don't actually answer the question</td>
+        <td>Re-ranking (§07); tighter similarity thresholds; better chunking (§05)</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Lost-in-the-middle</strong>
+        </td>
+        <td>LLMs attend less reliably to information placed in the middle of a long context window than at the start or end</td>
+        <td>Put the most relevant chunk first/last; keep retrieved context concise rather than maximal</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Redundant retrieval</strong>
+        </td>
+        <td>Top-k chunks are near-duplicates of each other, wasting context budget</td>
+        <td>Diversity-aware re-ranking (e.g. Maximal Marginal Relevance)</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Over-retrieval dilution</strong>
+        </td>
+        <td>Too many chunks retrieved "just in case," burying the genuinely relevant one</td>
+        <td>Tune k down; rely on re-ranking to do the real filtering, not raw retrieval volume</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-blue">
+    <strong>The unifying theme:</strong> nearly every retrieval failure is really a signal-to-noise problem in the context window — too little of the right information, too much of the wrong information, or the right information placed where the model attends to it least. §08's evaluation metrics exist specifically to catch these before they reach users.
+  </div>
+  <h3>1. Missing context — real example</h3>
+  <p>The lab notebook's own SS09 demonstration: 
+    <code>"Who is the company's CEO?"</code>, asked of a 16-document corpus that contains no information about a CEO at all.
+  </p>
+  <div class="math-box">
+    <span class="comment">// Real retrieval output — retrieval ALWAYS returns its top-k, however irrelevant:</span>
+"The company's return policy allows returns within 30 days of purchase with a valid receipt."
+"Model X-450's screen is 6.5 inches with a resolution of 2400x1080."
+"Remote employees receive a one-time $500 home office setup stipend."
+    <span class="comment">// Real generated answer:</span>
+"The company's CEO is not explicitly mentioned in the given context... it is
+impossible to determine who the company's CEO is."
+  </div>
+  <div class="callout callout-green">
+    <strong>This is the failure mode working correctly, not incorrectly.</strong> Retrieval did the only thing it can do — return its nearest matches — and generation's grounding instruction (§04, §07) caught that none of them were actually relevant. The "fix" here isn't better retrieval, since no chunk in the corpus could ever answer this; it's making sure the LLM says so instead of guessing from its own training data.
+  </div>
+  <h3>2. Irrelevant retrieval — real example</h3>
+  <p>The same paraphrase query from §06/§07, run through the local generation model with two different contexts: the raw hybrid-RRF order (before re-ranking, includes the irrelevant stipend document) vs. the cross-encoder re-ranked order.</p>
+  <div class="math-box">
+    <span class="comment">// BEFORE re-ranking — context = [doc 1 (leave policy), doc 12 (stipend), doc 9 (probation)]</span>
+Question: "How much time off do new hires get each year?"
+    <span class="hi">Answer: "New employees receive 90 days of paid annual leave each year."</span>   ← WRONG
+    <span class="comment">// AFTER re-ranking — context = [doc 1 (leave policy), doc 9 (probation), doc 0 (return policy)]</span>
+Answer: "New employees receive 15 days of paid annual leave per calendar year."   ← correct
+  </div>
+  <div class="callout callout-red">
+    <strong>The correct chunk (doc 1, "15 days") was present in BOTH contexts.</strong> Irrelevant retrieval didn't just waste space — the model appears to have blended the "90-day probationary period" number from the noise document into its answer about leave, producing a confident, wrong, oddly specific number. This is a real, reproducible failure: having the right chunk in context is necessary but not sufficient if the wrong chunks are sitting right next to it.
+  </div>
+  <h3>3. Lost-in-the-middle — a real attempt, and why it didn't reproduce here</h3>
+  <p>Placed a chunk containing a specific fact ("Remote employees receive a one-time $500 home office setup stipend.") at the start, middle, and end of a 16-chunk context, and asked the local model for that exact fact each time:</p>
+  <div class="math-box">Correct chunk at position  1 of 16: "...home office setup stipend is $500."   ✓
+Correct chunk at position  8 of 16: "...home office setup stipend is $500."   ✓
+Correct chunk at position 16 of 16: "...home office setup stipend is $500."   ✓
+    <span class="comment">// No degradation observed at any position, in this setup</span>
+  </div>
+  <div class="callout callout-purple">
+    <strong>Honest result: this local, small-scale setup did not reproduce the effect.</strong> Liu et al. (2023)'s original finding uses much longer contexts (tens of retrieved passages, thousands of tokens) and often several plausible-looking distractor values competing for the same answer slot — conditions this 16-short-sentence, single-unambiguous-fact setup doesn't create. The lesson isn't "lost-in-the-middle isn't real" — it's that the effect is a function of context length and distractor difficulty, and a demo has to actually stress those to show it. Take this as a template to stretch (more chunks, longer chunks, near-duplicate decoy numbers) rather than as a disproof.
+  </div>
+  <h3>4. Redundant retrieval — worked with real embeddings</h3>
+  <p>A real embedding computation: candidate A (the genuine ticket-priority document) and candidate B (a synthetic near-duplicate paraphrase of A), alongside two unrelated real documents, all scored against the query 
+    <code>"What are the support ticket priority levels?"</code>:
+  </p>
+  <div class="math-box">
+    <span class="comment">// Real cosine similarities</span>
+sim(query, A)  = 0.854      sim(query, B) = 0.700      sim(query, C) = 0.198     sim(query, D) = 0.229
+sim(A, B)      = 
+    <span class="hi">0.810</span>  ← A and B are near-duplicates of each other
+    <span class="comment">// Relevance-only ranking would pick: A, B, D — wasting slot 2 on a near-duplicate of slot 1</span>
+    <span class="comment">// MMR (λ=0.5) selection trace:</span>
+step 1: pick A  (highest relevance, nothing selected yet to penalize)
+step 2: MMR(B) = 0.5×0.700 − 0.5×0.810(sim to A) = 
+    <span class="hi">−0.055</span>
+        MMR(D) = 0.5×0.229 − 0.5×0.264(sim to A) = 
+    <span class="hi">−0.018</span>  ← wins, D picked instead of B
+step 3: pick C (last remaining)
+    <span class="eq">MMR final order</span>: A, D, C   ← B (the redundant paraphrase) never gets a context slot
+  </div>
+  <div class="callout callout-green">
+    <strong>MMR didn't drop B because it's irrelevant</strong> — sim(query, B) = 0.700 is still fairly high. It dropped B because, having already selected A, adding B contributes almost nothing new: the marginal value of a near-duplicate is low regardless of how relevant it looks in isolation. That's the "marginal" in Maximal Marginal Relevance.
+  </div>
+  <h3>5. Over-retrieval dilution — a real recall@k curve</h3>
+  <p>BM25 recall@k over the notebook's 10 labeled queries, k = 1 through 10:</p>
+  <div class="math-box">
+    <span class="eq">k= 1</span>  Recall@k =  80.0%
+    <span class="eq">k= 2</span>  Recall@k =  90.0%   ← the only real gain past k=1
+    <span class="eq">k= 3</span>  Recall@k =  90.0%
+    <span class="eq">k= 4</span>  Recall@k =  90.0%
+    <span class="eq">k= 5</span>  Recall@k =  90.0%
+   ...                              
+    <span class="comment">// flat all the way out</span>
+    <span class="eq">k=10</span>  Recall@k =  90.0%   ← identical to k=2
+  </div>
+  <div class="callout callout-blue">
+    <strong>Every chunk retrieved beyond k=2 bought exactly zero additional recall</strong> on this query set, while still consuming context-window budget and giving the LLM 5-8 more chances to be distracted by something irrelevant (exactly failure mode #2, above). "Retrieve more, just in case" is not a free hedge — past the point where recall saturates, it's pure downside.
+  </div>
+</section>
+<section class="section" id="s10">
+  <div class="section-eyebrow">Section 10</div>
+  <h2>Knowledge Freshness</h2>
+  <p>The index built in §04's "index-time" phase is a snapshot. The moment the underlying documents change — a policy updates, a price changes, a new document is added — that snapshot is stale, and RAG will confidently retrieve and ground answers in outdated information.</p>
+  <table>
+    <tbody>
+      <tr>
+        <th>Strategy</th>
+        <th>How it works</th>
+        <th>Trade-off</th>
+      </tr>
+      <tr>
+        <td>
+          <strong>Full re-index</strong>
+        </td>
+        <td>Periodically re-embed and rebuild the entire index from scratch</td>
+        <td>Simple, guaranteed consistent; expensive and slow at scale</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Incremental indexing</strong>
+        </td>
+        <td>Only re-embed documents that actually changed (tracked via timestamps/hashes); add/update/delete individual vectors</td>
+        <td>Cheap and fast; requires change-tracking infrastructure</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Time-decay scoring</strong>
+        </td>
+        <td>Down-weight older documents in the ranking, even if not literally removed</td>
+        <td>Softens staleness without needing to detect exact changes; needs reliable timestamps</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-green">
+    <strong>A freshness failure looks exactly like a correct RAG answer.</strong> The system will retrieve confidently, generate a well-grounded-sounding answer, cite a real chunk — and the chunk itself is just outdated. This makes freshness bugs unusually dangerous: there's no error to catch, only a wrong answer delivered with full apparent legitimacy.
+  </div>
+  <h3>1. Full re-index — worked cost</h3>
+  <p>A corpus of 50,000 documents, each taking ~8ms to embed (a realistic small sentence-embedding model on CPU), where only 12 documents actually changed since yesterday:</p>
+  <div class="math-box">
+    <span class="eq">Full re-index cost</span> = 50,000 docs × 8ms = 400,000ms = 
+    <span class="hi">400 seconds (~6.7 minutes)</span>
+    <span class="comment">// ...to account for 12 changed documents out of 50,000 (0.024% of the corpus)</span>
+  </div>
+  <div class="callout callout-red">
+    <strong>The waste scales with corpus size, not with how much actually changed.</strong> At 50,000 documents this is an annoying 7-minute batch job; at 50 million it's the difference between a nightly job and one that never finishes before the next day's changes arrive.
+  </div>
+  <h3>2. Incremental indexing — the same scenario, done differently</h3>
+  <div class="math-box">
+    <span class="eq">Incremental re-index cost</span> = 12 changed docs × 8ms = 
+    <span class="hi">96 milliseconds</span>
+    <span class="eq">Speedup</span> = 400,000ms / 96ms ≈ 
+    <span class="hi">4,167x fewer embedding calls</span>
+    <span class="comment">// Plus: delete the 12 old vectors from the index and upsert the 12 new ones — no full rebuild</span>
+  </div>
+  <div class="callout callout-purple">
+    <strong>The 4,167x isn't a rounding trick</strong> — it's the literal ratio of "12" to "50,000." The entire cost of incremental indexing comes from change-tracking infrastructure (knowing which 12 changed, out of 50,000, without re-checking all 50,000) — once that's solved, the embedding cost itself becomes nearly free.
+  </div>
+  <h3>3. Time-decay scoring — worked reordering</h3>
+  <p>Two documents competing for the same query: doc X is a strong topical match but 400 days old; doc Y is a weaker match but only 10 days old. Applying exponential decay 
+    <code>score = similarity × e^(−λ × age_days)</code> with a moderate decay rate 
+    <code>λ = 0.002</code> (a ~347-day half-life):
+  </p>
+  <div class="math-box">
+    <span class="comment">// Before decay — pure similarity ranking</span>
+doc X: similarity = 0.85, age = 400 days   ← ranks #1 on similarity alone
+doc Y: similarity = 0.78, age =  10 days   ← ranks #2 on similarity alone
+    <span class="comment">// After decay:</span>
+    <span class="eq">decayed(X)</span> = 0.85 × e^(−0.002×400) = 0.85 × 0.4493 = 
+    <span class="hi">0.382</span>
+    <span class="eq">decayed(Y)</span> = 0.78 × e^(−0.002× 10) = 0.78 × 0.9802 = 
+    <span class="hi">0.765</span>
+    <span class="comment">// Y now ranks #1 — the ranking flipped entirely</span>
+  </div>
+  <div class="callout callout-blue">
+    <strong>λ = 0.002/day is a real tuning knob, not a fixed constant</strong> — it sets a ~347-day half-life (
+    <code>ln(2)/λ</code>), meaning a document's effective score halves roughly every 11.5 months regardless of how well it originally matched. Set λ too high and genuinely evergreen content (a well-written policy that hasn't changed in years) gets unfairly buried; set it too low and staleness stops mattering at all. Unlike full or incremental re-indexing, this strategy never requires detecting that content changed — it just assumes older is progressively less trustworthy by default.
+  </div>
+</section>
+<section class="section" id="s11">
+  <div class="section-eyebrow">Section 11</div>
+  <h2>Retrieval Security Considerations</h2>
+  <table>
+    <tbody>
+      <tr>
+        <th>Risk</th>
+        <th>Mechanism</th>
+        <th>Mitigation</th>
+      </tr>
+      <tr>
+        <td>
+          <strong>Indirect prompt injection</strong>
+        </td>
+        <td>A malicious instruction hidden inside a retrieved document ("ignore previous instructions and...") gets fed into the LLM's context as if it were trusted data, and the model may follow it</td>
+        <td>Treat retrieved content as untrusted data, never as instructions; sanitize/strip suspicious patterns; instruction-hardened prompting</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Data leakage across access boundaries</strong>
+        </td>
+        <td>A shared vector index retrieves a chunk the querying user shouldn't be permitted to see (wrong tenant, wrong permission level)</td>
+        <td>Metadata-based access filtering enforced at retrieval time, not just at the UI layer</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Corpus/index poisoning</strong>
+        </td>
+        <td>An attacker with write access to the source documents inserts content specifically crafted to be retrieved for common queries and to manipulate the model's answer</td>
+        <td>Access control on ingestion, not just on query; provenance tracking for indexed content</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Embedding inversion</strong>
+        </td>
+        <td>Under some conditions, embeddings can leak information about the original text they were computed from</td>
+        <td>Treat embeddings themselves as sensitive data, not just the raw documents</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-red">
+    <strong>Exam favourite:</strong> "Why is prompt injection via retrieved documents different from the prompt injection risks in earlier modules?" — the injected instruction doesn't come from the user's own prompt, where at least the user is a somewhat-trusted party — it arrives silently, embedded in data the system itself decided to retrieve and trust, from a document the end user never wrote and often can't even see.
+  </div>
+</section>
+<section class="section" id="s12">
+  <div class="section-eyebrow">Section 12</div>
+  <h2>Key Takeaways &amp; Exam Prep</h2>
+  <div class="steps">
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Embeddings encode meaning as geometry</h4>
+      <p>Cosine similarity compares direction, not magnitude — the basis for all retrieval in this module.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>FAISS trades exactness for speed</h4>
+      <p>Flat is exact but slow at scale; IVF/HNSW/PQ approximate, at a tunable recall cost.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>RAG has two distinct phases</h4>
+      <p>Index-time (once) vs. query-time (every request) — confusing them is the most common design mistake.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Chunk size is a real hyperparameter</h4>
+      <p>No universal right answer — tune against your own evaluation set.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Hybrid retrieval fuses disjoint failure modes</h4>
+      <p>Dense catches paraphrase; sparse (BM25) catches exact identifiers.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Re-ranking is a second, more expensive pass</h4>
+      <p>Cross-encoders are too slow for the whole corpus, but affordable on a narrowed shortlist.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Faithfulness ≠ correctness</h4>
+      <p>A RAG answer can be true without actually being grounded in what was retrieved.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Freshness bugs look like correct answers</h4>
+      <p>Nothing errors — the system just confidently grounds you in outdated information.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Retrieved content is untrusted input</h4>
+      <p>Indirect prompt injection arrives through data the system chose to trust, not through the user.</p>
+    </div>
+  </div>
+  <h3>Common exam questions</h3>
+  <table>
+    <tbody>
+      <tr>
+        <th>Question</th>
+        <th>Short answer</th>
+      </tr>
+      <tr>
+        <td>Why use a dedicated embedding model instead of an LLM's own token embeddings for retrieval?</td>
+        <td>Token embeddings are optimized for next-token prediction; sentence-embedding models are trained with a contrastive objective specifically so that semantically similar texts land close together</td>
+      </tr>
+      <tr>
+        <td>What's the difference between a bi-encoder and a cross-encoder?</td>
+        <td>A bi-encoder embeds query and document separately (allowing pre-computation, used for fast retrieval); a cross-encoder embeds them jointly (more accurate, too slow for anything but re-ranking a short list)</td>
+      </tr>
+      <tr>
+        <td>Why combine dense and sparse retrieval instead of picking one?</td>
+        <td>Their failure modes are largely disjoint — dense misses exact identifiers, sparse misses paraphrase — so fusing rankings (e.g. via RRF) recovers documents either alone would miss</td>
+      </tr>
+      <tr>
+        <td>What does "faithfulness" measure in RAG evaluation, specifically?</td>
+        <td>Whether every claim in the generated answer is actually traceable to the retrieved context — independent of whether the claim happens to be true</td>
+      </tr>
+      <tr>
+        <td>Why is indirect prompt injection via retrieved documents especially dangerous?</td>
+        <td>The malicious instruction arrives as data the system itself chose to trust and insert into context, not from the user's own (at least partially trusted) prompt</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout" style="margin-top:2rem">
+    <strong>References:</strong>
+    <br>
+    Lewis et al. (2020) — Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.
+    <br>
+    Reimers &amp; Gurevych (2019) — Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks.
+    <br>
+    Johnson, Douze &amp; Jégou (2017) — Billion-scale similarity search with GPUs (FAISS).
+    <br>
+    Robertson &amp; Zaragoza (2009) — The Probabilistic Relevance Framework: BM25 and Beyond.
+    <br>
+    Cormack, Clarke &amp; Buettcher (2009) — Reciprocal Rank Fusion outperforms Condorcet and individual rank learning methods.
+    <br>
+    Liu et al. (2023) — Lost in the Middle: How Language Models Use Long Contexts.
+    <br>
+    Es et al. (2023) — RAGAS: Automated Evaluation of Retrieval Augmented Generation.
+    <br>
+    Greshake et al. (2023) — Not what you've signed up for: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection.
+  </div>
+  <div class="callout callout-blue" style="margin-top:1.5rem">
+    <strong>Companion notebook:</strong> 
+    <code>1_RAG_Pipeline_Lab.ipynb</code> builds a complete, runnable RAG pipeline — chunking, FAISS indexing, hybrid (dense + BM25) retrieval, re-ranking, and a grounded-answer generation step — end to end, locally.
+  </div>
+</section>
+<footer style="text-align:center;padding:2rem;font-family:var(--mono);font-size:0.75rem;color:#aaa;border-top:1px solid var(--rule)">Module 3 — Retrieval-Augmented Generation · Companion to Module 2 (Advanced Reasoning &amp; Structured Generation)</footer>

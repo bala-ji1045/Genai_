@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Part 2b · Generation: Vision-Language Models — Study Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Fraunces:ital,wght@0,300;0,700;1,300&family=Inter:wght@400;500;600&display=swap');
+  :root {
+    --ink: #0f1117; --paper: #f7f6f2; --mid: #e8e5dd; --rule: #c9c4b8; --accent: #1a3a5c;
+    --highlight: #e8a020; --green: #2a7a4b; --red: #b83232; --blue: #2255aa; --purple: #6b3fa0; --teal: #0d7a7a;
+    --mono: 'IBM Plex Mono', monospace; --display: 'Fraunces', Georgia, serif; --body: 'Inter', system-ui, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--body); background: var(--paper); color: var(--ink); line-height: 1.7; font-size: 16px; }
+  .hero { background: linear-gradient(160deg, #0f1117 0%, #1a3a5c 100%); color: #fff; padding: 4rem 2rem 3rem; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 20% 30%, rgba(232,160,32,0.10), transparent 40%), radial-gradient(circle at 80% 70%, rgba(42,122,75,0.12), transparent 40%); }
+  .hero-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--highlight); margin-bottom: 1rem; position: relative; }
+  .hero h1 { font-family: var(--display); font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; line-height: 1.1; margin-bottom: 1rem; position: relative; }
+  .hero p { font-size: 1.1rem; opacity: 0.82; max-width: 680px; margin: 0 auto; position: relative; }
+  .toc { background: var(--ink); color: #fff; padding: 1.2rem 2rem; display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; position: sticky; top: 0; z-index: 100; }
+  .toc a { color: rgba(255,255,255,0.7); text-decoration: none; font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.02em; transition: color 0.2s; }
+  .toc a:hover { color: var(--highlight); }
+  .section { max-width: 900px; margin: 0 auto; padding: 4rem 2rem; border-bottom: 1px solid var(--rule); }
+  .section-eyebrow { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.5rem; }
+  .section h2 { font-family: var(--display); font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 700; margin-bottom: 1.5rem; color: var(--ink); }
+  .section h3 { font-family: var(--display); font-size: 1.25rem; font-weight: 700; margin: 2rem 0 0.8rem; color: var(--accent); }
+  .section h4 { font-size: 0.95rem; font-weight: 600; margin: 1.4rem 0 0.5rem; color: var(--ink); }
+  .section p { margin-bottom: 1rem; color: #333; }
+  .section ul, .section ol { margin: 0 0 1rem 1.4rem; color: #333; }
+  .section li { margin-bottom: 0.35rem; }
+  .callout { border-left: 4px solid var(--highlight); background: #fff8ee; padding: 1rem 1.25rem; border-radius: 0 6px 6px 0; margin: 1.5rem 0; font-size: 0.95rem; }
+  .callout strong { color: var(--accent); }
+  .callout-blue  { border-left-color: var(--blue);   background: #eef3ff; }
+  .callout-green { border-left-color: var(--green);  background: #edfaf3; }
+  .callout-red   { border-left-color: var(--red);    background: #fff0f0; }
+  .callout-purple{ border-left-color: var(--purple); background: #f5f0ff; }
+  .callout-teal  { border-left-color: var(--teal);   background: #eaf7f7; }
+  .math-box { background: var(--ink); color: #e8e8e8; font-family: var(--mono); font-size: 0.84rem; line-height: 1.85; padding: 1.5rem; border-radius: 8px; margin: 1.5rem 0; overflow-x: auto; white-space: pre; }
+  .math-box .comment { color: #6a9f6a; } .math-box .var { color: #f0b060; } .math-box .eq { color: #7ab8f5; } .math-box .hi { color: #ff9090; }
+  table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.86rem; }
+  .table-wrap { overflow-x: auto; margin: 1.5rem 0; } .table-wrap table { margin: 0; min-width: 640px; }
+  th { background: var(--accent); color: #fff; padding: 0.6rem 0.9rem; text-align: left; font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.04em; }
+  td { padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--mid); vertical-align: top; }
+  tr:nth-child(even) td { background: #fafaf7; }
+  .diagram-wrap { background: #fff; border: 1px solid var(--rule); border-radius: 10px; padding: 1.5rem; margin: 2rem 0; overflow-x: auto; }
+  .diagram-caption { text-align: center; font-family: var(--mono); font-size: 0.74rem; color: #777; margin-top: 0.75rem; letter-spacing: 0.04em; line-height: 1.6; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+  .step-card { background: #fff; border: 1px solid var(--rule); border-radius: 8px; padding: 1.1rem; }
+  .step-num { font-family: var(--mono); font-size: 1.9rem; font-weight: 600; color: var(--mid); line-height: 1; margin-bottom: 0.4rem; }
+  .step-card h4 { font-size: 0.88rem; font-weight: 600; color: var(--accent); margin: 0 0 0.35rem; }
+  .step-card p { font-size: 0.82rem; margin: 0; color: #444; }
+  .shape { font-family: var(--mono); font-size: 0.8em; background: #eef3ff; color: var(--blue); padding: 0.05rem 0.35rem; border-radius: 4px; white-space: nowrap; }
+  code { font-family: var(--mono); font-size: 0.86em; background: #efece4; padding: 0.05rem 0.3rem; border-radius: 3px; }
+  .model-card { background: #fff; border: 1px solid var(--rule); border-top: 4px solid var(--accent); border-radius: 8px; padding: 1.2rem 1.4rem; margin: 1.5rem 0; }
+  .model-card .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.6rem 1.2rem; margin-top: 0.6rem; }
+  .model-card .facts div { font-size: 0.82rem; color: #444; } .model-card .facts b { display: block; font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  @media (max-width: 620px) { .steps { grid-template-columns: 1fr 1fr; } .section { padding: 2.5rem 1.2rem; } }
+
+  .roadmap { max-width: 900px; margin: 2.5rem auto 0; padding: 0 2rem; }
+  .roadmap-inner { background: #fff; border: 1px solid var(--rule); border-left: 5px solid var(--highlight); border-radius: 10px; padding: 1.3rem 1.5rem; }
+  .roadmap-path { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; margin-bottom: 1rem; font-family: var(--mono); font-size: 0.72rem; }
+  .roadmap-path a, .roadmap-path span.cur { padding: 0.25rem 0.6rem; border-radius: 999px; text-decoration: none; border: 1px solid var(--rule); color: #555; }
+  .roadmap-path span.cur { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+  .roadmap-path a:hover { border-color: var(--highlight); color: var(--accent); }
+  .roadmap-path i { color: #aaa; font-style: normal; }
+  .roadmap-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+  .roadmap-grid h5 { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin: 0 0 0.35rem; }
+  .roadmap-grid p, .roadmap-grid li { font-size: 0.9rem; color: #333; margin: 0 0 0.3rem; }
+  .roadmap-grid ul { margin: 0 0 0 1.1rem; padding: 0; }
+  .roadmap-contrast { margin-top: 1rem; padding: 0.7rem 0.9rem; background: var(--paper); border-radius: 8px; font-size: 0.88rem; color: #333; }
+  .next-part { max-width: 900px; margin: 2rem auto; padding: 0 2rem; text-align: right; font-family: var(--mono); font-size: 0.85rem; }
+  .next-part a { color: var(--accent); text-decoration: none; border: 1px solid var(--accent); border-radius: 6px; padding: 0.5rem 0.9rem; display: inline-block; }
+  .next-part a:hover { background: var(--accent); color: #fff; }
+  @media (max-width: 620px) { .roadmap, .next-part { padding: 0 1.2rem; } }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-label">Module 5 · Part 2b — Generation (talking about images)</div>
+  <h1>Generation: Vision-Language Models</h1>
+  <p>From an aligned image encoder to a model that can talk about images: the four ways to connect vision to an LLM, and how Flamingo, BLIP-2, LLaVA, Qwen2-VL, PaliGemma, Llama 3.2 Vision, Gemini and GPT-4o are built, trained and run.</p>
+</div>
+
+<nav class="toc">
+  <a href="#s1">01 Alignment → VLMs</a>
+  <a href="#s2">02 Flamingo</a>
+  <a href="#s3">03 BLIP-2</a>
+  <a href="#s4">04 LLaVA</a>
+  <a href="#s5">05 Modern Open VLMs</a>
+  <a href="#s6">06 Native Multimodal</a>
+  <a href="#s7">07 Training Recipes</a>
+  <a href="#s8">08 Hands-On Code</a>
+  <a href="#s9">09 Takeaways</a>
+</nav>
+
+<div class="roadmap"><div class="roadmap-inner">
+  <div class="roadmap-path"><a href="1_Foundations_of_Multimodal_AI.html">1 Foundations</a> <i>→</i> <a href="2a_Alignment_CLIP.html">2a Alignment</a> <i>→</i> <span class="cur">2b Generation</span> <i>→</i> <a href="3_Challenges_in_Multimodal_AI.html">3 Challenges</a> <i>→</i> <a href="4_Multimodal_Applications.html">4 Applications</a> <i>→</i> <a href="Lab/1_Multimodal_PDF_QA_Lab.ipynb">Lab</a></div>
+  <div class="roadmap-grid">
+    <div><h5>What you learned before</h5><ul><li>Part 2a: CLIP turns an image into vectors aligned with text and can score image–text pairs.</li><li>Its limit: no decoder, so it cannot generate an answer.</li></ul></div>
+    <div><h5>What this part answers</h5><ul><li>How to wire a vision encoder into an LLM: four patterns (§01).</li><li>Flamingo, BLIP-2, LLaVA, modern open VLMs and natively multimodal models (Part 1 cards 4–7, in depth).</li><li>Output: <b>written answers</b> about images.</li></ul></div>
+    <div><h5>Where it leads</h5><ul><li>Part 3: where both kinds of model fail (hallucination, evaluation, cost).</li></ul></div>
+  </div>
+  <div class="roadmap-contrast"><b>2a vs 2b in one line:</b> <b>Alignment (2a)</b> = image + text → a <em>similarity score</em> (“do these match?”). <b>Generation (2b)</b> = image + question → a <em>written answer</em> (“what is in this image?”). 2b reuses 2a’s aligned image encoder as its eyes, so read 2a first.</div>
+</div></div>
+
+
+<!-- ============================================================ 01 -->
+<section class="section" id="s1">
+  <div class="section-eyebrow">Section 01</div>
+  <h2>From Alignment to Vision-Language Models: Four Ways to Wire Vision into an LLM</h2>
+
+  <p>Part 2a built the <em>aligned</em> vision encoder: CLIP turns an image into vectors that sit next to the matching text (alignment), and a ViT turns the image into a sequence of patch tokens (Part 2a §02). This Part answers the next question: how do we get a model that can <em>talk about</em> the image? Part 1 §04 gave a one-card overview of each technique; here each model is covered in full.</p>
+
+  <p>A dual encoder can <em>score</em> an image–text pair but cannot <em>write</em> text. To answer “What is unusual about this image?”, we need a language model that can condition on the image. There are four ways to connect them:</p>
+
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 760 330" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;display:block;margin:0 auto" font-family="IBM Plex Mono,monospace" font-size="9">
+      <defs><marker id="a3" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#777"/></marker></defs>
+      <text x="380" y="16" text-anchor="middle" font-size="11" font-weight="600" fill="#333" letter-spacing="1.5">FOUR WAYS TO CONNECT A VISION ENCODER TO AN LLM</text>
+      <!-- A -->
+      <rect x="10" y="30" width="180" height="290" rx="8" fill="#fbfaf6" stroke="#c9c4b8"/>
+      <text x="100" y="48" text-anchor="middle" font-weight="600" fill="#1a3a5c">A · Cross-attention</text>
+      <text x="100" y="61" text-anchor="middle" fill="#777">Flamingo, Llama 3.2 Vision</text>
+      <rect x="30" y="80" width="140" height="28" rx="4" fill="#2255aa"/><text x="100" y="98" text-anchor="middle" fill="#fff">vision encoder</text>
+      <rect x="30" y="130" width="140" height="150" rx="4" fill="#fff" stroke="#1a3a5c"/>
+      <text x="100" y="150" text-anchor="middle" fill="#333">LLM layers</text>
+      <rect x="45" y="160" width="110" height="18" fill="#e8a020"/><text x="100" y="173" text-anchor="middle" fill="#fff">x-attn → image</text>
+      <rect x="45" y="182" width="110" height="18" fill="#ddd"/><text x="100" y="195" text-anchor="middle">self-attn</text>
+      <rect x="45" y="210" width="110" height="18" fill="#e8a020"/><text x="100" y="223" text-anchor="middle" fill="#fff">x-attn → image</text>
+      <rect x="45" y="232" width="110" height="18" fill="#ddd"/><text x="100" y="245" text-anchor="middle">self-attn</text>
+      <path d="M150 110 L150 158" stroke="#e8a020" stroke-width="2" marker-end="url(#a3)"/>
+      <text x="100" y="300" text-anchor="middle" fill="#555">image never enters the</text><text x="100" y="312" text-anchor="middle" fill="#555">token sequence</text>
+      <!-- B -->
+      <rect x="200" y="30" width="180" height="290" rx="8" fill="#fbfaf6" stroke="#c9c4b8"/>
+      <text x="290" y="48" text-anchor="middle" font-weight="600" fill="#1a3a5c">B · Query bridge</text>
+      <text x="290" y="61" text-anchor="middle" fill="#777">BLIP-2 Q-Former, Perceiver</text>
+      <rect x="220" y="80" width="140" height="28" rx="4" fill="#2255aa"/><text x="290" y="98" text-anchor="middle" fill="#fff">vision encoder (frozen)</text>
+      <rect x="220" y="130" width="140" height="40" rx="4" fill="#6b3fa0"/><text x="290" y="148" text-anchor="middle" fill="#fff">32 learned queries</text><text x="290" y="161" text-anchor="middle" fill="#e9defb">cross-attend to image</text>
+      <rect x="220" y="195" width="140" height="28" rx="4" fill="#fff" stroke="#1a3a5c"/><text x="290" y="213" text-anchor="middle">LLM (frozen)</text>
+      <path d="M290 110 L290 128" stroke="#777" stroke-width="2" marker-end="url(#a3)"/><path d="M290 172 L290 193" stroke="#777" stroke-width="2" marker-end="url(#a3)"/>
+      <text x="290" y="300" text-anchor="middle" fill="#555">fixed, small number of</text><text x="290" y="312" text-anchor="middle" fill="#555">visual tokens (e.g. 32)</text>
+      <!-- C -->
+      <rect x="390" y="30" width="180" height="290" rx="8" fill="#fbfaf6" stroke="#c9c4b8"/>
+      <text x="480" y="48" text-anchor="middle" font-weight="600" fill="#1a3a5c">C · Projected tokens</text>
+      <text x="480" y="61" text-anchor="middle" fill="#777">LLaVA, Qwen2-VL, PaliGemma</text>
+      <rect x="410" y="80" width="140" height="28" rx="4" fill="#2255aa"/><text x="480" y="98" text-anchor="middle" fill="#fff">vision encoder</text>
+      <rect x="410" y="130" width="140" height="28" rx="4" fill="#0d7a7a"/><text x="480" y="148" text-anchor="middle" fill="#fff">MLP projector</text>
+      <g><rect x="410" y="185" width="22" height="22" fill="#2255aa"/><rect x="434" y="185" width="22" height="22" fill="#2255aa"/><rect x="458" y="185" width="22" height="22" fill="#2255aa"/><rect x="482" y="185" width="22" height="22" fill="#2a7a4b"/><rect x="506" y="185" width="22" height="22" fill="#2a7a4b"/><rect x="530" y="185" width="20" height="22" fill="#2a7a4b"/></g>
+      <text x="480" y="222" text-anchor="middle" fill="#555">image tokens + text tokens</text>
+      <rect x="410" y="232" width="140" height="28" rx="4" fill="#fff" stroke="#1a3a5c"/><text x="480" y="250" text-anchor="middle">LLM</text>
+      <path d="M480 110 L480 128" stroke="#777" stroke-width="2" marker-end="url(#a3)"/><path d="M480 160 L480 183" stroke="#777" stroke-width="2" marker-end="url(#a3)"/>
+      <text x="480" y="300" text-anchor="middle" fill="#555">simple; many visual tokens</text><text x="480" y="312" text-anchor="middle" fill="#555">(256–2,880+)</text>
+      <!-- D -->
+      <rect x="580" y="30" width="170" height="290" rx="8" fill="#fbfaf6" stroke="#c9c4b8"/>
+      <text x="665" y="48" text-anchor="middle" font-weight="600" fill="#1a3a5c">D · Native / early fusion</text>
+      <text x="665" y="61" text-anchor="middle" fill="#777">Gemini, GPT-4o, Chameleon</text>
+      <rect x="598" y="80" width="135" height="40" rx="4" fill="#fff" stroke="#2255aa"/><text x="665" y="97" text-anchor="middle">image / audio / text</text><text x="665" y="110" text-anchor="middle">tokenisers</text>
+      <rect x="598" y="145" width="135" height="90" rx="4" fill="#1a3a5c"/><text x="665" y="185" text-anchor="middle" fill="#fff">one Transformer,</text><text x="665" y="199" text-anchor="middle" fill="#fff">trained on all</text><text x="665" y="213" text-anchor="middle" fill="#fff">modalities from start</text>
+      <path d="M665 122 L665 143" stroke="#777" stroke-width="2" marker-end="url(#a3)"/>
+      <text x="665" y="300" text-anchor="middle" fill="#555">most capable;</text><text x="665" y="312" text-anchor="middle" fill="#555">most expensive to train</text>
+    </svg>
+    <div class="diagram-caption">FIG 3 — The four connection patterns. Most open VLMs since 2023 use pattern C because it is the simplest to train and reuses existing LLMs unchanged.</div>
+  </div>
+
+  <div class="table-wrap"><table>
+    <tr><th>Pattern</th><th>How the LLM sees the image</th><th>Visual tokens</th><th>What is trained</th><th>Strength</th><th>Weakness</th></tr>
+    <tr><td>A · Cross-attention</td><td>New cross-attention layers inside the LLM read image features</td><td>Not in the sequence (no context cost)</td><td>New cross-attention layers (+ resampler)</td><td>Keeps the LLM's text skills intact; many images cheap</td><td>Changes the LLM architecture</td></tr>
+    <tr><td>B · Query bridge</td><td>A small Transformer distils the image into a few query vectors, fed as soft prompt</td><td>Fixed and small (32–64)</td><td>Only the bridge (~100–200M params)</td><td>Very cheap to train; short sequences</td><td>Compression loses fine detail (OCR, small objects)</td></tr>
+    <tr><td>C · Projected tokens</td><td>Every patch feature becomes a token in the LLM's input</td><td>Many (256, 576, up to thousands)</td><td>Projector, then projector + LLM</td><td>Simple, strong, keeps detail</td><td>Long sequences: cost grows with resolution</td></tr>
+    <tr><td>D · Native</td><td>All modalities tokenised into one sequence from pretraining</td><td>Varies</td><td>Everything, from scratch</td><td>Best cross-modal reasoning; can also output images/audio</td><td>Only feasible for frontier labs</td></tr>
+  </table></div>
+</section>
+
+<!-- ============================================================ 02 -->
+<section class="section" id="s2">
+  <div class="section-eyebrow">Section 02</div>
+  <h2>Flamingo: Few-Shot Learning Across Images and Text</h2>
+
+  <div class="model-card">
+    <b>Flamingo</b> (Alayrac et al., DeepMind, 2022) — pattern A
+    <div class="facts">
+      <div><b>Vision</b>NFNet-F6, contrastively pretrained, then frozen</div>
+      <div><b>Language</b>Frozen Chinchilla LMs (1.4B, 7B, 70B) → Flamingo-3B / 9B / 80B</div>
+      <div><b>New parts</b>Perceiver Resampler + gated cross-attention (XATTN-DENSE) layers</div>
+      <div><b>Data</b>M3W: 43M web pages with interleaved images and text; ALIGN (1.8B pairs); LTIP (312M pairs); VTP (27M short videos)</div>
+      <div><b>Signature skill</b>In-context few-shot learning with interleaved images, like GPT-3 prompting</div>
+    </div>
+  </div>
+
+  <h3>Architecture</h3>
+  <ol>
+    <li><b>Perceiver Resampler.</b> The vision encoder outputs a variable number of features (more for higher resolution or more video frames). A fixed set of <b>64 learned latent queries</b> cross-attends to them and outputs exactly 64 visual tokens per image — a constant-size summary. For video, features from frames (with learned time embeddings) are resampled together.</li>
+    <li><b>Gated XATTN-DENSE layers.</b> Inserted between the frozen LM layers. Each one lets text tokens cross-attend to the visual tokens, followed by a feed-forward layer. Its output is multiplied by <code>tanh(α)</code>, where α is a learned scalar <b>initialised to 0</b> — so at the start of training the model is <em>exactly</em> the original language model, and vision is blended in gradually. This protects the LM's language ability.</li>
+    <li><b>Image-causal masking.</b> In an interleaved document, each text token attends only to the image that immediately precedes it, while the LM's self-attention still sees all previous text. This lets one sequence contain many images.</li>
+  </ol>
+
+  <h3>Training</h3>
+  <p>Only the resampler and the cross-attention layers are trained; vision encoder and LM stay frozen. The objective is ordinary next-token prediction on text, conditioned on the interleaved images, with a weighted mixture of the four datasets. The interleaved web pages (M3W) are what give Flamingo its in-context ability: it learned from documents where images and text naturally alternate.</p>
+
+  <h3>Inference: few-shot prompting with images</h3>
+  <div class="math-box"><span class="comment"># A 2-shot prompt (images shown as &lt;image&gt;)</span>
+&lt;image: flamingo photo&gt;  Output: This is a flamingo. They are found in the Caribbean.
+&lt;image: panda photo&gt;     Output: This is a panda. They are found in China.
+&lt;image: new photo&gt;       Output:            <span class="comment">← the model continues in the same style</span></div>
+  <p><b>Result:</b> with a handful of examples and no fine-tuning, Flamingo-80B set a new few-shot state of the art on 16 image and video benchmarks, and on 6 of them beat models fine-tuned on thousands of times more task data. Open reproductions: <b>OpenFlamingo</b> and Hugging Face's <b>IDEFICS</b>.</p>
+</section>
+
+<!-- ============================================================ 03 -->
+<section class="section" id="s3">
+  <div class="section-eyebrow">Section 03</div>
+  <h2>BLIP-2: Bridging Frozen Models with a Q-Former</h2>
+
+  <div class="model-card">
+    <b>BLIP-2</b> (Li et al., Salesforce, 2023) — pattern B
+    <div class="facts">
+      <div><b>Vision</b>Frozen ViT-g/14 from EVA-CLIP</div>
+      <div><b>Language</b>Frozen OPT (2.7B, 6.7B) or Flan-T5 (XL, XXL)</div>
+      <div><b>Bridge</b>Q-Former: ~188M params, 32 learned query vectors of size 768, initialised from BERT-base</div>
+      <div><b>Data</b>129M images (COCO, Visual Genome, CC3M, CC12M, SBU, 115M from LAION) with synthetic captions (CapFilt)</div>
+      <div><b>Headline</b>Beat Flamingo-80B by 8.7 points on zero-shot VQAv2 with 54× fewer trainable parameters</div>
+    </div>
+  </div>
+
+  <h3>The Q-Former</h3>
+  <p>A small Transformer with two inputs: <b>32 learnable query embeddings</b> and text. The queries cross-attend to the frozen image features (in every other block) and interact with the text through shared self-attention layers. Whatever the image looks like, the output is 32 vectors — a learned “interview” of the image.</p>
+
+  <h3>Two-stage training</h3>
+  <div class="table-wrap"><table>
+    <tr><th>Stage</th><th>Connected to</th><th>Losses</th><th>What it teaches</th></tr>
+    <tr><td><b>1 · Representation learning</b></td><td>Frozen image encoder only</td>
+        <td><b>ITC</b> image–text contrastive (queries vs text CLS);<br><b>ITM</b> image–text matching, a binary classifier with hard negatives;<br><b>ITG</b> image-grounded text generation (text generated from the queries)</td>
+        <td>Make the 32 queries extract the visual information most relevant to text. Each loss uses a different self-attention mask between queries and text.</td></tr>
+    <tr><td><b>2 · Generative learning</b></td><td>Frozen image encoder + frozen LLM</td>
+        <td>Language-modelling loss (decoder LLM) or prefix-LM loss (Flan-T5)</td>
+        <td>A linear layer maps the 32 query outputs to the LLM's embedding size; they are prepended to the text as “soft visual prompts”.</td></tr>
+  </table></div>
+
+  <h3>Inference</h3>
+  <div class="math-box">image (224×224) → frozen ViT-g → 257 × 1408 features
+       → Q-Former (32 queries) → 32 × 768 → linear → 32 × 2560 (OPT-2.7B width)
+       → [32 visual tokens] + "Question: how many dogs are in the picture? Answer:" → LLM → "two"</div>
+  <div class="callout callout-purple">
+    <strong>Why it mattered:</strong> BLIP-2 showed you could build a capable VLM by training only a small bridge between two frozen, off-the-shelf models. <b>InstructBLIP</b> (2023) added instruction-aware queries (the instruction is also fed into the Q-Former) and instruction tuning across 26 datasets. The trade-off is compression: 32 tokens struggle with dense text and small details, which is why later models moved to pattern C.
+  </div>
+</section>
+
+<!-- ============================================================ 04 -->
+<section class="section" id="s4">
+  <div class="section-eyebrow">Section 04</div>
+  <h2>LLaVA: Visual Instruction Tuning, End to End</h2>
+
+  <div class="model-card">
+    <b>LLaVA — Large Language and Vision Assistant</b> (Liu et al., NeurIPS 2023) and <b>LLaVA-1.5</b> (2023) — pattern C
+    <div class="facts">
+      <div><b>Vision</b>CLIP ViT-L/14 (224px in v1, 336px in 1.5), frozen; features from the second-to-last layer</div>
+      <div><b>Connector</b>v1: one linear layer · 1.5: two-layer MLP with GELU</div>
+      <div><b>Language</b>Vicuna (LLaMA fine-tuned on conversations), 7B and 13B</div>
+      <div><b>Key idea</b>Use a text-only GPT-4 to write multimodal instruction data</div>
+      <div><b>Cost (1.5-13B)</b>About one day on a single 8×A100 node</div>
+    </div>
+  </div>
+
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 760 210" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;display:block;margin:0 auto" font-family="IBM Plex Mono,monospace" font-size="9">
+      <defs><marker id="a4" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#777"/></marker></defs>
+      <text x="380" y="16" text-anchor="middle" font-size="11" font-weight="600" fill="#333" letter-spacing="1.5">LLAVA-1.5 FORWARD PASS WITH TENSOR SHAPES</text>
+      <rect x="10" y="50" width="90" height="70" rx="6" fill="#cfe0f5" stroke="#2255aa"/><text x="55" y="82" text-anchor="middle">image</text><text x="55" y="96" text-anchor="middle" fill="#2255aa">336×336</text>
+      <path d="M103 85 L128 85" stroke="#777" stroke-width="2" marker-end="url(#a4)"/>
+      <rect x="132" y="50" width="120" height="70" rx="6" fill="#2255aa"/><text x="192" y="78" text-anchor="middle" fill="#fff">CLIP ViT-L/14</text><text x="192" y="92" text-anchor="middle" fill="#dbe6f7">frozen · 24×24 grid</text><text x="192" y="106" text-anchor="middle" fill="#dbe6f7">→ 576 × 1024</text>
+      <path d="M255 85 L280 85" stroke="#777" stroke-width="2" marker-end="url(#a4)"/>
+      <rect x="284" y="50" width="120" height="70" rx="6" fill="#0d7a7a"/><text x="344" y="78" text-anchor="middle" fill="#fff">MLP projector</text><text x="344" y="92" text-anchor="middle" fill="#d9f1f1">Linear–GELU–Linear</text><text x="344" y="106" text-anchor="middle" fill="#d9f1f1">→ 576 × 5120</text>
+      <path d="M407 85 L432 85" stroke="#777" stroke-width="2" marker-end="url(#a4)"/>
+      <rect x="436" y="40" width="160" height="90" rx="6" fill="#fff" stroke="#1a3a5c"/>
+      <text x="516" y="58" text-anchor="middle" fill="#333">input sequence</text>
+      <text x="516" y="76" text-anchor="middle" fill="#2a7a4b">"USER:" (text tokens)</text>
+      <text x="516" y="92" text-anchor="middle" fill="#2255aa">576 image tokens</text>
+      <text x="516" y="108" text-anchor="middle" fill="#2a7a4b">question tokens</text>
+      <text x="516" y="122" text-anchor="middle" fill="#2a7a4b">"ASSISTANT:"</text>
+      <path d="M599 85 L624 85" stroke="#777" stroke-width="2" marker-end="url(#a4)"/>
+      <rect x="628" y="50" width="122" height="70" rx="6" fill="#1a3a5c"/><text x="689" y="78" text-anchor="middle" fill="#fff">Vicuna-13B</text><text x="689" y="92" text-anchor="middle" fill="#c9d6ea">width 5120</text><text x="689" y="106" text-anchor="middle" fill="#c9d6ea">→ answer tokens</text>
+      <text x="380" y="160" text-anchor="middle" fill="#555">The &lt;image&gt; placeholder in the prompt is replaced by the 576 projected vectors. From the LLM's point of view they are just 576 extra “words”.</text>
+      <text x="380" y="178" text-anchor="middle" fill="#555">Stage 1 trains only the projector. Stage 2 trains projector + LLM. The vision encoder is never trained.</text>
+    </svg>
+    <div class="diagram-caption">FIG 4 — LLaVA-1.5-13B. For the 7B model the projector outputs width 4096 instead of 5120.</div>
+  </div>
+
+  <h3>The data trick: GPT-4 writes the training data</h3>
+  <p>In 2023 there was little multimodal instruction data. LLaVA's authors gave a <em>text-only</em> GPT-4 a symbolic description of COCO images — the five human captions plus the object bounding boxes — and asked it to write three kinds of data:</p>
+  <div class="table-wrap"><table>
+    <tr><th>Type</th><th>Count</th><th>Example of what GPT-4 wrote</th></tr>
+    <tr><td>Conversations</td><td>58K</td><td>Multi-turn Q&amp;A as if looking at the image: “What colour is the bus?” → “The bus is red and white.”</td></tr>
+    <tr><td>Detailed descriptions</td><td>23K</td><td>A rich paragraph describing everything in the scene.</td></tr>
+    <tr><td>Complex reasoning</td><td>77K</td><td>“What challenges might these people face?” — answers that require inference beyond what is visible.</td></tr>
+    <tr><td><b>Total (LLaVA-Instruct-158K)</b></td><td><b>158K</b></td><td>GPT-4 never saw a pixel — it reasoned from the captions and boxes.</td></tr>
+  </table></div>
+
+  <h3>Two-stage training</h3>
+  <div class="table-wrap"><table>
+    <tr><th>Stage</th><th>Data</th><th>Trained</th><th>Frozen</th><th>Purpose</th></tr>
+    <tr><td><b>1 · Feature alignment</b></td><td>v1: 595K filtered CC3M pairs · 1.5: 558K LAION/CC/SBU pairs with BLIP captions — each turned into “Describe this image briefly.” → caption</td><td>Projector only</td><td>ViT + LLM</td><td>Teach the projector to translate CLIP features into vectors the LLM understands — like learning a visual “dictionary”.</td></tr>
+    <tr><td><b>2 · Visual instruction tuning</b></td><td>v1: 158K instructions (+ ScienceQA) · 1.5: 665K mix — LLaVA-Instruct, ShareGPT text conversations, VQAv2, GQA, OKVQA, OCR-VQA, A-OKVQA, TextCaps, RefCOCO, Visual Genome</td><td>Projector + LLM</td><td>ViT</td><td>Teach the model to follow instructions about images and answer in the right format.</td></tr>
+  </table></div>
+  <div class="math-box"><span class="comment">// Loss: standard next-token cross-entropy, computed ONLY on the assistant's answer tokens</span>
+<span class="var">L</span> = −Σ_t log p( answer_t | image tokens, instruction, answer_&lt;t )
+<span class="comment">// The image tokens and the user's question are context, never prediction targets.</span></div>
+  <div class="callout callout-teal">
+    <strong>LLaVA-1.5's small fix with a big effect:</strong> academic VQA datasets have one-word answers, which made the model terse everywhere. LLaVA-1.5 appended a format prompt to those examples — “Answer the question using a single word or phrase.” — so the model learned <em>when</em> to be short. Together with the MLP projector and 336px input, LLaVA-1.5 reached state of the art on 11 of 12 benchmarks it reported, using only public data.
+  </div>
+
+  <h3>Inference walk-through with a real example</h3>
+  <p>The LLaVA paper (following the GPT-4 report) used a photo of a man ironing clothes on an ironing board attached to the back of a moving yellow taxi in a city street.</p>
+  <ol>
+    <li><b>Pre-process:</b> resize/pad to 336×336, normalise with CLIP's mean and std.</li>
+    <li><b>Encode:</b> ViT-L/14 → 24×24 = 576 patch features from the penultimate layer, each 1024-d.</li>
+    <li><b>Project:</b> MLP → 576 vectors of LLM width.</li>
+    <li><b>Build the prompt:</b> <code>USER: &lt;image&gt;\nWhat is unusual about this image? ASSISTANT:</code> — the placeholder becomes the 576 vectors.</li>
+    <li><b>Prefill:</b> the LLM processes all ~600 input positions in one pass and fills its KV cache (Module 1).</li>
+    <li><b>Decode:</b> generate token by token: the man is ironing clothes on an ironing board attached to the roof of a moving taxi, which is unusual and unsafe…</li>
+  </ol>
+  <h4>LLaVA-NeXT (LLaVA-1.6, 2024): AnyRes</h4>
+  <p>To read small text, the input image is split into a grid of 336×336 tiles (for example 672×672 → 2×2 tiles) plus one downsampled global view; each tile is encoded separately and the tokens concatenated — up to roughly 2,880 visual tokens. Better OCR and detail, at the cost of a much longer sequence.</p>
+</section>
+
+<!-- ============================================================ 05 -->
+<section class="section" id="s5">
+  <div class="section-eyebrow">Section 05</div>
+  <h2>Modern Open VLMs: Qwen2-VL, PaliGemma and Llama 3.2 Vision</h2>
+
+  <div class="model-card">
+    <b>Qwen2-VL</b> (Alibaba, 2024) — pattern C with dynamic resolution
+    <div class="facts">
+      <div><b>Vision</b>~675M-param ViT with 2D rotary position embeddings, trained to accept any resolution</div>
+      <div><b>Token merging</b>Each 2×2 block of 14px patches is merged by an MLP into one token</div>
+      <div><b>Positions</b>M-RoPE: rotary positions split into temporal, height and width components</div>
+      <div><b>Sizes</b>2B, 7B, 72B</div>
+    </div>
+  </div>
+  <div class="math-box"><span class="comment">// Naive Dynamic Resolution: no fixed input size, no tiling</span>
+224×224 image → 16×16 patches of 14px → merge 2×2 → <span class="eq">8×8 = 64 tokens</span> (+ vision start/end markers)
+896×672 image → 64×48 patches          → merge 2×2 → <span class="eq">32×24 = 768 tokens</span>
+<span class="comment">// Token count follows the image's real size and aspect ratio. Video: frames sampled (e.g. 2 per second),</span>
+<span class="comment">// and M-RoPE's time axis tells the model which frame each token came from.</span></div>
+
+  <div class="model-card">
+    <b>PaliGemma</b> (Google, 2024) — pattern C with a prefix-LM
+    <div class="facts">
+      <div><b>Vision</b>SigLIP So400m/14</div>
+      <div><b>Language</b>Gemma-2B</div>
+      <div><b>Image tokens</b>256 at 224px · 1,024 at 448px · 4,096 at 896px</div>
+      <div><b>Attention</b>Full (bidirectional) over image + prompt (“prefix”); causal over the answer (“suffix”)</div>
+    </div>
+  </div>
+  <p>PaliGemma is designed as a <em>transferable base</em> rather than a chatbot. Its prompts are task prefixes, and its vocabulary includes 1,024 location tokens (<code>&lt;loc0000&gt;</code>…<code>&lt;loc1023&gt;</code>) and segmentation tokens, so detection and segmentation become text generation:</p>
+  <div class="math-box">prefix: "detect car"         →  suffix: "&lt;loc0123&gt;&lt;loc0456&gt;&lt;loc0789&gt;&lt;loc0890&gt; car"
+<span class="comment">// four location tokens = a bounding box (y_min, x_min, y_max, x_max) on a 1024-step grid</span>
+prefix: "caption en"         →  suffix: "a white truck parked beside a loading dock"
+prefix: "answer en what colour is the truck?"  →  "white"</div>
+  <p>Training: unimodal pretraining of each component, multimodal pretraining with <b>all parameters unfrozen</b>, a resolution-increase stage, then per-task transfer (fine-tuning).</p>
+
+  <div class="model-card">
+    <b>Llama 3.2 Vision</b> (Meta, 2024) — pattern A
+    <div class="facts">
+      <div><b>Sizes</b>11B and 90B</div>
+      <div><b>Design</b>An image encoder plus cross-attention adapter layers feeding image representations into the Llama 3.1 language model</div>
+      <div><b>Training</b>Adapters trained on image–text data while the language-model weights were kept frozen, preserving text-only behaviour</div>
+    </div>
+  </div>
+  <div class="callout callout-blue">
+    <strong>Why Meta chose cross-attention:</strong> it keeps the text model identical (a drop-in replacement for Llama 3.1 on text tasks) and keeps visual tokens out of the context window. LLaVA-style models instead fine-tune the LLM, which can slightly degrade pure-text skills unless text-only data is mixed in (LLaVA-1.5 added ShareGPT conversations for exactly this reason).
+  </div>
+</section>
+
+<!-- ============================================================ 06 -->
+<section class="section" id="s6">
+  <div class="section-eyebrow">Section 06</div>
+  <h2>Natively Multimodal Models: GPT-4V, Gemini, GPT-4o, Chameleon</h2>
+
+  <div class="table-wrap"><table>
+    <tr><th>Model</th><th>What is public about the architecture</th><th>Notable capabilities</th></tr>
+    <tr><td><b>GPT-4V</b> (OpenAI, Sep 2023)</td><td>Vision added to GPT-4; architecture and data undisclosed (system card only)</td><td>Strong general visual reasoning, charts, documents; API access only</td></tr>
+    <tr><td><b>Gemini 1.0</b> (Google DeepMind, Dec 2023)</td><td>Transformer decoder trained <em>from the start</em> on interleaved text, images, audio and video; can output images through discrete image tokens</td><td>Video as sequences of frames; audio understanding; multilingual</td></tr>
+    <tr><td><b>Gemini 1.5</b> (2024)</td><td>Mixture-of-experts; context up to 1M tokens (later 2M)</td><td>Reasoning over roughly an hour of video or very long documents in one prompt</td></tr>
+    <tr><td><b>GPT-4o</b> (OpenAI, May 2024)</td><td>One model trained end to end across text, vision and audio (“o” for omni)</td><td>Speech in, speech out without a separate speech-to-text step; average voice response latency around 320 ms</td></tr>
+    <tr><td><b>Chameleon</b> (Meta, 2024)</td><td>Early fusion: images converted to discrete tokens by a learned image tokenizer (VQ), mixed with text tokens in one vocabulary</td><td>Reads and generates interleaved image-and-text documents</td></tr>
+  </table></div>
+  <div class="callout callout-purple">
+    <strong>Bolt-on vs native, the trade-off in one line:</strong> bolting vision onto a pretrained LLM (LLaVA) is cheap and reuses everything; training on all modalities from scratch (Gemini, GPT-4o) lets cross-modal reasoning emerge in pretraining and enables generating non-text outputs, but costs a frontier-scale training run. This is Module 1's “pretrain once, adapt cheaply” trade-off, applied across modalities.
+  </div>
+</section>
+
+<!-- ============================================================ 07 -->
+<section class="section" id="s7">
+  <div class="section-eyebrow">Section 07</div>
+  <h2>Training Recipes Side by Side</h2>
+  <div class="table-wrap"><table>
+    <tr><th>Model</th><th>Vision encoder</th><th>Connector</th><th>LLM</th><th>Frozen during training</th><th>Objective</th><th>Key data</th></tr>
+    <tr><td>CLIP</td><td>ViT-L/14 (trained)</td><td>Linear to joint space</td><td>— (text encoder)</td><td>Nothing</td><td>Contrastive (softmax)</td><td>400M WIT pairs</td></tr>
+    <tr><td>SigLIP</td><td>ViT (trained)</td><td>Linear</td><td>— (text encoder)</td><td>Nothing</td><td>Pairwise sigmoid</td><td>WebLI pairs</td></tr>
+    <tr><td>Flamingo</td><td>NFNet-F6</td><td>Perceiver Resampler + gated x-attn</td><td>Chinchilla</td><td>Vision + LLM</td><td>Next-token on interleaved docs</td><td>M3W, ALIGN, LTIP, VTP</td></tr>
+    <tr><td>BLIP-2</td><td>EVA ViT-g</td><td>Q-Former (32 queries)</td><td>OPT / Flan-T5</td><td>Vision + LLM</td><td>Stage 1: ITC+ITM+ITG · Stage 2: LM</td><td>129M images, synthetic captions</td></tr>
+    <tr><td>LLaVA-1.5</td><td>CLIP ViT-L/14-336</td><td>2-layer MLP</td><td>Vicuna</td><td>Vision always; LLM in stage 1</td><td>Next-token on answers</td><td>558K captions + 665K instructions</td></tr>
+    <tr><td>Qwen2-VL</td><td>ViT ~675M (any resolution)</td><td>MLP merge 2×2</td><td>Qwen2</td><td>Varies by stage</td><td>Next-token</td><td>Large mix incl. documents, video</td></tr>
+    <tr><td>PaliGemma</td><td>SigLIP So400m</td><td>Linear</td><td>Gemma-2B</td><td>Nothing (all unfrozen in multimodal pretraining)</td><td>Prefix-LM next-token</td><td>Multitask mixture</td></tr>
+    <tr><td>Llama 3.2 Vision</td><td>Image encoder</td><td>Cross-attention adapters</td><td>Llama 3.1</td><td>LLM</td><td>Next-token</td><td>Image–text pairs, then instruction data</td></tr>
+    <tr><td>Gemini / GPT-4o</td><td colspan="3">Single natively multimodal model</td><td>—</td><td>Next-token across modalities</td><td>Undisclosed, web-scale multimodal</td></tr>
+  </table></div>
+  <div class="callout callout-green">
+    <strong>The common pattern in almost every open VLM:</strong> (1) start from a contrastively aligned vision encoder; (2) <em>align</em>: train only the connector on image–caption pairs; (3) <em>instruction-tune</em>: train connector + LLM on instruction data; (4) optionally <em>preference-tune</em> (RLHF or DPO) to reduce hallucination and improve helpfulness.
+  </div>
+  <div class="callout callout-blue">
+    <strong>Continues in Part 3:</strong> what these models cost at inference (visual-token budgets), how they fail (alignment errors, object hallucination and its mitigations) and how they are benchmarked are covered in depth in Part 3 §02–§05, so they are not repeated here.
+  </div>
+</section>
+
+<!-- ============================================================ 08 -->
+<section class="section" id="s8">
+  <div class="section-eyebrow">Section 08</div>
+  <h2>Hands-On Code (Hugging Face Transformers)</h2>
+  <p>CLIP code (zero-shot classification, the loss, retrieval) is in Part 2a §10. The two examples below run a frozen-bridge VLM (BLIP-2) and a projected-token VLM (LLaVA-1.5) on the same image.</p>
+  <div class="math-box">import torch
+from PIL import Image
+image = Image.open("your_photo.jpg")</div>
+  <h3>BLIP-2 visual question answering</h3>
+  <div class="math-box">from transformers import Blip2Processor, Blip2ForConditionalGeneration
+
+processor = Blip2Processor.from_pretrained("Salesforce/blip2-opt-2.7b")
+model = Blip2ForConditionalGeneration.from_pretrained(
+    "Salesforce/blip2-opt-2.7b", torch_dtype=torch.float16, device_map="auto")
+inputs = processor(images=image, text="Question: how many people are in the picture? Answer:",
+                   return_tensors="pt").to(model.device, torch.float16)
+print(processor.decode(model.generate(**inputs, max_new_tokens=20)[0], skip_special_tokens=True))</div>
+
+  <h3>LLaVA-1.5 chat</h3>
+  <div class="math-box">from transformers import AutoProcessor, LlavaForConditionalGeneration
+
+model_id = "llava-hf/llava-1.5-7b-hf"
+model = LlavaForConditionalGeneration.from_pretrained(model_id, torch_dtype=torch.float16, device_map="auto")
+processor = AutoProcessor.from_pretrained(model_id)
+
+prompt = "USER: &lt;image&gt;\nWhat is unusual about this image? ASSISTANT:"
+inputs = processor(images=image, text=prompt, return_tensors="pt").to(model.device, torch.float16)
+out = model.generate(**inputs, max_new_tokens=120)
+print(processor.decode(out[0], skip_special_tokens=True))
+<span class="comment"># print(inputs["input_ids"].shape) shows the sequence length including the 576 image positions</span></div>
+  <div class="callout callout-blue">
+    <strong>Exercises:</strong> (1) Feed LLaVA the same image at 224px and 672px (with a LLaVA-NeXT checkpoint) and compare answers about small text. (2) Ask a VLM “Is there a dog in the image?” for an image without a dog but with a dog leash — a POPE-style co-occurrence test (Part 3 §03). (3) Ask BLIP-2 and LLaVA the same five questions about a document photo and compare: which one loses small text, and why (32 query tokens vs 576 patch tokens)?
+  </div>
+</section>
+
+<!-- ============================================================ 09 -->
+<section class="section" id="s9">
+  <div class="section-eyebrow">Section 09</div>
+  <h2>Key Takeaways &amp; Exam Prep</h2>
+  <div class="steps">
+    <div class="step-card"><div class="step-num">✓</div><h4>Score vs generate</h4><p>A dual encoder (CLIP) scores image–text pairs; a VLM writes text conditioned on the image.</p></div>
+    <div class="step-card"><div class="step-num">✓</div><h4>Four ways to wire vision into an LLM</h4><p>Cross-attention, query bridge, projected tokens, native.</p></div>
+    <div class="step-card"><div class="step-num">✓</div><h4>Align, then instruction-tune</h4><p>The two-stage recipe behind LLaVA and most open VLMs.</p></div>
+    <div class="step-card"><div class="step-num">✓</div><h4>Token budget is the trade-off</h4><p>32–64 tokens (BLIP-2, Flamingo) are cheap but lose detail; 576+ (LLaVA, Qwen2-VL) keep detail but cost more.</p></div>
+  </div>
+  <h3>Common exam questions</h3>
+  <div class="table-wrap"><table>
+    <tr><th>Question</th><th>Short answer</th></tr>
+    <tr><td>Why can't CLIP answer “What is unusual about this image?”</td><td>It is a dual encoder: it outputs embeddings and a similarity score, with no decoder to generate text. Answering needs a language model conditioned on the image (a VLM)</td></tr>
+        <tr><td>What is the Perceiver Resampler and why does Flamingo need it?</td><td>Learned latent queries that cross-attend to a variable number of visual features and output a fixed 64 tokens, so any resolution or number of frames costs the same downstream</td></tr>
+    <tr><td>Why is Flamingo's gate initialised to zero?</td><td>tanh(0) = 0, so the model starts as the unchanged language model and vision is blended in gradually, protecting language ability</td></tr>
+    <tr><td>Name BLIP-2's stage-1 losses.</td><td>Image-text contrastive (ITC), image-text matching (ITM), image-grounded text generation (ITG)</td></tr>
+    <tr><td>Describe LLaVA's two training stages.</td><td>Stage 1: train only the projector on image–caption pairs (feature alignment). Stage 2: train projector + LLM on visual instruction data; the vision encoder stays frozen</td></tr>
+    <tr><td>How was LLaVA's instruction data created?</td><td>A text-only GPT-4 was given COCO captions and bounding boxes and wrote 158K conversations, detailed descriptions and reasoning questions</td></tr>
+    <tr><td>Bolt-on (LLaVA) vs native (Gemini)?</td><td>Bolt-on reuses a pretrained LLM and trains a connector cheaply; native trains one model on all modalities from scratch, with stronger cross-modal reasoning and the ability to output other modalities, at far higher cost</td></tr>
+    <tr><td>Why did BLIP-2 struggle with dense text compared with LLaVA-1.5?</td><td>BLIP-2 compresses every image into 32 query vectors; LLaVA-1.5 passes all 576 patch tokens from a 336px image, keeping much more fine detail</td></tr>
+  </table></div>
+  <p style="font-size:0.85rem;color:#555;margin-top:2rem"><b>References:</b> Alayrac et al. (2022) Flamingo · Li et al. (2023) BLIP-2 · Dai et al. (2023) InstructBLIP · Liu et al. (2023) LLaVA and LLaVA-1.5 · Liu et al. (2024) LLaVA-NeXT · Wang et al. (2024) Qwen2-VL · Beyer et al. (2024) PaliGemma · Meta (2024) Llama 3.2 · Gemini Team (2023, 2024) · OpenAI (2023) GPT-4V system card · OpenAI (2024) GPT-4o · Chameleon Team (2024).</p>
+</section>
+
+<p style="text-align:center;font-family:'IBM Plex Mono',monospace;font-size:0.75rem;color:#777;padding:2rem">Module 5 · Part 2b — Vision-Language Models · Builds on Part 2a (Alignment: CLIP in Depth) · Continues in Part 3 (Challenges) and Part 4 (Applications)</p>
+
+
+<div class="next-part"><a href="3_Challenges_in_Multimodal_AI.html">Next: Part 3 — Challenges in Multimodal AI →</a></div>
+</body>
+</html>

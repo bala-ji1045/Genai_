@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tools, MCP &amp; Agent vs. Tool — Study Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Fraunces:ital,wght@0,300;0,700;1,300&family=Inter:wght@400;500;600&display=swap');
+  :root {
+    --ink: #0f1117; --paper: #f7f6f2; --mid: #e8e5dd; --rule: #c9c4b8; --accent: #1a3a5c;
+    --highlight: #e8a020; --green: #2a7a4b; --red: #b83232; --blue: #2255aa; --purple: #6b3fa0; --teal: #0d7a7a;
+    --mono: 'IBM Plex Mono', monospace; --display: 'Fraunces', Georgia, serif; --body: 'Inter', system-ui, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--body); background: var(--paper); color: var(--ink); line-height: 1.7; font-size: 16px; }
+  .hero { background: linear-gradient(160deg, #0f1117 0%, #1a3a5c 100%); color: #fff; padding: 4rem 2rem 3rem; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 20% 30%, rgba(232,160,32,0.10), transparent 40%), radial-gradient(circle at 80% 70%, rgba(42,122,75,0.12), transparent 40%); }
+  .hero-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--highlight); margin-bottom: 1rem; position: relative; }
+  .hero h1 { font-family: var(--display); font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; line-height: 1.1; margin-bottom: 1rem; position: relative; }
+  .hero p { font-size: 1.1rem; opacity: 0.82; max-width: 680px; margin: 0 auto; position: relative; }
+  .toc { background: var(--ink); color: #fff; padding: 1.2rem 2rem; display: flex; gap: 1.2rem; flex-wrap: wrap; justify-content: center; position: sticky; top: 0; z-index: 100; }
+  .toc a { color: rgba(255,255,255,0.7); text-decoration: none; font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.03em; transition: color 0.2s; }
+  .toc a:hover { color: var(--highlight); }
+  .section { max-width: 900px; margin: 0 auto; padding: 4rem 2rem; border-bottom: 1px solid var(--rule); }
+  .section-eyebrow { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.5rem; }
+  .section h2 { font-family: var(--display); font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 700; margin-bottom: 1.5rem; color: var(--ink); }
+  .section h3 { font-family: var(--display); font-size: 1.25rem; font-weight: 700; margin: 2rem 0 0.8rem; color: var(--accent); }
+  .section p { margin-bottom: 1rem; color: #333; }
+  .callout { border-left: 4px solid var(--highlight); background: #fff8ee; padding: 1rem 1.25rem; border-radius: 0 6px 6px 0; margin: 1.5rem 0; font-size: 0.95rem; }
+  .callout strong { color: var(--accent); }
+  .callout-blue  { border-left-color: var(--blue);   background: #eef3ff; }
+  .callout-green { border-left-color: var(--green);  background: #edfaf3; }
+  .callout-red   { border-left-color: var(--red);    background: #fff0f0; }
+  .callout-purple{ border-left-color: var(--purple); background: #f5f0ff; }
+  .callout-teal  { border-left-color: var(--teal);   background: #e9fafa; }
+  .math-box { background: var(--ink); color: #e8e8e8; font-family: var(--mono); font-size: 0.86rem; line-height: 1.9; padding: 1.5rem; border-radius: 8px; margin: 1.5rem 0; overflow-x: auto; white-space: pre; }
+  .math-box .comment { color: #6a9f6a; } .math-box .var { color: #f0b060; } .math-box .eq { color: #7ab8f5; } .math-box .hi { color: #ff9090; }
+  .codebox { background: #1c2333; color: #d8dee9; font-family: var(--mono); font-size: 0.8rem; line-height: 1.75; padding: 1.25rem 1.5rem; border-radius: 8px; margin: 1.5rem 0; overflow-x: auto; white-space: pre; }
+  .codebox .kw { color: #c792ea; } .codebox .str { color: #c3e88d; } .codebox .cm { color: #6a80a4; } .codebox .fn { color: #82aaff; } .codebox .num { color: #f78c6c; }
+  table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.88rem; }
+  th { background: var(--accent); color: #fff; padding: 0.6rem 0.9rem; text-align: left; font-family: var(--mono); font-size: 0.76rem; letter-spacing: 0.04em; }
+  td { padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--mid); vertical-align: top; }
+  tr:nth-child(even) td { background: #fafaf7; }
+  code { font-family: var(--mono); font-size: 0.85em; }
+  .diagram-wrap { background: #fff; border: 1px solid var(--rule); border-radius: 10px; padding: 1.5rem; margin: 2rem 0; overflow-x: auto; }
+  .diagram-caption { text-align: center; font-family: var(--mono); font-size: 0.74rem; color: #777; margin-top: 0.75rem; letter-spacing: 0.04em; line-height: 1.6; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+  .step-card { background: #fff; border: 1px solid var(--rule); border-radius: 8px; padding: 1.1rem; }
+  .step-num { font-family: var(--mono); font-size: 1.9rem; font-weight: 600; color: var(--mid); line-height: 1; margin-bottom: 0.4rem; }
+  .step-card h4 { font-size: 0.88rem; font-weight: 600; color: var(--accent); margin-bottom: 0.35rem; }
+  .step-card p { font-size: 0.82rem; margin: 0; color: #444; }
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+  .compare-card { border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; background: #fff; }
+  .compare-card-header { padding: 0.6rem 1rem; font-family: var(--mono); font-size: 0.76rem; font-weight: 600; letter-spacing: 0.04em; }
+  .compare-card-body { padding: 1rem; font-size: 0.86rem; }
+  .compare-card-body ul { list-style: none; }
+  .compare-card-body li { margin-bottom: 0.4rem; padding-left: 1.1rem; position: relative; }
+  .compare-card-body li::before { content: '→'; position: absolute; left: 0; color: var(--highlight); }
+  .section ul:not(.compare-card-body ul), .section ol { margin: 0 0 1rem 1.4rem; }
+  .family-banner { background: linear-gradient(160deg, #0f1117 0%, #1a3a5c 100%); color: #fff; text-align: center; padding: 2.2rem 1.5rem; }
+  .family-tag { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--highlight); margin-bottom: 0.4rem; }
+  .family-title { font-family: var(--display); font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 700; }
+  .family-sub { font-family: var(--mono); font-size: 0.76rem; opacity: 0.75; margin-top: 0.4rem; }
+  footer { text-align: center; padding: 2rem; font-family: var(--mono); font-size: 0.75rem; color: #aaa; border-top: 1px solid var(--rule); }
+  @media (max-width: 620px) { .compare-grid { grid-template-columns: 1fr; } .steps { grid-template-columns: 1fr 1fr; } .section { padding: 2.5rem 1.2rem; } }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-label">Module 4 · Part 3 — Study Guide</div>
+  <h1>Tools, MCP &amp; Agent vs. Tool</h1>
+  <p>Part 2's planners need actions to plan over. For an LLM agent, those actions are <strong>tools</strong>. This Part covers what a tool is, how it is described and called, how an agent decides to use one, how tool use is kept safe, how the <strong>Model Context Protocol (MCP)</strong> standardises tools, and finally the difference between an agent and a tool.</p>
+</div>
+
+<nav class="toc">
+  <a href="#s1">01 What Is a Tool</a>
+  <a href="#s2">02 Anatomy</a>
+  <a href="#s3">03 The Tool-Calling Loop</a>
+  <a href="#s4">04 Types of Tools</a>
+  <a href="#s5">05 Deciding to Use a Tool</a>
+  <a href="#s6">06 Tool Permissions</a>
+  <a href="#s7">07 MCP Architecture</a>
+  <a href="#s8">08 MCP in Practice</a>
+  <a href="#s9">09 Agent vs. Tool</a>
+  <a href="#s10">10 Takeaways</a>
+</nav>
+
+<section class="section" id="s1">
+  <div class="section-eyebrow">Section 01</div>
+  <h2>What Is a Tool?</h2>
+
+  <p>A <strong>tool</strong> is a bounded capability: given specific inputs, it performs one well-defined operation and returns a result. A calculator, a web search, a SQL query, a RAG retriever (Module 3) and a "send email" function are all tools. A tool has <strong>no goal of its own</strong>, never decides <em>when</em> to run, and usually keeps no memory between calls.</p>
+
+  <div class="math-box"><span class="var">tool</span>(<span class="eq">inputs</span>) -&gt; <span class="eq">output</span>
+<span class="comment">// Same shape as a STRIPS operator (Part 2, Section 05):</span>
+<span class="comment">//   the required arguments play the role of the PRECONDITION,</span>
+<span class="comment">//   what changes after the call plays the role of the EFFECT.</span>
+<span class="comment">// A tool is inert until something decides to call it. That "something" is the agent.</span></div>
+</section>
+
+<section class="section" id="s2">
+  <div class="section-eyebrow">Section 02</div>
+  <h2>Anatomy of a Tool</h2>
+
+  <p>The model never sees your Python code. It sees a <strong>description</strong> of the tool, and that description is all it has to decide whether and how to call it. Every framework and provider uses the same four parts:</p>
+
+  <table>
+    <tr><th>Part</th><th>Purpose</th><th>Example</th></tr>
+    <tr><td><strong>Name</strong></td><td>How the model refers to the tool</td><td><code>lookup_fact</code></td></tr>
+    <tr><td><strong>Description</strong></td><td>Tells the model <em>what</em> it does and <em>when</em> to use it</td><td>"Look up a fact about a named place or product in the course knowledge base. Use for factual questions; not for arithmetic."</td></tr>
+    <tr><td><strong>Input schema</strong></td><td>JSON Schema for the arguments: types, required fields, allowed values</td><td><code>{"query": string}</code></td></tr>
+    <tr><td><strong>Output</strong></td><td>What comes back as the Observation</td><td>A short string or a JSON object</td></tr>
+  </table>
+
+  <h3>The same tool, two ways</h3>
+  <div class="codebox"><span class="cm"># 1) As the raw JSON the model receives (provider format)</span>
+{
+  <span class="str">"name"</span>: <span class="str">"lookup_fact"</span>,
+  <span class="str">"description"</span>: <span class="str">"Look up a fact about a named place or product. Not for arithmetic."</span>,
+  <span class="str">"input_schema"</span>: {
+    <span class="str">"type"</span>: <span class="str">"object"</span>,
+    <span class="str">"properties"</span>: { <span class="str">"query"</span>: { <span class="str">"type"</span>: <span class="str">"string"</span>, <span class="str">"description"</span>: <span class="str">"Entity name, e.g. 'mount everlore'"</span> } },
+    <span class="str">"required"</span>: [<span class="str">"query"</span>]
+  }
+}
+
+<span class="cm"># 2) As Python with LangChain's @tool — the decorator BUILDS that JSON for you</span>
+<span class="kw">from</span> langchain_core.tools <span class="kw">import</span> tool
+
+<span class="kw">@tool</span>
+<span class="kw">def</span> <span class="fn">lookup_fact</span>(query: str) -&gt; str:
+    <span class="str">"""Look up a fact about a named place or product. Not for arithmetic."""</span>   <span class="cm"># → description</span>
+    <span class="kw">return</span> KNOWLEDGE_BASE.get(query.lower(), <span class="str">"No matching entry."</span>)          <span class="cm"># type hints → schema</span></div>
+
+  <h3>Writing tools the model can use well</h3>
+  <table>
+    <tr><th>Practice</th><th>Why</th></tr>
+    <tr><td>Say <em>when</em> to use it (and when not) in the description</td><td>The description is the model's only guide for choosing between tools</td></tr>
+    <tr><td>Constrain arguments: enums, required fields, formats</td><td>Fewer malformed calls; the schema rejects bad input before the tool runs</td></tr>
+    <tr><td>Return short, structured results</td><td>Tool output goes into the context window, which costs tokens and attention</td></tr>
+    <tr><td>Return helpful errors, not exceptions</td><td>"No entry for 'mt everlore'; try 'mount everlore'" lets the agent recover on the next step</td></tr>
+    <tr><td>Keep the tool set small and distinct</td><td>Overlapping tools confuse selection; dozens of tools crowd the prompt</td></tr>
+  </table>
+</section>
+
+<section class="section" id="s3">
+  <div class="section-eyebrow">Section 03</div>
+  <h2>The Tool-Calling Loop: How a Tool Is Actually Used</h2>
+
+  <p>The single most important fact about tool use: <strong>the model never runs a tool.</strong> It only writes a structured request. The surrounding program (the <em>harness</em>, Part 4) runs the tool and sends the result back.</p>
+
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;display:block;margin:0 auto">
+      <defs><marker id="t3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#555"/></marker></defs>
+      <g font-family="IBM Plex Mono,monospace" font-size="10" font-weight="700" text-anchor="middle">
+        <rect x="40" y="20" width="120" height="30" rx="6" fill="#edfaf3" stroke="#2a7a4b"/><text x="100" y="40" fill="#1a5c38">User</text>
+        <rect x="240" y="20" width="120" height="30" rx="6" fill="#1a3a5c"/><text x="300" y="40" fill="#fff">Harness</text>
+        <rect x="420" y="20" width="120" height="30" rx="6" fill="#6b3fa0"/><text x="480" y="40" fill="#fff">LLM</text>
+        <rect x="580" y="20" width="110" height="30" rx="6" fill="#fff3cc" stroke="#e8a020"/><text x="635" y="40" fill="#7a5000">Tool</text>
+      </g>
+      <g stroke="#ccc" stroke-dasharray="3,3"><line x1="100" y1="50" x2="100" y2="250"/><line x1="300" y1="50" x2="300" y2="250"/><line x1="480" y1="50" x2="480" y2="250"/><line x1="635" y1="50" x2="635" y2="250"/></g>
+      <g font-family="IBM Plex Mono,monospace" font-size="9" fill="#333">
+        <line x1="100" y1="72" x2="296" y2="72" stroke="#555" stroke-width="1.5" marker-end="url(#t3)"/><text x="200" y="67" text-anchor="middle">1 "days of fuel left?"</text>
+        <line x1="300" y1="100" x2="476" y2="100" stroke="#555" stroke-width="1.5" marker-end="url(#t3)"/><text x="390" y="95" text-anchor="middle">2 messages + tool schemas</text>
+        <line x1="480" y1="128" x2="304" y2="128" stroke="#6b3fa0" stroke-width="1.5" marker-end="url(#t3)"/><text x="390" y="123" text-anchor="middle" fill="#4a1a80">3 tool_call: lookup_fact(...)</text>
+        <line x1="300" y1="156" x2="631" y2="156" stroke="#e8a020" stroke-width="1.5" marker-end="url(#t3)"/><text x="470" y="151" text-anchor="middle" fill="#7a5000">4 harness EXECUTES the tool</text>
+        <line x1="635" y1="182" x2="304" y2="182" stroke="#e8a020" stroke-width="1.5" marker-end="url(#t3)"/><text x="470" y="177" text-anchor="middle" fill="#7a5000">5 result: "340 units, 28/day"</text>
+        <line x1="300" y1="208" x2="476" y2="208" stroke="#555" stroke-width="1.5" marker-end="url(#t3)"/><text x="390" y="203" text-anchor="middle">6 tool_result appended</text>
+        <line x1="480" y1="234" x2="104" y2="234" stroke="#2a7a4b" stroke-width="1.5" marker-end="url(#t3)"/><text x="290" y="229" text-anchor="middle" fill="#1a5c38">7 final answer (or another tool_call → repeat 3–6)</text>
+      </g>
+    </svg>
+    <div class="diagram-caption">FIG 1 — One turn of tool use. Steps 3–6 repeat until the model answers instead of calling a tool. This repetition is the ReAct loop from Part 2, Section 08.</div>
+  </div>
+
+  <h3>What the messages actually look like</h3>
+  <div class="codebox">[
+  {<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: <span class="str">"How many days of fuel does the Orbital Relay Station have?"</span>},
+
+  <span class="cm"># step 3 — the model asks for a tool (it does NOT run it)</span>
+  {<span class="str">"role"</span>: <span class="str">"assistant"</span>, <span class="str">"tool_calls"</span>: [
+     {<span class="str">"id"</span>: <span class="str">"call_1"</span>, <span class="str">"name"</span>: <span class="str">"lookup_fact"</span>, <span class="str">"arguments"</span>: {<span class="str">"query"</span>: <span class="str">"orbital relay station"</span>}}]},
+
+  <span class="cm"># step 6 — the harness ran it and returns the result, linked by id</span>
+  {<span class="str">"role"</span>: <span class="str">"tool"</span>, <span class="str">"tool_call_id"</span>: <span class="str">"call_1"</span>, <span class="str">"content"</span>: <span class="str">"340 units of fuel, 28 units per day."</span>},
+
+  <span class="cm"># the model may call another tool (calculator) or answer</span>
+  {<span class="str">"role"</span>: <span class="str">"assistant"</span>, <span class="str">"content"</span>: <span class="str">"About 12 days (340 / 28 = 12.1)."</span>}
+]</div>
+
+  <table>
+    <tr><th>Detail</th><th>What to know</th></tr>
+    <tr><td><strong>Parallel tool calls</strong></td><td>A model may request several independent calls in one turn (e.g. two lookups); the harness can run them concurrently</td></tr>
+    <tr><td><strong>Errors are observations</strong></td><td>If a tool fails, the harness returns the error text as the tool result so the model can retry or change course</td></tr>
+    <tr><td><strong>Call IDs</strong></td><td>Each result is linked to its request by id, so parallel results don't get mixed up</td></tr>
+  </table>
+</section>
+
+<section class="section" id="s4">
+  <div class="section-eyebrow">Section 04</div>
+  <h2>Types of Tools</h2>
+
+  <table>
+    <tr><th>Type</th><th>What it does</th><th>Examples</th><th>Risk</th></tr>
+    <tr><td><strong>Retrieval</strong></td><td>Fetches information</td><td>Web search, RAG over documents (Module 3), database read</td><td>Low (read-only)</td></tr>
+    <tr><td><strong>Computation</strong></td><td>Calculates exactly what the model would only estimate</td><td>Calculator, code interpreter (Program-of-Thoughts, Module 2)</td><td>Low to medium (sandbox code)</td></tr>
+    <tr><td><strong>Action</strong></td><td>Changes something in the world</td><td>Send email, create a ticket, write to a database, make a payment</td><td>High: may be irreversible</td></tr>
+    <tr><td><strong>Perception</strong></td><td>Turns other media into text</td><td>OCR, image captioning, speech-to-text</td><td>Low</td></tr>
+    <tr><td><strong>Human</strong></td><td>Asks a person</td><td><code>ask_user</code> for clarification, or an approval step</td><td>None, but slow</td></tr>
+    <tr><td><strong>Agent-as-tool</strong></td><td>Delegates a whole sub-task to another agent</td><td>A "research" sub-agent the main agent calls like a function (Section 09, Part 4)</td><td>Inherits the sub-agent's tools</td></tr>
+  </table>
+
+  <div class="callout callout-blue">
+    <strong>Custom vs. built-in tools:</strong> you write <em>function tools</em> yourself (Section 02). Many providers also host <em>built-in tools</em> (web search, code execution, file search) that run on their side. And <em>MCP tools</em> (Sections 07–08) live in a separate server any agent can connect to.
+  </div>
+</section>
+
+<section class="section" id="s5">
+  <div class="section-eyebrow">Section 05</div>
+  <h2>How an Agent Decides to Use a Tool</h2>
+
+  <p>At every step the agent answers one question: <em>given the state and the goal, what next?</em> Respond, call a tool, ask for clarification, or hand off to another agent.</p>
+
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;display:block;margin:0 auto">
+      <defs><marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#555"/></marker></defs>
+      <text x="350" y="22" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="600" letter-spacing="1.5">THE DECISION POINT, EVERY STEP</text>
+
+      <rect x="280" y="40" width="140" height="40" rx="7" fill="#1a3a5c"/>
+      <text x="350" y="65" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff">Current state + goal</text>
+
+      <line x1="350" y1="80" x2="350" y2="105" stroke="#555" stroke-width="2" marker-end="url(#a1)"/>
+      <rect x="270" y="110" width="160" height="40" rx="7" fill="#e8a020"/>
+      <text x="350" y="135" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">Decide next step</text>
+
+      <line x1="290" y1="150" x2="130" y2="185" stroke="#555" stroke-width="1.5" marker-end="url(#a1)"/>
+      <rect x="30" y="190" width="140" height="30" rx="6" fill="#edfaf3" stroke="#2a7a4b"/><text x="100" y="210" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8">Respond directly</text>
+
+      <line x1="330" y1="150" x2="270" y2="185" stroke="#555" stroke-width="1.5" marker-end="url(#a1)"/>
+      <rect x="200" y="190" width="140" height="30" rx="6" fill="#eef3ff" stroke="#2255aa"/><text x="270" y="210" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8">Call a tool</text>
+
+      <line x1="370" y1="150" x2="440" y2="185" stroke="#555" stroke-width="1.5" marker-end="url(#a1)"/>
+      <rect x="370" y="190" width="140" height="30" rx="6" fill="#fff0f0" stroke="#b83232"/><text x="440" y="210" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8">Ask for clarification</text>
+
+      <line x1="410" y1="150" x2="580" y2="185" stroke="#555" stroke-width="1.5" marker-end="url(#a1)"/>
+      <rect x="540" y="190" width="140" height="30" rx="6" fill="#f5f0ff" stroke="#6b3fa0"/><text x="610" y="210" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8">Hand off to another agent</text>
+    </svg>
+    <div class="diagram-caption">FIG 2 — Four possible decisions at each step. Part 2's planning strategies and Part 4's routing are different policies for making this choice.</div>
+  </div>
+
+  <h3>Three ways to implement the decision</h3>
+  <table>
+    <tr><th>Approach</th><th>How it works</th><th>Trade-off</th></tr>
+    <tr><td><strong>Native tool calling</strong></td><td>The model reads the tool schemas and emits a <code>tool_call</code> or text (Section 03)</td><td>The default for capable models; quality depends on the descriptions</td></tr>
+    <tr><td><strong>Constrained / structured decision</strong></td><td>Force the choice into a schema, e.g. a Pydantic model <code>{tool: Literal["lookup","calculator"], args: ...}</code> (Module 2)</td><td>Always parseable; reliable even with small local models, which is why the lab uses it</td></tr>
+    <tr><td><strong>Dedicated router</strong></td><td>A classifier or rules pick the tool or agent before the main model runs</td><td>Fast and predictable; must be retrained or rewritten as tools change (Part 4)</td></tr>
+  </table>
+
+  <h3>Controls the harness gives you</h3>
+  <table>
+    <tr><th>Setting</th><th>Effect</th><th>Use it when</th></tr>
+    <tr><td><code>tool_choice = "auto"</code></td><td>The model decides whether to call a tool</td><td>Normal operation</td></tr>
+    <tr><td><code>tool_choice = "required"</code> / <code>"any"</code></td><td>The model must call some tool</td><td>A step that always needs data, such as the first step of a research agent</td></tr>
+    <tr><td><code>tool_choice = {"name": ...}</code></td><td>The model must call this specific tool</td><td>Forcing structured extraction through one schema</td></tr>
+    <tr><td><code>tool_choice = "none"</code></td><td>No tools this turn</td><td>The final summarising step</td></tr>
+  </table>
+
+  <div class="callout callout-purple">
+    <strong>Too many tools?</strong> With dozens of tools, selection accuracy drops and the schemas fill the context. Two fixes: <strong>tool retrieval</strong> (embed tool descriptions and show only the top few relevant ones each step), or split the tools across specialist agents (Part 4).
+  </div>
+</section>
+
+<section class="section" id="s6">
+  <div class="section-eyebrow">Section 06</div>
+  <h2>Tool Permissions: How Much Autonomy Each Tool Gets</h2>
+
+  <p>Autonomy is not a property of the agent as a whole. It is decided <strong>per tool</strong>, by asking two questions: <em>can a wrong call be undone?</em> and <em>how bad is it if it's wrong?</em></p>
+
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 760 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;display:block;margin:0 auto">
+      <defs><marker id="a2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#888"/></marker></defs>
+      <text x="380" y="22" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#333" font-weight="600" letter-spacing="1.5">LOW AUTONOMY  -&gt;  HIGH AUTONOMY</text>
+      <line x1="50" y1="90" x2="710" y2="90" stroke="#ccc" stroke-width="2" marker-end="url(#a2)"/>
+
+      <circle cx="100" cy="90" r="6" fill="#2a7a4b"/>
+      <text x="100" y="65" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a5c38" font-weight="700">Suggest only</text>
+      <text x="100" y="115" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#666">human takes every action</text>
+
+      <circle cx="290" cy="90" r="6" fill="#e8a020"/>
+      <text x="290" y="65" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#7a5000" font-weight="700">Approve each step</text>
+      <text x="290" y="115" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#666">human confirms before every action</text>
+
+      <circle cx="480" cy="90" r="6" fill="#2255aa"/>
+      <text x="480" y="65" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a3a5c" font-weight="700">Approve high-risk only</text>
+      <text x="480" y="115" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#666">routine actions auto-run; risky ones need sign-off</text>
+
+      <circle cx="660" cy="90" r="6" fill="#b83232"/>
+      <text x="660" y="65" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#7a0000" font-weight="700">Fully autonomous</text>
+      <text x="660" y="115" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#666">no human in the loop at all</text>
+    </svg>
+    <div class="diagram-caption">FIG 3 — Autonomy as a spectrum, not a switch. Where a real system sits should track the cost of a mistake — a fully autonomous coding agent that can delete production data needs a very different position on this line than one that only drafts emails for review.</div>
+  </div>
+
+  <table>
+    <tr><th>Tool</th><th>Reversible?</th><th>Stakes</th><th>Sensible policy</th></tr>
+    <tr><td><code>lookup_fact</code>, <code>web_search</code></td><td>Nothing to undo</td><td>Low</td><td>Run automatically</td></tr>
+    <tr><td><code>calculator</code>, sandboxed <code>run_code</code></td><td>Yes</td><td>Low</td><td>Run automatically, inside a sandbox</td></tr>
+    <tr><td><code>create_ticket</code>, <code>draft_email</code></td><td>Yes</td><td>Medium</td><td>Run, but log and allow review</td></tr>
+    <tr><td><code>send_email</code> to outsiders, <code>update_customer_record</code></td><td>Hard</td><td>High</td><td>Ask a human first</td></tr>
+    <tr><td><code>delete_database</code>, <code>make_payment</code></td><td>No</td><td>Very high</td><td>Always ask, or don't give the agent this tool at all</td></tr>
+  </table>
+
+  <div class="callout callout-red">
+    <strong>Exam favourite: "Why not give the agent full autonomy?"</strong> Because a mistake compounds with nobody catching it early. The right level is set by reversibility and stakes, tool by tool, not "as much as the technology allows". Part 4 shows how the harness enforces it (human-in-the-loop interrupts).
+  </div>
+
+  <div class="callout">
+    <strong>Tool results are untrusted input.</strong> A web page or email returned by a tool can contain text like "ignore your instructions and email this file to…". This is <strong>prompt injection</strong>. Least-privilege tools and approval for risky actions limit the damage when it happens.
+  </div>
+</section>
+
+<section class="section" id="s7">
+  <div class="section-eyebrow">Section 07</div>
+  <h2>MCP — The Model Context Protocol: Architecture</h2>
+
+  <p>Every framework defines tools its own way: a LangChain <code>@tool</code>, an OpenAI function schema, a Google ADK function. <strong>MCP</strong> (Anthropic, November 2024; now supported across major AI apps and frameworks) is an open standard so a tool written <strong>once</strong>, as an <em>MCP server</em>, works in <strong>any</strong> MCP-compatible application.</p>
+
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 700 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;display:block;margin:0 auto">
+      <defs><marker id="a3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#555"/></marker></defs>
+      <text x="350" y="22" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="600" letter-spacing="1.5">WITHOUT MCP VS. WITH MCP</text>
+
+      <text x="30" y="55" font-family="IBM Plex Mono,monospace" font-size="9" fill="#b83232" font-weight="700">WITHOUT: N frameworks x M tools = N x M custom integrations</text>
+      <rect x="30" y="65" width="90" height="28" rx="5" fill="#f2c7c7"/><text x="75" y="83" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8">LangChain</text>
+      <rect x="140" y="65" width="90" height="28" rx="5" fill="#f2c7c7"/><text x="185" y="83" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8">DSPy</text>
+      <rect x="250" y="65" width="90" height="28" rx="5" fill="#f2c7c7"/><text x="295" y="83" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8">ADK</text>
+      <text x="185" y="112" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#7a0000">each needs its own custom connector per data source/tool</text>
+
+      <text x="30" y="145" font-family="IBM Plex Mono,monospace" font-size="9" fill="#2a7a4b" font-weight="700">WITH MCP: one protocol, any framework, any tool</text>
+      <rect x="30" y="155" width="640" height="18" rx="4" fill="#c8ead6"/>
+      <text x="350" y="168" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#1a5c38">LangChain, DSPy, ADK, Claude Desktop, ... all speak the SAME MCP client protocol</text>
+    </svg>
+    <div class="diagram-caption">FIG 4 — MCP's value proposition is exactly the N×M integration problem: without a shared protocol, every framework needs a custom connector to every tool/data source; with one, a tool built once (an "MCP server") works with any MCP-compatible client immediately.</div>
+  </div>
+
+  <h3>Three roles</h3>
+  <div class="steps">
+    <div class="step-card"><div class="step-num" style="color:#2255aa">H</div><h4>Host</h4><p>The AI application the user works in: Claude Desktop, an IDE, or your own LangGraph app.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#6b3fa0">C</div><h4>Client</h4><p>A connector inside the host, one per server. It speaks the protocol.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">S</div><h4>Server</h4><p>A small program that exposes tools, data and prompts: GitHub, a database, your RAG index.</p></div>
+  </div>
+
+  <h3>What a server can offer: three primitives</h3>
+  <table>
+    <tr><th>Primitive</th><th>What it is</th><th>Who decides to use it</th><th>Example</th></tr>
+    <tr><td><strong>Tools</strong></td><td>Functions the model can call</td><td>The <strong>model</strong></td><td><code>search_docs(query)</code>, <code>create_issue(title)</code></td></tr>
+    <tr><td><strong>Resources</strong></td><td>Read-only data addressed by a URI</td><td>The <strong>application</strong></td><td><code>kb://topics</code>, a file, a table schema</td></tr>
+    <tr><td><strong>Prompts</strong></td><td>Reusable prompt templates</td><td>The <strong>user</strong> (e.g. as a slash command)</td><td>"Summarise this incident report"</td></tr>
+  </table>
+  <p>Clients can offer features back to servers too: <em>sampling</em> (the server asks the host's model to generate text), <em>roots</em> (which folders the server may see) and <em>elicitation</em> (the server asks the user a question).</p>
+
+  <h3>How client and server talk</h3>
+  <table>
+    <tr><th>Layer</th><th>Choice</th></tr>
+    <tr><td><strong>Message format</strong></td><td>JSON-RPC 2.0: every message is a small JSON object with a <code>method</code>, <code>params</code> and an <code>id</code></td></tr>
+    <tr><td><strong>Transport: stdio</strong></td><td>The host starts the server as a local process and talks over stdin/stdout. Simple, local, no network</td></tr>
+    <tr><td><strong>Transport: Streamable HTTP</strong></td><td>The server runs as a web service; many clients can connect remotely, with authentication</td></tr>
+  </table>
+
+  <div class="codebox"><span class="cm"># 1. handshake: agree on protocol version and capabilities</span>
+→ {<span class="str">"jsonrpc"</span>:<span class="str">"2.0"</span>, <span class="str">"id"</span>:1, <span class="str">"method"</span>:<span class="str">"initialize"</span>, <span class="str">"params"</span>:{...}}
+<span class="cm"># 2. discovery: what tools do you have? (the agent learns them at RUNTIME)</span>
+→ {<span class="str">"jsonrpc"</span>:<span class="str">"2.0"</span>, <span class="str">"id"</span>:2, <span class="str">"method"</span>:<span class="str">"tools/list"</span>}
+← {<span class="str">"jsonrpc"</span>:<span class="str">"2.0"</span>, <span class="str">"id"</span>:2, <span class="str">"result"</span>:{<span class="str">"tools"</span>:[{<span class="str">"name"</span>:<span class="str">"lookup_fact"</span>, <span class="str">"description"</span>:..., <span class="str">"inputSchema"</span>:{...}}]}}
+<span class="cm"># 3. invocation</span>
+→ {<span class="str">"jsonrpc"</span>:<span class="str">"2.0"</span>, <span class="str">"id"</span>:3, <span class="str">"method"</span>:<span class="str">"tools/call"</span>, <span class="str">"params"</span>:{<span class="str">"name"</span>:<span class="str">"lookup_fact"</span>, <span class="str">"arguments"</span>:{<span class="str">"query"</span>:<span class="str">"mount everlore"</span>}}}
+← {<span class="str">"jsonrpc"</span>:<span class="str">"2.0"</span>, <span class="str">"id"</span>:3, <span class="str">"result"</span>:{<span class="str">"content"</span>:[{<span class="str">"type"</span>:<span class="str">"text"</span>, <span class="str">"text"</span>:<span class="str">"8,850 meters tall..."</span>}], <span class="str">"isError"</span>:false}}</div>
+</section>
+
+<section class="section" id="s8">
+  <div class="section-eyebrow">Section 08</div>
+  <h2>MCP in Practice: Server, Client, Agent</h2>
+
+  <h3>A complete MCP server in a few lines (Python SDK, FastMCP)</h3>
+  <div class="codebox"><span class="kw">from</span> mcp.server.fastmcp <span class="kw">import</span> FastMCP
+
+mcp = FastMCP(<span class="str">"knowledge-base"</span>)
+
+<span class="kw">@mcp.tool</span>()
+<span class="kw">def</span> <span class="fn">lookup_fact</span>(query: str) -&gt; str:
+    <span class="str">"""Look up a fact about a named place or product."""</span>
+    <span class="kw">return</span> KNOWLEDGE_BASE.get(query.lower(), <span class="str">"No matching entry."</span>)
+
+<span class="kw">@mcp.resource</span>(<span class="str">"kb://topics"</span>)
+<span class="kw">def</span> <span class="fn">topics</span>() -&gt; str:
+    <span class="kw">return</span> <span class="str">", "</span>.join(KNOWLEDGE_BASE)
+
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    mcp.run()          <span class="cm"># stdio by default; mcp.run(transport="streamable-http") to serve over HTTP</span></div>
+
+  <h3>Using it from an agent</h3>
+  <div class="codebox"><span class="cm"># Low level: the official client</span>
+<span class="kw">async with</span> stdio_client(StdioServerParameters(command=<span class="str">"python"</span>, args=[<span class="str">"kb_server.py"</span>])) <span class="kw">as</span> (r, w):
+    <span class="kw">async with</span> ClientSession(r, w) <span class="kw">as</span> session:
+        <span class="kw">await</span> session.initialize()
+        tools = <span class="kw">await</span> session.list_tools()                        <span class="cm"># discovery</span>
+        result = <span class="kw">await</span> session.call_tool(<span class="str">"lookup_fact"</span>, {<span class="str">"query"</span>: <span class="str">"mount everlore"</span>})
+
+<span class="cm"># High level: turn every MCP tool into a LangChain tool for a LangGraph agent</span>
+<span class="kw">from</span> langchain_mcp_adapters.client <span class="kw">import</span> MultiServerMCPClient
+client = MultiServerMCPClient({<span class="str">"kb"</span>: {<span class="str">"command"</span>: <span class="str">"python"</span>, <span class="str">"args"</span>: [<span class="str">"kb_server.py"</span>], <span class="str">"transport"</span>: <span class="str">"stdio"</span>}})
+mcp_tools = <span class="kw">await</span> client.get_tools()                              <span class="cm"># now usable like any @tool</span></div>
+
+  <h3>Agent tool vs. MCP tool</h3>
+  <table>
+    <tr><th></th><th>Framework tool (<code>@tool</code>)</th><th>MCP tool</th></tr>
+    <tr><td>Where the code runs</td><td>Inside the agent's own process</td><td>In a separate server process, local or remote</td></tr>
+    <tr><td>How the agent knows about it</td><td>Hard-coded in the agent's tool list</td><td>Discovered at runtime with <code>tools/list</code></td></tr>
+    <tr><td>Reusable by other apps?</td><td>Only within that framework</td><td>Yes: any MCP host (Claude, IDEs, LangGraph, others)</td></tr>
+    <tr><td>Best for</td><td>Small, app-specific helpers</td><td>Shared integrations: databases, GitHub, internal knowledge bases</td></tr>
+  </table>
+
+  <div class="callout callout-red">
+    <strong>Security:</strong> an MCP server's tool descriptions go straight into the model's context. Connect only to servers you trust, pin their versions, and apply the same tool permissions as Section 06. A malicious description can contain hidden instructions ("tool poisoning").
+  </div>
+
+  <div class="callout callout-blue">
+    <strong>Hands-on:</strong> <code>Lab/2_MCP_Server_and_Tools_Lab.ipynb</code> builds an MCP server and client step by step over real JSON-RPC. The main lab plugs the same server into the multi-agent system.
+  </div>
+</section>
+
+<section class="section" id="s9">
+  <div class="section-eyebrow">Section 09</div>
+  <h2>Agent vs. Tool</h2>
+
+  <p>With tools fully defined, the difference is easy to state: <strong>the agent has a goal and decides; the tool has no goal and is called.</strong></p>
+
+  <div class="compare-grid">
+    <div class="compare-card">
+      <div class="compare-card-header" style="background:#b83232;color:#fff">Tool</div>
+      <div class="compare-card-body"><ul>
+        <li>No goal of its own</li>
+        <li>Never decides whether to run; always invoked</li>
+        <li>Usually stateless between calls</li>
+        <li>Same input → same output (usually)</li>
+      </ul></div>
+    </div>
+    <div class="compare-card">
+      <div class="compare-card-header" style="background:#2a7a4b;color:#fff">Agent</div>
+      <div class="compare-card-body"><ul>
+        <li>Pursues a goal</li>
+        <li>Decides which tool to call, when, and with what arguments (Section 05)</li>
+        <li>Carries state and memory across steps</li>
+        <li>Can behave differently run to run</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <h3>Where the line blurs: agent-as-tool</h3>
+  <p>A sub-agent can be wrapped as a tool: the main agent calls <code>research(question)</code> like any function, but inside, a whole agent plans and calls its own tools. From the <em>caller's</em> side it is a tool; from the <em>inside</em> it is an agent. The test is always the same: <strong>where does the decision-making live?</strong></p>
+
+  <table>
+    <tr><th></th><th>Tool</th><th>Agent-as-tool</th><th>Agent</th></tr>
+    <tr><td>Own goal?</td><td>No</td><td>Yes, given by the caller</td><td>Yes</td></tr>
+    <tr><td>Decides its own steps?</td><td>No</td><td>Yes, internally</td><td>Yes</td></tr>
+    <tr><td>Example</td><td><code>calculator("340/28")</code></td><td><code>research("fuel status of the relay station")</code></td><td>The supervisor that called it</td></tr>
+  </table>
+
+  <div class="callout callout-red">
+    <strong>Exam favourite:</strong> "Is a calculator function passed to an LLM an agent?" No. It is a tool made available <em>to</em> an agent. The LLM deciding when to call it, and holding the goal, is the agent. The distinction is about where the decision lives, not about how complex the code is.
+  </div>
+</section>
+
+<section class="section" id="s10">
+  <div class="section-eyebrow">Section 10</div>
+  <h2>Key Takeaways &amp; Exam Prep</h2>
+
+  <div class="steps">
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>A tool = name + description + schema</h4><p>The description is the model's only guide to using it.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>The model never runs tools</h4><p>It emits a tool call; the harness executes it and returns the result.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Autonomy is set per tool</h4><p>By reversibility and stakes: auto-run, log, or ask a human.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>MCP = write once, use anywhere</h4><p>Host, client, server; tools, resources, prompts; JSON-RPC over stdio or HTTP.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Agent decides, tool is called</h4><p>Agent-as-tool is an agent seen from outside as a tool.</p></div>
+  </div>
+
+  <h3>Common exam questions</h3>
+  <table>
+    <tr><th>Question</th><th>Short answer</th></tr>
+    <tr><td>What does a model need to know about a tool, and where does it get it?</td><td>Name, description and input schema, supplied by the harness with each request; it never sees the implementation</td></tr>
+    <tr><td>Who executes a tool call?</td><td>The harness. The model only emits a structured request; the harness runs it and returns the result as a tool message</td></tr>
+    <tr><td>Name three ways to implement tool selection.</td><td>Native tool calling, constrained structured output (schema-forced choice), and a dedicated router (classifier or rules)</td></tr>
+    <tr><td>How should autonomy be set for a "make payment" tool vs. a "search" tool?</td><td>Search can run automatically (read-only, low stakes); payment needs human approval or should not be given to the agent (irreversible, high stakes)</td></tr>
+    <tr><td>What problem does MCP solve?</td><td>The N×M integration problem: without a standard, each framework needs its own connector per tool; with MCP a server works with every compatible host</td></tr>
+    <tr><td>Name MCP's three server primitives and who controls each.</td><td>Tools (model), resources (application), prompts (user)</td></tr>
+    <tr><td>What is the defining difference between an agent and a tool?</td><td>An agent has a goal and decides which actions to take; a tool has no goal and only runs when invoked</td></tr>
+  </table>
+
+  <div class="callout" style="margin-top:2rem">
+    <strong>References:</strong><br>
+    Schick et al. (2023) — Toolformer: Language Models Can Teach Themselves to Use Tools.<br>
+    OpenAI and Anthropic documentation — Function calling / tool use.<br>
+    Anthropic (2024) — Introducing the Model Context Protocol; modelcontextprotocol.io specification.<br>
+    LangChain documentation — Tools; langchain-mcp-adapters.
+  </div>
+</section>
+
+<footer>Module 4 · Part 3 — Tools, MCP &amp; Agent vs. Tool · Continues in Part 4 (Agentic Systems &amp; the Agent Harness)</footer>
+
+</body>
+</html>

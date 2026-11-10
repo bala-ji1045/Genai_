@@ -1,0 +1,571 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advanced Reasoning — Study Guide</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Fraunces:ital,wght@0,300;0,700;1,300&family=Inter:wght@400;500;600&display=swap');
+  :root {
+    --ink: #0f1117; --paper: #f7f6f2; --mid: #e8e5dd; --rule: #c9c4b8; --accent: #1a3a5c;
+    --highlight: #e8a020; --green: #2a7a4b; --red: #b83232; --blue: #2255aa; --purple: #6b3fa0; --teal: #0d7a7a;
+    --mono: 'IBM Plex Mono', monospace; --display: 'Fraunces', Georgia, serif; --body: 'Inter', system-ui, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--body); background: var(--paper); color: var(--ink); line-height: 1.7; font-size: 16px; }
+  .hero { background: linear-gradient(160deg, #0f1117 0%, #1a3a5c 100%); color: #fff; padding: 4rem 2rem 3rem; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 20% 30%, rgba(232,160,32,0.10), transparent 40%), radial-gradient(circle at 80% 70%, rgba(42,122,75,0.12), transparent 40%); }
+  .hero-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--highlight); margin-bottom: 1rem; position: relative; }
+  .hero h1 { font-family: var(--display); font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; line-height: 1.1; margin-bottom: 1rem; position: relative; }
+  .hero p { font-size: 1.1rem; opacity: 0.82; max-width: 640px; margin: 0 auto; position: relative; }
+  .toc { background: var(--ink); color: #fff; padding: 1.2rem 2rem; display: flex; gap: 1.3rem; flex-wrap: wrap; justify-content: center; position: sticky; top: 0; z-index: 100; }
+  .toc a { color: rgba(255,255,255,0.7); text-decoration: none; font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.04em; transition: color 0.2s; }
+  .toc a:hover { color: var(--highlight); }
+  .section { max-width: 900px; margin: 0 auto; padding: 4rem 2rem; border-bottom: 1px solid var(--rule); }
+  .section-eyebrow { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.5rem; }
+  .section h2 { font-family: var(--display); font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 700; margin-bottom: 1.5rem; color: var(--ink); }
+  .section h3 { font-family: var(--display); font-size: 1.25rem; font-weight: 700; margin: 2rem 0 0.8rem; color: var(--accent); }
+  .section p { margin-bottom: 1rem; color: #333; }
+  .callout { border-left: 4px solid var(--highlight); background: #fff8ee; padding: 1rem 1.25rem; border-radius: 0 6px 6px 0; margin: 1.5rem 0; font-size: 0.95rem; }
+  .callout strong { color: var(--accent); }
+  .callout-blue  { border-left-color: var(--blue);   background: #eef3ff; }
+  .callout-green { border-left-color: var(--green);  background: #edfaf3; }
+  .callout-red   { border-left-color: var(--red);    background: #fff0f0; }
+  .callout-purple{ border-left-color: var(--purple); background: #f5f0ff; }
+  .math-box { background: var(--ink); color: #e8e8e8; font-family: var(--mono); font-size: 0.86rem; line-height: 1.9; padding: 1.5rem; border-radius: 8px; margin: 1.5rem 0; overflow-x: auto; white-space: pre; }
+  .math-box .comment { color: #6a9f6a; } .math-box .var { color: #f0b060; } .math-box .eq { color: #7ab8f5; } .math-box .hi { color: #ff9090; }
+  table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.88rem; }
+  th { background: var(--accent); color: #fff; padding: 0.6rem 0.9rem; text-align: left; font-family: var(--mono); font-size: 0.76rem; letter-spacing: 0.04em; }
+  td { padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--mid); vertical-align: top; }
+  tr:nth-child(even) td { background: #fafaf7; }
+  .diagram-wrap { background: #fff; border: 1px solid var(--rule); border-radius: 10px; padding: 1.5rem; margin: 2rem 0; overflow-x: auto; }
+  .diagram-caption { text-align: center; font-family: var(--mono); font-size: 0.74rem; color: #777; margin-top: 0.75rem; letter-spacing: 0.04em; line-height: 1.6; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+  .step-card { background: #fff; border: 1px solid var(--rule); border-radius: 8px; padding: 1.1rem; }
+  .step-num { font-family: var(--mono); font-size: 1.9rem; font-weight: 600; color: var(--mid); line-height: 1; margin-bottom: 0.4rem; }
+  .step-card h4 { font-size: 0.88rem; font-weight: 600; color: var(--accent); margin-bottom: 0.35rem; }
+  .step-card p { font-size: 0.82rem; margin: 0; color: #444; }
+  .promptbox { background: #fff; border: 1px solid var(--rule); border-radius: 8px; padding: 1.1rem 1.3rem; margin: 1.2rem 0; font-family: var(--mono); font-size: 0.83rem; line-height: 1.75; white-space: pre-wrap; }
+  .promptbox .role { color: var(--purple); font-weight: 600; } .promptbox .user { color: var(--blue); font-weight: 600; } .promptbox .out { color: var(--green); font-weight: 600; } .promptbox .act { color: var(--highlight); font-weight: 600; }
+  @media (max-width: 620px) { .steps { grid-template-columns: 1fr 1fr; } .section { padding: 2.5rem 1.2rem; } }</style>
+<div class="hero">
+  <div class="hero-label">Module 2 · Part 2 — Study Guide</div>
+  <h1>Advanced Reasoning</h1>
+  <p>Beyond a single chain: search over reasoning paths (Tree/Graph-of-Thoughts), offloading computation to code (PAL/PoT), interleaving reasoning with tool use (ReAct), and self-correction (reflection, self-critique).</p>
+</div>
+<nav class="toc">
+  <a href="#s1">01 Tree-of-Thoughts</a>
+  <a href="#s2">02 Graph-of-Thoughts</a>
+  <a href="#s3">03 PoT &amp; PAL</a>
+  <a href="#s4">04 ReAct</a>
+  <a href="#s5">05 Reflection</a>
+  <a href="#s6">06 Self-Critique</a>
+  <a href="#s7">07 Comparison</a>
+  <a href="#s8">08 Takeaways</a>
+</nav>
+<section class="section" id="s1">
+  <div class="section-eyebrow">Section 01</div>
+  <h2>Tree-of-Thoughts (ToT)</h2>
+  <p>Chain-of-thought (Module 2 §01/§03) commits to a single reasoning path — one wrong step early on dooms the whole chain, and there's no way to look ahead or backtrack. 
+    <strong>Tree-of-Thoughts</strong> (Yao et al., 2023) reframes reasoning as a 
+    <em>search problem</em>: at each step, generate several candidate next-thoughts, evaluate them, keep the promising ones, and explore further — exactly like search algorithms explore a game tree.
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;display:block;margin:0 auto">
+      <defs>
+        <marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#888"></polygon>
+        </marker>
+      </defs>
+      <text x="380" y="24" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#333" font-weight="600" letter-spacing="1.5">SEARCH OVER THOUGHTS, NOT ONE CHAIN</text>
+      <rect x="330" y="40" width="100" height="34" rx="6" fill="#1a3a5c"></rect>
+      <text x="380" y="62" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff">Problem</text>
+      <line x1="360" y1="74" x2="230" y2="115" stroke="#888" stroke-width="1.5" marker-end="url(#a1)"></line>
+      <line x1="380" y1="74" x2="380" y2="115" stroke="#888" stroke-width="1.5" marker-end="url(#a1)"></line>
+      <line x1="400" y1="74" x2="530" y2="115" stroke="#888" stroke-width="1.5" marker-end="url(#a1)"></line>
+      <rect x="170" y="120" width="120" height="42" rx="6" fill="#edfaf3" stroke="#2a7a4b" stroke-width="1.5"></rect>
+      <text x="230" y="140" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a5c38">Thought A</text>
+      <text x="230" y="154" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#1a5c38">eval: promising</text>
+      <rect x="320" y="120" width="120" height="42" rx="6" fill="#fff0f0" stroke="#b83232" stroke-width="1.5"></rect>
+      <text x="380" y="140" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#7a0000">Thought B</text>
+      <text x="380" y="154" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#7a0000">eval: dead end ✗</text>
+      <rect x="470" y="120" width="120" height="42" rx="6" fill="#edfaf3" stroke="#2a7a4b" stroke-width="1.5"></rect>
+      <text x="530" y="140" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a5c38">Thought C</text>
+      <text x="530" y="154" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#1a5c38">eval: promising</text>
+      <line x1="200" y1="162" x2="150" y2="200" stroke="#888" stroke-width="1.3" marker-end="url(#a1)"></line>
+      <line x1="260" y1="162" x2="280" y2="200" stroke="#888" stroke-width="1.3" marker-end="url(#a1)"></line>
+      <line x1="500" y1="162" x2="470" y2="200" stroke="#888" stroke-width="1.3" marker-end="url(#a1)"></line>
+      <line x1="560" y1="162" x2="610" y2="200" stroke="#888" stroke-width="1.3" marker-end="url(#a1)"></line>
+      <rect x="95" y="205" width="110" height="36" rx="6" fill="#f5f0ff" stroke="#6b3fa0" stroke-width="1.3"></rect>
+      <text x="150" y="227" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#4a1a80">A1 (pruned)</text>
+      <rect x="225" y="205" width="110" height="36" rx="6" fill="#e8a020"></rect>
+      <text x="280" y="227" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#fff" font-weight="700">A2 ★ best</text>
+      <rect x="415" y="205" width="110" height="36" rx="6" fill="#f5f0ff" stroke="#6b3fa0" stroke-width="1.3"></rect>
+      <text x="470" y="227" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#4a1a80">C1 (pruned)</text>
+      <rect x="555" y="205" width="110" height="36" rx="6" fill="#f5f0ff" stroke="#6b3fa0" stroke-width="1.3"></rect>
+      <text x="610" y="227" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#4a1a80">C2 (pruned)</text>
+      <line x1="280" y1="241" x2="380" y2="275" stroke="#e8a020" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="320" y="280" width="120" height="32" rx="6" fill="#e8a020"></rect>
+      <text x="380" y="300" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff" font-weight="700">Final Answer</text>
+    </svg>
+    <div class="diagram-caption">FIG 1 — ToT explores multiple candidate thoughts at each step, uses a state evaluator to score/prune weak branches (B, A1, C1, C2), and expands only promising ones (A2) — like BFS/DFS over a game tree, with the LLM playing both "move generator" and "position evaluator."</div>
+  </div>
+  <h3>The three components every ToT system needs</h3>
+  <table>
+    <tbody>
+      <tr>
+        <th>Component</th>
+        <th>Role</th>
+      </tr>
+      <tr>
+        <td>
+          <strong>Thought generator</strong>
+        </td>
+        <td>Given a partial solution, propose several plausible next steps (usually by sampling the LLM k times, or asking it to list k options)</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>State evaluator</strong>
+        </td>
+        <td>Score each candidate thought — "sure/likely/impossible" or a numeric value — often the same LLM, prompted to judge rather than generate</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Search algorithm</strong>
+        </td>
+        <td>BFS (keep the best b candidates at each level) or DFS (follow the most promising path, backtrack on failure)</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-red">
+    <strong>Exam favourite:</strong> "What does ToT add that chain-of-thought self-consistency (Module 2 §04) doesn't?" — self-consistency samples K 
+    <em>complete, independent</em> chains and votes at the end; it cannot backtrack mid-reasoning or share information across branches. ToT evaluates and prunes 
+    <em>during</em> generation, so a bad early step gets caught before wasting compute on the rest of that branch.
+  </div>
+</section>
+<section class="section" id="s2">
+  <div class="section-eyebrow">Section 02</div>
+  <h2>Graph-of-Thoughts (GoT)</h2>
+  <p>A tree only lets thoughts branch and get pruned — it never lets two separate branches 
+    <em>merge</em>. 
+    <strong>Graph-of-Thoughts</strong> (Besta et al., 2023) generalizes ToT's tree into an arbitrary graph: thoughts can be generated, refined, 
+    <strong>aggregated</strong> (combine two partial solutions into a better one), and even looped back on for further refinement.
+  </p>
+  <table>
+    <tbody>
+      <tr>
+        <th>Operation</th>
+        <th>Tree-of-Thoughts</th>
+        <th>Graph-of-Thoughts</th>
+      </tr>
+      <tr>
+        <td>Generate</td>
+        <td>✓</td>
+        <td>✓</td>
+      </tr>
+      <tr>
+        <td>Evaluate / prune</td>
+        <td>✓</td>
+        <td>✓</td>
+      </tr>
+      <tr>
+        <td>Backtrack</td>
+        <td>✓ (DFS)</td>
+        <td>✓</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Aggregate (merge two branches)</strong>
+        </td>
+        <td>✗ — branches are isolated</td>
+        <td>✓ — a node can have multiple parents</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Refine (loop a thought on itself)</strong>
+        </td>
+        <td>✗</td>
+        <td>✓ — self-edges</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-blue">
+    <strong>When aggregation actually matters:</strong> tasks that decompose into independent sub-problems whose partial solutions need combining — e.g. sorting a long list by splitting into chunks, solving each chunk, then 
+    <em>merging</em> the sorted chunks. A tree structure has no operation for "merge branch 3 and branch 7's results" — GoT does, natively.
+  </div>
+  <div class="callout callout-purple">
+    <strong>Cost reality:</strong> GoT's added flexibility comes from evaluating and merging more candidate thoughts, which means more LLM calls than ToT for the same problem. Reserve it for tasks that genuinely decompose-and-recombine; for tasks that are naturally a single decision sequence, ToT is cheaper for comparable quality.
+  </div>
+</section>
+<section class="section" id="s3">
+  <div class="section-eyebrow">Section 03</div>
+  <h2>Program-of-Thoughts (PoT) &amp; Program-Aided Language Models (PAL)</h2>
+  <p>LLMs are unreliable at precise arithmetic and symbolic manipulation — not because they can't reason about the 
+    <em>structure</em> of a problem, but because token-by-token generation has no guaranteed calculator underneath it. 
+    <strong>PAL</strong> (Gao et al., 2022) and 
+    <strong>PoT</strong> (Chen et al., 2022) share one idea: have the LLM write the reasoning as 
+    <em>executable code</em>, then run that code in a real interpreter to get the final answer — instead of asking the LLM to compute the answer itself in natural language.
+  </p>
+  <div class="promptbox">
+    <span class="user">User:</span> A store had 120 apples. They sold 35% on Monday and 20% of what remained on Tuesday. How many apples are left?
+    <span class="act"># PAL/PoT-style output — code, not a text answer</span>
+apples = 120
+sold_monday = apples * 0.35
+remaining_after_monday = apples - sold_monday
+sold_tuesday = remaining_after_monday * 0.20
+remaining = remaining_after_monday - sold_tuesday
+print(remaining)
+    <span class="out">→ executed by a Python interpreter → 62.4</span>
+  </div>
+  <div class="callout callout-green">
+    <strong>Why this beats plain CoT on math/logic tasks:</strong> chain-of-thought still asks the LLM to perform the arithmetic itself, in tokens — every multiplication is a chance for a token-level slip. PAL/PoT only asks the LLM to get the 
+    <em>logic</em> right (which operations, in what order); a real interpreter executes the arithmetic exactly, every time. The LLM's job shrinks to what it's actually reliable at: translating a word problem into correct code.
+  </div>
+  <table>
+    <tbody>
+      <tr>
+        <th></th>
+        <th>Chain-of-Thought</th>
+        <th>PAL / PoT</th>
+      </tr>
+      <tr>
+        <td>Where the answer is computed</td>
+        <td>By the LLM, in generated tokens</td>
+        <td>By a real interpreter, executing generated code</td>
+      </tr>
+      <tr>
+        <td>Arithmetic reliability</td>
+        <td>Can slip on multi-digit / multi-step math</td>
+        <td>Exact, by construction</td>
+      </tr>
+      <tr>
+        <td>Requires</td>
+        <td>Nothing extra</td>
+        <td>A code execution environment (sandbox)</td>
+      </tr>
+      <tr>
+        <td>Best for</td>
+        <td>Qualitative, linguistic, or fuzzy reasoning</td>
+        <td>Math, counting, date arithmetic, symbolic manipulation</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-purple">
+    <strong>This is a special case of tool use.</strong> A code interpreter is just one tool an LLM can call. §04 (ReAct) generalizes "write code, run it, use the result" into "take any action — code, search, an API call — observe the result, and reason about what to do next."
+  </div>
+</section>
+<section class="section" id="s4">
+  <div class="section-eyebrow">Section 04</div>
+  <h2>ReAct — Reasoning + Acting</h2>
+  <p>
+    <strong>ReAct</strong> (Yao et al., 2022) interleaves three things in a loop: a 
+    <strong>Thought</strong> (reasoning about what to do next), an 
+    <strong>Action</strong> (calling a tool — search, calculator, API, code executor), and an 
+    <strong>Observation</strong> (the tool's real-world result) — repeated until the model has enough information to answer.
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 700 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;display:block;margin:0 auto">
+      <defs>
+        <marker id="a2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#555"></polygon>
+        </marker>
+      </defs>
+      <circle cx="350" cy="130" r="105" fill="none" stroke="#ddd" stroke-width="1.5"></circle>
+      <rect x="290" y="20" width="120" height="46" rx="8" fill="#fff3cc" stroke="#e8a020" stroke-width="1.8"></rect>
+      <text x="350" y="42" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#7a5000" font-weight="700">Thought</text>
+      <text x="350" y="57" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#7a5000">"I need the current price"</text>
+      <rect x="480" y="107" width="130" height="46" rx="8" fill="#eef3ff" stroke="#2255aa" stroke-width="1.8"></rect>
+      <text x="545" y="129" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a3a5c" font-weight="700">Action</text>
+      <text x="545" y="144" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#1a3a5c">search("AAPL price")</text>
+      <rect x="290" y="194" width="120" height="46" rx="8" fill="#edfaf3" stroke="#2a7a4b" stroke-width="1.8"></rect>
+      <text x="350" y="216" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a5c38" font-weight="700">Observation</text>
+      <text x="350" y="231" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#1a5c38">"$231.40"</text>
+      <path d="M 400 55 A 105 105 0 0 1 540 115" fill="none" stroke="#888" stroke-width="1.8" marker-end="url(#a2)"></path>
+      <path d="M 545 155 A 105 105 0 0 1 395 205" fill="none" stroke="#888" stroke-width="1.8" marker-end="url(#a2)"></path>
+      <path d="M 300 205 A 105 105 0 0 1 300 60" fill="none" stroke="#888" stroke-width="1.8" marker-end="url(#a2)" stroke-dasharray="5,3"></path>
+      <text x="180" y="130" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#666">repeat until</text>
+      <text x="180" y="145" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#666">enough info</text>
+      <rect x="30" y="105" width="130" height="50" rx="8" fill="#1a3a5c"></rect>
+      <text x="95" y="126" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#fff" font-weight="700">Final Answer</text>
+      <text x="95" y="142" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#cce">once loop ends</text>
+    </svg>
+    <div class="diagram-caption">FIG 2 — The ReAct loop: Thought decides what's needed, Action calls a real tool, Observation feeds the tool's actual result back in — grounding each subsequent Thought in reality rather than the model's possibly-outdated internal knowledge.</div>
+  </div>
+  <div class="promptbox">
+    <span class="out">Thought:</span> I need to find who directed the highest-grossing film of 2023.
+    <span class="act">Action:</span> search("highest grossing film 2023")
+    <span class="user">Observation:</span> "Barbie" grossed $1.44B, the highest of 2023.
+    <span class="out">Thought:</span> Now I need the director of Barbie.
+    <span class="act">Action:</span> search("Barbie 2023 director")
+    <span class="user">Observation:</span> Directed by Greta Gerwig.
+    <span class="out">Thought:</span> I have enough information to answer.
+    <span class="out">Final Answer:</span> Greta Gerwig.
+  </div>
+  <div class="callout callout-blue">
+    <strong>Why interleaving beats "reason first, then act once":</strong> pure CoT reasoning can only use knowledge baked into the model's weights at training time — it hallucinates confidently when that knowledge is stale, missing, or wrong. ReAct grounds each reasoning step in a fresh 
+    <em>Observation</em> from the real world, and lets later Thoughts correct course based on what Actions actually returned — the loop, not a single lookup, is what makes it robust to a wrong first guess.
+  </div>
+  <div class="callout">
+    <strong>This is the mechanism behind agentic LLM systems.</strong> "Tool calling" and "function calling" (Module 2 §04's structured-generation counterpart) are the structured-output plumbing that makes the Action step reliable and parseable — ReAct is the reasoning pattern that decides 
+    <em>when</em> and 
+    <em>what</em> to call.
+  </div>
+</section>
+<section class="section" id="s5">
+  <div class="section-eyebrow">Section 05</div>
+  <h2>Reflection-Based Reasoning</h2>
+  <p>Every method so far generates an answer and stops. 
+    <strong>Reflection</strong> (notably Reflexion, Shinn et al., 2023) adds a loop on top of an attempt: after acting (e.g. running code that fails a test, or producing an answer that's checked and found wrong), the model generates a 
+    <em>verbal self-reflection</em> — a natural-language critique of what went wrong — and stores it in memory to inform the next attempt.
+  </p>
+  <div class="math-box">
+    <span class="comment">// Reflexion loop, one task episode</span>
+attempt₁ = 
+    <span class="eq">solve(task)</span>
+result₁  = 
+    <span class="eq">evaluate(attempt₁)</span>              
+    <span class="comment">// e.g. unit tests pass/fail</span>
+    <span class="var">if</span> result₁ == FAIL:
+    reflection = 
+    <span class="eq">reflect("why did attempt₁ fail?", result₁)</span>
+    memory.append(reflection)                
+    <span class="comment">// episodic memory — carried into the NEXT attempt</span>
+    attempt₂ = 
+    <span class="eq">solve(task, memory)</span>          
+    <span class="comment">// same task, informed by its own past mistake</span>
+  </div>
+  <table>
+    <tbody>
+      <tr>
+        <th>Ingredient</th>
+        <th>Role</th>
+      </tr>
+      <tr>
+        <td>
+          <strong>Actor</strong>
+        </td>
+        <td>Generates the attempt (the LLM doing the task)</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Evaluator</strong>
+        </td>
+        <td>Scores the attempt — can be external and exact (unit tests, a verifier) or another LLM call</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Self-reflection generator</strong>
+        </td>
+        <td>Given a failed attempt + its evaluation, writes a natural-language diagnosis, not just a score</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Episodic memory</strong>
+        </td>
+        <td>Accumulates reflections across attempts on the same task — this is what lets performance improve without any weight update</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-purple">
+    <strong>Reflection vs. self-consistency:</strong> self-consistency (§04 of Module 2's Part 1) runs K independent attempts and votes — the attempts never learn from each other. Reflection runs attempts 
+    <em>sequentially</em>, and each one is explicitly informed by a natural-language critique of the previous failure. It trades parallelism for a much richer error signal.
+  </div>
+</section>
+<section class="section" id="s6">
+  <div class="section-eyebrow">Section 06</div>
+  <h2>Self-Critique &amp; Verification</h2>
+  <p>A narrower, single-pass version of reflection: 
+    <strong>generate → critique → revise</strong>. The model produces a draft answer, then — in a separate pass, often with a different or more targeted prompt — is asked to find flaws in its own draft, then produces a revised answer incorporating the critique.
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 700 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;display:block;margin:0 auto">
+      <defs>
+        <marker id="a3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#555"></polygon>
+        </marker>
+      </defs>
+      <rect x="20" y="55" width="150" height="50" rx="8" fill="#1a3a5c"></rect>
+      <text x="95" y="76" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">Generate draft</text>
+      <text x="95" y="92" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#cce">pass 1</text>
+      <line x1="170" y1="80" x2="215" y2="80" stroke="#555" stroke-width="2" marker-end="url(#a3)"></line>
+      <rect x="220" y="55" width="150" height="50" rx="8" fill="#e8a020"></rect>
+      <text x="295" y="76" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">Critique draft</text>
+      <text x="295" y="92" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#fff8ee">"find every flaw" · pass 2</text>
+      <line x1="370" y1="80" x2="415" y2="80" stroke="#555" stroke-width="2" marker-end="url(#a3)"></line>
+      <rect x="420" y="55" width="150" height="50" rx="8" fill="#2a7a4b"></rect>
+      <text x="495" y="76" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">Revise</text>
+      <text x="495" y="92" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#c8ead6">draft + critique · pass 3</text>
+      <line x1="570" y1="80" x2="615" y2="80" stroke="#555" stroke-width="2" marker-end="url(#a3)"></line>
+      <text x="655" y="76" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700">Final</text>
+      <text x="655" y="92" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#888">answer</text>
+    </svg>
+    <div class="diagram-caption">FIG 3 — Self-critique as a fixed three-pass pipeline: generate, critique with a dedicated "find flaws" prompt, revise incorporating the critique. Can be repeated for multiple rounds, or stopped once the critique pass finds nothing.</div>
+  </div>
+  <div class="callout callout-red">
+    <strong>An honest limitation, worth knowing for exams:</strong> a model critiquing its own output shares the same blind spots that produced the error in the first place — if it didn't know something was wrong when generating, it may not recognize it as wrong when asked to critique either. Self-critique reliably catches surface issues (formatting, an obviously missed constraint) but is a weaker guarantee against errors rooted in genuine knowledge gaps. External verifiers (unit tests, a retrieval check, a separate specialized model) catch a different, often more reliable, class of error.
+  </div>
+  <table>
+    <tbody>
+      <tr>
+        <th>Verification source</th>
+        <th>Catches</th>
+        <th>Misses</th>
+      </tr>
+      <tr>
+        <td>Self-critique (same model)</td>
+        <td>Formatting slips, obviously unmet instructions, internal inconsistency</td>
+        <td>Errors from genuine knowledge gaps shared by generator and critic</td>
+      </tr>
+      <tr>
+        <td>External verifier (tests, rules, retrieval)</td>
+        <td>Objective, checkable failure modes</td>
+        <td>Anything outside what the verifier was built to check</td>
+      </tr>
+      <tr>
+        <td>Separate, stronger model as critic</td>
+        <td>Some errors the weaker generator can't see in itself</td>
+        <td>Cost of a second model call; still not a guarantee</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+<section class="section" id="s7">
+  <div class="section-eyebrow">Section 07</div>
+  <h2>Choosing a Method</h2>
+  <table>
+    <tbody>
+      <tr>
+        <th>Method</th>
+        <th>Adds</th>
+        <th>Cost</th>
+        <th>Best for</th>
+      </tr>
+      <tr>
+        <td>Chain-of-thought</td>
+        <td>Explicit intermediate steps</td>
+        <td>1× call, longer output</td>
+        <td>Any multi-step reasoning, as a baseline</td>
+      </tr>
+      <tr>
+        <td>Self-consistency</td>
+        <td>K parallel votes</td>
+        <td>K× calls</td>
+        <td>Reducing variance on well-posed problems with a clear final answer</td>
+      </tr>
+      <tr>
+        <td>Tree-of-Thoughts</td>
+        <td>Search + pruning over steps</td>
+        <td>Many calls (generate + evaluate per node)</td>
+        <td>Problems with real branching decisions and dead ends (puzzles, planning)</td>
+      </tr>
+      <tr>
+        <td>Graph-of-Thoughts</td>
+        <td>Merge/aggregate across branches</td>
+        <td>More than ToT</td>
+        <td>Decompose-and-recombine problems</td>
+      </tr>
+      <tr>
+        <td>PAL / PoT</td>
+        <td>Code execution instead of mental math</td>
+        <td>1× call + interpreter</td>
+        <td>Arithmetic, counting, precise symbolic tasks</td>
+      </tr>
+      <tr>
+        <td>ReAct</td>
+        <td>Real-world tool grounding</td>
+        <td>Many calls (one per Thought/Action/Observation cycle)</td>
+        <td>Tasks needing current/external information, multi-step tool use</td>
+      </tr>
+      <tr>
+        <td>Reflection</td>
+        <td>Sequential learning from failure within one episode</td>
+        <td>Multiple sequential attempts</td>
+        <td>Tasks with a clear pass/fail signal (code, structured tasks)</td>
+      </tr>
+      <tr>
+        <td>Self-critique</td>
+        <td>A dedicated find-flaws pass</td>
+        <td>2–3× calls</td>
+        <td>Improving quality/completeness of open-ended output</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-green">
+    <strong>These compose.</strong> A production agent commonly combines several: ReAct for tool use, wrapped in a reflection loop when a tool call fails, using PAL for any arithmetic sub-step, occasionally sampling several ToT branches at a genuinely ambiguous decision point. None of these are mutually exclusive.
+  </div>
+</section>
+<section class="section" id="s8">
+  <div class="section-eyebrow">Section 08</div>
+  <h2>Key Takeaways &amp; Exam Prep</h2>
+  <div class="steps">
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>ToT turns reasoning into search</h4>
+      <p>Generate, evaluate, and prune candidate thoughts instead of committing to one chain.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>GoT adds merge and refine</h4>
+      <p>The one operation a tree structurally cannot do: combine two branches into one.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>PAL/PoT delegate arithmetic to code</h4>
+      <p>The LLM's job shrinks to translating logic into code; a real interpreter computes.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>ReAct grounds reasoning in observations</h4>
+      <p>Thought → Action → Observation, looped, corrects course using real-world feedback.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Reflection learns within an episode</h4>
+      <p>A verbal self-critique stored in memory informs the next attempt — no weight update.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Self-critique shares the generator's blind spots</h4>
+      <p>Reliable for surface errors; weaker on errors rooted in genuine knowledge gaps.</p>
+    </div>
+  </div>
+  <h3>Common exam questions</h3>
+  <table>
+    <tbody>
+      <tr>
+        <th>Question</th>
+        <th>Short answer</th>
+      </tr>
+      <tr>
+        <td>What can Graph-of-Thoughts do that Tree-of-Thoughts cannot?</td>
+        <td>Aggregate/merge two separate branches into one combined thought — a tree only supports branching and pruning, not merging</td>
+      </tr>
+      <tr>
+        <td>Why does PAL improve accuracy on math word problems specifically?</td>
+        <td>It moves the actual arithmetic out of token-by-token LLM generation and into a real code interpreter, which computes exactly</td>
+      </tr>
+      <tr>
+        <td>What does the "Observation" step in ReAct provide that pure chain-of-thought lacks?</td>
+        <td>Real, current, external information from an actual tool call — grounding reasoning in reality rather than only the model's training-time knowledge</td>
+      </tr>
+      <tr>
+        <td>What's the key structural difference between reflection and self-consistency?</td>
+        <td>Self-consistency runs independent parallel attempts and votes; reflection runs sequential attempts where each is informed by a critique of the previous failure</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout" style="margin-top:2rem">
+    <strong>References:</strong>
+    <br>
+    Yao et al. (2023) — Tree of Thoughts: Deliberate Problem Solving with Large Language Models.
+    <br>
+    Besta et al. (2023) — Graph of Thoughts: Solving Elaborate Problems with Large Language Models.
+    <br>
+    Gao et al. (2022) — PAL: Program-aided Language Models.
+    <br>
+    Chen et al. (2022) — Program of Thoughts Prompting.
+    <br>
+    Yao et al. (2022) — ReAct: Synergizing Reasoning and Acting in Language Models.
+    <br>
+    Shinn et al. (2023) — Reflexion: Language Agents with Verbal Reinforcement Learning.
+    <br>
+    Madaan et al. (2023) — Self-Refine: Iterative Refinement with Self-Feedback.
+  </div>
+</section>
+<footer style="text-align:center;padding:2rem;font-family:var(--mono);font-size:0.75rem;color:#aaa;border-top:1px solid var(--rule)">Module 2 · Part 2 — Advanced Reasoning · Companion to Part 1 (Prompt Engineering) and Part 3 (Test-Time Scaling)</footer>

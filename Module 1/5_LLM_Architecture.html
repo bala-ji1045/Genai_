@@ -1,0 +1,1531 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Large Language Models &amp; LLM Architecture — Study Guide</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Fraunces:ital,wght@0,300;0,700;1,300&family=Inter:wght@400;500;600&display=swap');
+  :root {
+    --ink:       #0f1117;
+    --paper:     #f7f6f2;
+    --mid:       #e8e5dd;
+    --rule:      #c9c4b8;
+    --accent:    #1a3a5c;
+    --highlight: #e8a020;
+    --green:     #2a7a4b;
+    --red:       #b83232;
+    --blue:      #2255aa;
+    --purple:    #6b3fa0;
+    --teal:      #0d7a7a;
+    --mono:      'IBM Plex Mono', monospace;
+    --display:   'Fraunces', Georgia, serif;
+    --body:      'Inter', system-ui, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--body);
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.7;
+    font-size: 16px;
+  }
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(160deg, #0f1117 0%, #1a3a5c 100%);
+    color: #fff;
+    padding: 4rem 2rem 3rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(232,160,32,0.10), transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(42,122,75,0.12), transparent 40%);
+  }
+  .hero-label {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--highlight);
+    margin-bottom: 1rem;
+    position: relative;
+  }
+  .hero h1 {
+    font-family: var(--display);
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+  .hero p {
+    font-size: 1.1rem;
+    opacity: 0.82;
+    max-width: 640px;
+    margin: 0 auto;
+    position: relative;
+  }
+  /* ── NAV ── */
+  .toc {
+    background: var(--ink);
+    color: #fff;
+    padding: 1.2rem 2rem;
+    display: flex;
+    gap: 1.3rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .toc a {
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    transition: color 0.2s;
+  }
+  .toc a:hover { color: var(--highlight); }
+  /* ── SECTIONS ── */
+  .section {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .section-eyebrow {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+  .section h2 {
+    font-family: var(--display);
+    font-size: clamp(1.5rem, 3vw, 2.2rem);
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: var(--ink);
+  }
+  .section h3 {
+    font-family: var(--display);
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 2rem 0 0.8rem;
+    color: var(--accent);
+  }
+  .section > h4 {
+    font-family: var(--display);
+    font-size: 1.02rem;
+    font-weight: 700;
+    margin: 1.4rem 0 0.6rem;
+    color: var(--ink);
+  }
+  .section p { margin-bottom: 1rem; color: #333; }
+  /* ── CALLOUT ── */
+  .callout {
+    border-left: 4px solid var(--highlight);
+    background: #fff8ee;
+    padding: 1rem 1.25rem;
+    border-radius: 0 6px 6px 0;
+    margin: 1.5rem 0;
+    font-size: 0.95rem;
+  }
+  .callout strong { color: var(--accent); }
+  .callout-blue  { border-left-color: var(--blue);   background: #eef3ff; }
+  .callout-green { border-left-color: var(--green);  background: #edfaf3; }
+  .callout-red   { border-left-color: var(--red);    background: #fff0f0; }
+  .callout-purple{ border-left-color: var(--purple); background: #f5f0ff; }
+  /* ── MATH BOX ── */
+  .math-box {
+    background: var(--ink);
+    color: #e8e8e8;
+    font-family: var(--mono);
+    font-size: 0.86rem;
+    line-height: 1.9;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .math-box .comment { color: #6a9f6a; }
+  .math-box .var     { color: #f0b060; }
+  .math-box .eq      { color: #7ab8f5; }
+  .math-box .hi      { color: #ff9090; }
+  /* ── TABLE ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 0.88rem;
+  }
+  th {
+    background: var(--accent);
+    color: #fff;
+    padding: 0.6rem 0.9rem;
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 0.76rem;
+    letter-spacing: 0.04em;
+  }
+  td {
+    padding: 0.6rem 0.9rem;
+    border-bottom: 1px solid var(--mid);
+    vertical-align: top;
+  }
+  tr:nth-child(even) td { background: #fafaf7; }
+  .tag {
+    display: inline-block;
+    background: var(--mid);
+    padding: 0.12rem 0.45rem;
+    border-radius: 3px;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+  }
+  /* ── DIAGRAM ── */
+  .diagram-wrap {
+    background: #fff;
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    overflow-x: auto;
+  }
+  .diagram-caption {
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    color: #777;
+    margin-top: 0.75rem;
+    letter-spacing: 0.04em;
+    line-height: 1.6;
+  }
+  /* ── STEP CARDS ── */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  .step-card {
+    background: #fff;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 1.1rem;
+  }
+  .step-num {
+    font-family: var(--mono);
+    font-size: 1.9rem;
+    font-weight: 600;
+    color: var(--mid);
+    line-height: 1;
+    margin-bottom: 0.4rem;
+  }
+  .step-card h4 {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 0.35rem;
+  }
+  .step-card p { font-size: 0.82rem; margin: 0; color: #444; }
+  /* ── COMPARE GRID ── */
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  .compare-card {
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+  }
+  .compare-card-header {
+    padding: 0.6rem 1rem;
+    font-family: var(--mono);
+    font-size: 0.76rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .compare-card-body { padding: 1rem; font-size: 0.86rem; }
+  .compare-card-body ul { list-style: none; }
+  .compare-card-body li { margin-bottom: 0.4rem; padding-left: 1.1rem; position: relative; }
+  .compare-card-body li::before { content: '→'; position: absolute; left: 0; color: var(--highlight); }
+  @media (max-width: 620px) {
+    .compare-grid { grid-template-columns: 1fr; }
+    .steps { grid-template-columns: 1fr 1fr; }
+    .section { padding: 2.5rem 1.2rem; }
+  }</style>
+<!-- ══════════ HERO ══════════ -->
+<div class="hero">
+  <div class="hero-label">Module 1 · Part 7 · Part 4 — Study Guide</div>
+  <h1>Large Language Models
+    <br>&amp; LLM Architecture
+  </h1>
+  <p>From next-token prediction to tokenization, embeddings, positional schemes, decoder-only architectures, foundation models, and the open- vs closed-source landscape.</p>
+</div>
+<!-- ══════════ NAV ══════════ -->
+<nav class="toc">
+  <a href="#s1">01 Neural LMs</a>
+  <a href="#s2">02 Tokenization</a>
+  <a href="#s3">03 Embeddings</a>
+  <a href="#s4">04 Positional Schemes</a>
+  <a href="#s5">05 Decoder-Only</a>
+  <a href="#s6">06 Architecture Families</a>
+  <a href="#s7">07 Foundation Models</a>
+  <a href="#s8">08 Open vs Closed</a>
+  <a href="#s9">09 Takeaways</a>
+</nav>
+<!-- ═══════════════════════════════════════════════════
+     SECTION 1 — NEURAL LANGUAGE MODELS
+═══════════════════════════════════════════════════ -->
+<section class="section" id="s1">
+  <div class="section-eyebrow">Section 01</div>
+  <h2>What Makes a Language Model "Large"?</h2>
+  <p>A 
+    <strong>language model</strong> is nothing more than a probability distribution over the next token, conditioned on everything that came before it: 
+    <code>P(token_t | token_1, ..., token_{t-1})</code>. Every LLM — GPT-4, Claude, Llama — is this one idea, scaled up by orders of magnitude in parameters, data, and compute.
+  </p>
+  <h3>The lineage: three generations of language models</h3>
+  <table>
+    <tbody>
+      <tr>
+        <th>Generation</th>
+        <th>How it estimates P(next token | context)</th>
+        <th>Context limit</th>
+        <th>Weakness</th>
+      </tr>
+      <tr>
+        <td>
+          <strong>N-gram (1990s)</strong>
+        </td>
+        <td>Count co-occurrence frequencies in a corpus, back off to smaller n on unseen sequences</td>
+        <td>2–5 tokens (fixed window)</td>
+        <td>Sparse — most n-grams never appear in training data</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>RNN/LSTM LM (2010s)</strong>
+        </td>
+        <td>Compress all prior tokens into one hidden state, updated sequentially</td>
+        <td>Unbounded in theory, ~dozens of tokens in practice</td>
+        <td>Long-range signal decays; sequential, can't parallelize training</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Transformer LM (2017–)</strong>
+        </td>
+        <td>Self-attention lets every token directly weigh every prior token</td>
+        <td>Thousands to millions of tokens</td>
+        <td>O(n²) memory; needs massive data + compute to reach fluency</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    <strong>"Large" refers to three things scaling together:</strong> parameter count (millions → hundreds of billions), training data (gigabytes → many trillions of tokens), and compute (GPU-hours). Kaplan et al. (2020) and Hoffmann et al. (2022, "Chinchilla") showed these three must scale 
+    <em>together</em> — more parameters alone, without proportionally more data, wastes compute. See §07.
+  </div>
+  <h3>The training objective: causal language modeling</h3>
+  <div class="math-box">
+    <span class="comment">// Autoregressive next-token prediction — the only objective pretraining needs</span>
+    <span class="var">Loss</span> = 
+    <span class="eq">- Σ_t log P(token_t | token_1, ..., token_{t-1}; θ)</span>
+    <span class="comment">// Concretely, for the sentence "the cat sat down":</span>
+P(the)                          
+    <span class="comment">// no context — just the prior over first tokens</span>
+P(cat  | the)
+P(sat  | the, cat)
+P(down | the, cat, sat)
+    <span class="comment">// Every token in every document becomes a free training example.</span>
+    <span class="comment">// No human labels required — this is why pretraining scales to trillions of tokens.</span>
+  </div>
+  <p>This objective is 
+    <strong>self-supervised</strong>: the "label" for predicting token 5 is just token 5 itself, already present in the raw text. That's the entire trick that makes it possible to pretrain on the open internet without paying for annotation.
+  </p>
+  <h3>Measuring a language model: perplexity</h3>
+  <div class="math-box">
+    <span class="comment">// Perplexity = how "surprised" the model is by held-out text, on average</span>
+    <span class="var">PPL</span> = 
+    <span class="eq">exp( -1/N · Σ log P(token_t | context) )</span>
+    <span class="comment">// Intuition: PPL = 1   → model predicts the correct next token with certainty</span>
+    <span class="comment">//            PPL = |V| → model is as clueless as uniform random guessing over the vocabulary</span>
+    <span class="comment">// GPT-2 (2019): ~35 PPL on WebText.  Modern frontier LLMs: single digits on curated benchmarks.</span>
+  </div>
+  <div class="callout callout-blue">
+    <strong>Why this matters for everything downstream:</strong> chat, coding, reasoning, tool-use — every LLM capability you interact with is built on top of this single next-token objective, plus post-training (instruction tuning, RLHF, and the fine-tuning techniques covered in Module 6). The base capability is entirely a byproduct of getting extremely good at predicting the next token across a vast and varied corpus.
+  </div>
+</section>
+<!-- ═══════════════════════════════════════════════════
+     SECTION 2 — TOKENIZATION
+═══════════════════════════════════════════════════ -->
+<section class="section" id="s2">
+  <div class="section-eyebrow">Section 02</div>
+  <h2>Tokenization — Turning Text into Numbers</h2>
+  <p>Neural networks only consume numbers. Before any embedding or attention happens, raw text must be chopped into discrete units — 
+    <strong>tokens</strong> — and each token mapped to an integer ID. The choice of tokenization scheme has real, visible consequences on model behavior.
+  </p>
+  <h3>Why not just use words, or just characters?</h3>
+  <div class="compare-grid">
+    <div class="compare-card">
+      <div class="compare-card-header" style="background:#b83232;color:#fff">Whole-word tokenization</div>
+      <div class="compare-card-body">
+        <ul>
+          <li>Vocabulary explodes: every inflection ("run", "running", "runner") is a separate ID</li>
+          <li>Any word not seen in training → 
+            <code>&lt;UNK&gt;</code>, information lost
+          </li>
+          <li>Cannot generalize to typos, new words, or other languages</li>
+        </ul>
+      </div>
+    </div>
+    <div class="compare-card">
+      <div class="compare-card-header" style="background:#b83232;color:#fff">Character-level tokenization</div>
+      <div class="compare-card-body">
+        <ul>
+          <li>Tiny vocabulary (~100 symbols), no 
+            <code>&lt;UNK&gt;</code> problem
+          </li>
+          <li>Sequences become 4–5× longer for the same text</li>
+          <li>Self-attention is O(n²) — 5× the tokens costs ~25× the compute</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="callout callout-green">
+    <strong>The middle ground: subword tokenization.</strong> Keep common whole words as single tokens ("the", "cat") but break rare/long words into reusable pieces ("token" + "ization"). This gives a bounded vocabulary (30k–250k tokens), no 
+    <code>&lt;UNK&gt;</code>s, and reasonable sequence lengths. Every modern LLM uses some form of this.
+  </div>
+  <h3>Byte-Pair Encoding (BPE) — worked example</h3>
+  <p>BPE builds its vocabulary bottom-up: start from individual characters, and repeatedly merge the 
+    <em>most frequent adjacent pair</em> into a new token.
+  </p>
+  <div class="math-box">
+    <span class="comment">// Toy corpus (word, frequency): "low"×5, "lower"×2, "newest"×6, "widest"×3</span>
+    <span class="comment">// Start: every word split into characters + end-of-word marker "_"</span>
+l o w _        × 5
+l o w e r _    × 2
+n e w e s t _  × 6
+w i d e s t _  × 3
+    <span class="comment">// Merge 1: most frequent adjacent pair is (e, s) → appears in "newest"×6 + "widest"×3 = 9 times</span>
+    <span class="hi">es</span> becomes a new token → n e w 
+    <span class="hi">es</span> t _ | w i d 
+    <span class="hi">es</span> t _
+    <span class="comment">// Merge 2: (es, t) now appears 9 times → merge to "est"</span>
+n e w 
+    <span class="hi">est</span> _ | w i d 
+    <span class="hi">est</span> _
+    <span class="comment">// Merge 3: (l, o) appears in "low"×5 + "lower"×2 = 7 times → merge to "lo"</span>
+    <span class="hi">lo</span> w _ | 
+    <span class="hi">lo</span> w e r _
+    <span class="comment">// Continue for a fixed number of merges (e.g. 30,000) → final vocabulary</span>
+  </div>
+  <table>
+    <tbody>
+      <tr>
+        <th>Scheme</th>
+        <th>Used by</th>
+        <th>How it picks merges</th>
+      </tr>
+      <tr>
+        <td>
+          <strong>BPE</strong>
+        </td>
+        <td>GPT-2/3/4, Llama (byte-level variant)</td>
+        <td>Greedy: merge the most frequent adjacent pair</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>WordPiece</strong>
+        </td>
+        <td>BERT</td>
+        <td>Merge the pair that most increases training-data likelihood, not just raw frequency</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>SentencePiece (Unigram)</strong>
+        </td>
+        <td>T5, Gemma, Llama (as the training framework)</td>
+        <td>Start from a large candidate vocabulary, prune tokens that least hurt overall likelihood</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-red">
+    <strong>Known tokenizer artifacts (classic interview questions):</strong> LLMs are famously bad at counting letters in a word ("how many r's in strawberry?") because 
+    <code>strawberry</code> is often a single token or split as 
+    <code>straw</code>+
+    <code>berry</code> — the model never sees individual characters, only opaque token IDs. Similarly, arithmetic on large numbers is hard because digit grouping into tokens is inconsistent (
+    <code>"1234"</code> might tokenize differently than 
+    <code>"11234"</code>, breaking place-value patterns the model would otherwise learn).
+  </div>
+  <h3>Vocabulary size is a real design trade-off</h3>
+  <table>
+    <tbody>
+      <tr>
+        <th>Vocabulary size</th>
+        <th>Sequence length for given text</th>
+        <th>Embedding table size</th>
+        <th>Example</th>
+      </tr>
+      <tr>
+        <td>Small (~32k)</td>
+        <td>Longer sequences</td>
+        <td>Smaller (fewer rows)</td>
+        <td>Llama 2 (32k)</td>
+      </tr>
+      <tr>
+        <td>Large (~250k)</td>
+        <td>Shorter sequences, better multilingual coverage</td>
+        <td>Larger — can be 10%+ of total params in small models</td>
+        <td>Gemma (256k), GPT-4 (~200k)</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+<!-- ═══════════════════════════════════════════════════
+     SECTION 3 — EMBEDDINGS
+═══════════════════════════════════════════════════ -->
+<section class="section" id="s3">
+  <div class="section-eyebrow">Section 03</div>
+  <h2>Embeddings — From Token IDs to Meaning</h2>
+  <p>A token ID (e.g. 
+    <code>4521</code>) carries no meaning by itself — it's an arbitrary index. The 
+    <strong>embedding layer</strong> is a lookup table that converts each ID into a dense vector of learned numbers, which 
+    <em>does</em> carry meaning, shaped entirely by training.
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 780 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:780px;display:block;margin:0 auto">
+      <defs>
+        <marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#555"></polygon>
+        </marker>
+      </defs>
+      <text x="390" y="24" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#333" font-weight="600" letter-spacing="1.5">TEXT → TOKENS → IDs → EMBEDDINGS</text>
+      <rect x="20" y="50" width="150" height="40" rx="6" fill="#f5f0ff" stroke="#6b3fa0" stroke-width="1.5"></rect>
+      <text x="95" y="75" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#4a2a70">"the cat sat"</text>
+      <line x1="170" y1="70" x2="205" y2="70" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="210" y="50" width="150" height="40" rx="6" fill="#fff3cc" stroke="#e8a020" stroke-width="1.5"></rect>
+      <text x="285" y="75" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#7a5000">[the][cat][sat]</text>
+      <line x1="360" y1="70" x2="395" y2="70" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="400" y="50" width="120" height="40" rx="6" fill="#eef3ff" stroke="#2255aa" stroke-width="1.5"></rect>
+      <text x="460" y="75" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a3a5c">[71, 4521, 892]</text>
+      <line x1="520" y1="70" x2="555" y2="70" stroke="#555" stroke-width="2" marker-end="url(#a1)"></line>
+      <rect x="560" y="35" width="200" height="70" rx="6" fill="#edfaf3" stroke="#2a7a4b" stroke-width="1.5"></rect>
+      <text x="660" y="55" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a5c38" font-weight="700">Embedding matrix E</text>
+      <text x="660" y="70" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a5c38">|V| × d_model</text>
+      <text x="660" y="85" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a5c38">row 4521 = "cat"'s vector</text>
+      <text x="660" y="98" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#5a9c7a">learned during training</text>
+      <text x="390" y="145" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="700" letter-spacing="1">EMBEDDING SPACE GEOMETRY</text>
+      <line x1="120" y1="230" x2="120" y2="165" stroke="#888" stroke-width="1"></line>
+      <line x1="120" y1="230" x2="320" y2="230" stroke="#888" stroke-width="1"></line>
+      <circle cx="180" cy="200" r="4" fill="#2255aa"></circle>
+      <text x="188" y="198" font-family="IBM Plex Mono,monospace" font-size="9" fill="#2255aa">king</text>
+      <circle cx="260" cy="180" r="4" fill="#2255aa"></circle>
+      <text x="268" y="178" font-family="IBM Plex Mono,monospace" font-size="9" fill="#2255aa">queen</text>
+      <circle cx="160" cy="215" r="4" fill="#b83232"></circle>
+      <text x="132" y="228" font-family="IBM Plex Mono,monospace" font-size="9" fill="#b83232">man</text>
+      <circle cx="240" cy="195" r="4" fill="#b83232"></circle>
+      <text x="248" y="193" font-family="IBM Plex Mono,monospace" font-size="9" fill="#b83232">woman</text>
+      <line x1="180" y1="200" x2="160" y2="215" stroke="#999" stroke-width="1.2" stroke-dasharray="3,2"></line>
+      <line x1="260" y1="180" x2="240" y2="195" stroke="#999" stroke-width="1.2" stroke-dasharray="3,2"></line>
+      <text x="480" y="185" font-family="IBM Plex Mono,monospace" font-size="10" fill="#444">king − man + woman ≈ queen</text>
+      <text x="480" y="205" font-family="Inter,sans-serif" font-size="10" fill="#666">Directions in embedding space</text>
+      <text x="480" y="220" font-family="Inter,sans-serif" font-size="10" fill="#666">encode relationships, learned</text>
+      <text x="480" y="235" font-family="Inter,sans-serif" font-size="10" fill="#666">purely from co-occurrence patterns.</text>
+    </svg>
+    <div class="diagram-caption">FIG 1 — Left: the full pipeline from raw text to a lookup in the embedding matrix. Right: the classic vector-arithmetic property of learned embedding spaces (illustrative, projected to 2D — real embeddings live in hundreds of dimensions).</div>
+  </div>
+  <h3>Key properties of the embedding layer</h3>
+  <div class="steps">
+    <div class="step-card">
+      <div class="step-num" style="color:#2255aa">1</div>
+      <h4>It's just a matrix</h4>
+      <p>Shape 
+        <code>|V| × d_model</code>. Looking up token ID 4521 is literally reading row 4521. No computation, pure indexing.
+      </p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#2255aa">2</div>
+      <h4>Learned, not designed</h4>
+      <p>Initialized randomly, updated by backprop like every other weight. Meaning emerges purely from the next-token prediction objective.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#2255aa">3</div>
+      <h4>Often tied to the output layer</h4>
+      <p>Many LLMs reuse the same matrix (transposed) as the final vocabulary-projection layer — "weight tying" — saving a large chunk of parameters.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#2255aa">4</div>
+      <h4>Dominant parameter cost at small scale</h4>
+      <p>For a 256k-vocabulary, 2048-dim model, the embedding matrix alone is ~500M parameters — significant for a small LLM.</p>
+    </div>
+  </div>
+  <div class="callout">
+    <strong>What the embedding layer does NOT do:</strong> it has no notion of word 
+    <em>order</em> — "cat sat" and "sat cat" produce the same two embedding vectors, just possibly in a different sequence. Order is injected separately — that's the whole subject of the next section.
+  </div>
+</section>
+<!-- ═══════════════════════════════════════════════════
+     SECTION 4 — POSITIONAL SCHEMES
+═══════════════════════════════════════════════════ -->
+<section class="section" id="s4">
+  <div class="section-eyebrow">Section 04</div>
+  <h2>Positional Encoding, Revisited — and How Modern LLMs Actually Do It</h2>
+  <p>Module 4 introduced sinusoidal positional encoding, added once to the input embeddings. Modern production LLMs mostly use something else. This section is the deeper dive: what changed, and why.</p>
+  <table>
+    <tbody>
+      <tr>
+        <th>Scheme</th>
+        <th>How position enters the model</th>
+        <th>Used by</th>
+        <th>Extrapolates past training length?</th>
+      </tr>
+      <tr>
+        <td>
+          <strong>Sinusoidal (absolute)</strong>
+        </td>
+        <td>Fixed sin/cos pattern added to input embeddings once, at the bottom</td>
+        <td>Original Transformer (2017)</td>
+        <td>Poorly</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Learned absolute</strong>
+        </td>
+        <td>A trainable embedding table indexed by position, added to input</td>
+        <td>BERT, GPT-2</td>
+        <td>No — undefined beyond max trained length</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>RoPE (Rotary)</strong>
+        </td>
+        <td>Rotates Q and K vectors by an angle proportional to position, inside every attention layer</td>
+        <td>Llama, Mistral, Gemma, GPT-NeoX, most modern open LLMs</td>
+        <td>Reasonably, with extensions (e.g. NTK-aware scaling)</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>ALiBi</strong>
+        </td>
+        <td>No positional vectors at all — instead, subtracts a distance-proportional penalty directly from attention scores</td>
+        <td>BLOOM, MPT</td>
+        <td>Very well — trains short, tests long</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3>Rotary Position Embeddings (RoPE) — the modern default</h3>
+  <h4>What is RoPE?</h4>
+  <p>RoPE is a way of telling the attention mechanism "how far apart are these two tokens" without ever adding a position vector to the embedding. Every other scheme on the table above works by 
+    <em>injecting</em> a position signal — adding a sinusoid or a learned vector onto the token embedding before it enters the network. RoPE does something different: it leaves the embedding alone and instead 
+    <strong>rotates</strong> the query and key vectors, inside the attention layer, by an angle that grows with each token's position. The content of the vector doesn't change (rotation preserves length), only its direction does — and that rotation angle is where positional information now lives.
+  </p>
+  <h4>How it works</h4>
+  <p>Pick a fixed angle-per-step, 
+    <code>θ</code> (e.g. 10° per position, as in FIG 2 below). Before computing attention, every query vector at position 
+    <code>i</code> gets rotated by 
+    <code>i·θ</code>, and every key vector at position 
+    <code>j</code> gets rotated by 
+    <code>j·θ</code>. The two vectors involved in a single attention score — one query, one key — arrive at the dot product each carrying their own rotation. Because a rotation is 
+    <em>orthogonal</em> (it preserves angles and lengths), the dot product of two rotated vectors depends only on the 
+    <strong>difference</strong> between the two rotation angles, i.e. on 
+    <code>i − j</code>. The absolute positions themselves cancel out. That's the whole mechanism: two absolute rotations combine, at dot-product time, into one relative signal.
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;display:block;margin:0 auto">
+      <text x="360" y="24" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#333" font-weight="600" letter-spacing="1.5">ROPE: ROTATE, DON'T ADD</text>
+      <circle cx="180" cy="150" r="80" fill="none" stroke="#ddd" stroke-width="1"></circle>
+      <line x1="180" y1="150" x2="180" y2="70" stroke="#ccc" stroke-width="1" stroke-dasharray="2,2"></line>
+      <line x1="180" y1="150" x2="260" y2="150" stroke="#ccc" stroke-width="1" stroke-dasharray="2,2"></line>
+      <line x1="180" y1="150" x2="180" y2="80" stroke="#e8a020" stroke-width="2.5" marker-end="url(#a1)"></line>
+      <text x="150" y="75" font-family="IBM Plex Mono,monospace" font-size="9" fill="#7a5000">q at pos 1 (θ=10°)</text>
+      <line x1="180" y1="150" x2="220" y2="90" stroke="#2255aa" stroke-width="2.5" marker-end="url(#a1)"></line>
+      <text x="225" y="88" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a3a5c">q at pos 5 (θ=50°)</text>
+      <line x1="180" y1="150" x2="245" y2="115" stroke="#2a7a4b" stroke-width="2.5" marker-end="url(#a1)"></line>
+      <text x="248" y="115" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a5c38">q at pos 9 (θ=90°)</text>
+      <text x="180" y="255" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#888">same vector, rotated further as position increases</text>
+      <rect x="420" y="70" width="270" height="160" rx="8" fill="#fff8ee" stroke="#e8a020" stroke-width="1.5"></rect>
+      <text x="555" y="95" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#7a5000" font-weight="700">WHY THIS IS ELEGANT</text>
+      <text x="435" y="118" font-family="Inter,sans-serif" font-size="9.5" fill="#555">The dot product q·k after rotation</text>
+      <text x="435" y="134" font-family="Inter,sans-serif" font-size="9.5" fill="#555">depends only on the RELATIVE angle</text>
+      <text x="435" y="150" font-family="Inter,sans-serif" font-size="9.5" fill="#555">(pos_i − pos_j), never on absolute</text>
+      <text x="435" y="166" font-family="Inter,sans-serif" font-size="9.5" fill="#555">position. Attention naturally becomes</text>
+      <text x="435" y="182" font-family="Inter,sans-serif" font-size="9.5" fill="#555">a function of distance between tokens</text>
+      <text x="435" y="198" font-family="Inter,sans-serif" font-size="9.5" fill="#555">— exactly the inductive bias language</text>
+      <text x="435" y="214" font-family="Inter,sans-serif" font-size="9.5" fill="#555">needs, with no extra parameters.</text>
+    </svg>
+    <div class="diagram-caption">FIG 2 — RoPE rotates each query/key vector by an angle proportional to its position. Because rotation is applied to both Q and K before their dot product, the score naturally encodes relative distance.</div>
+  </div>
+  <h4>The formula</h4>
+  <p>In the simplified 2D case (real RoPE splits the full 
+    <code>d_k</code>-dimensional head into pairs of dimensions and applies this same rotation to every pair, each pair with its own θ), the rotation applied to a vector 
+    <code>x = (x₁, x₂)</code> at position 
+    <code>pos</code> is:
+  </p>
+  <div class="math-box">
+    <span class="comment">// R(φ) is a standard 2D rotation matrix, φ = pos·θ</span>
+    <span class="var">RoPE(x, pos)</span> = R(pos·θ)·x = 
+    <span class="eq">(x₁cos(pos·θ) − x₂sin(pos·θ),  x₁sin(pos·θ) + x₂cos(pos·θ))</span>
+    <span class="comment">// applied to q at position i and k at position j, then dotted together:</span>
+    <span class="eq">RoPE(q, i) · RoPE(k, j)</span> = 
+    <span class="hi">f(q, k, i − j)</span>   
+    <span class="comment">// provably depends only on the relative distance i−j, never on i or j alone</span>
+  </div>
+  <h4>Worked example — applying the formula exactly: "the cat sat down"</h4>
+  <p>Take the same toy sentence used in the causal-mask example later in this module — 
+    <code>the cat sat down</code> — tokenized at positions 0, 1, 2, 3. The query at 
+    <strong>"sat"</strong> (position 2) attends back to the keys at 
+    <strong>"cat"</strong> (position 1) and 
+    <strong>"the"</strong> (position 0). Use 
+    <code>θ = 10°</code> per step, and give every token the same toy 2D content vector 
+    <code>x = (1, 0)</code> before rotation, so any difference in the final scores comes purely from position, not content.
+  </p>
+  <p>
+    <strong>Step 1 — rotate each vector using the formula above.</strong> With 
+    <code>x = (1, 0)</code>, the formula 
+    <code>(x₁cos φ − x₂sin φ, x₁sin φ + x₂cos φ)</code> simplifies to 
+    <code>(cos φ, sin φ)</code> since 
+    <code>x₂ = 0</code>:
+  </p>
+  <div class="math-box">
+    <span class="comment">// φ = pos·θ, plugged directly into RoPE(x, pos) = (x₁cosφ − x₂sinφ, x₁sinφ + x₂cosφ)</span>
+    <span class="var">k("the", pos 0)</span>: φ = 0×10° = 0°   → (cos0° − 0·sin0°,  0·cos0° + sin0°) = 
+    <span class="eq">(1.000, 0.000)</span>
+    <span class="var">k("cat", pos 1)</span>: φ = 1×10° = 10°  → (cos10° − 0·sin10°, 0·cos10° + sin10°) = 
+    <span class="eq">(0.985, 0.174)</span>
+    <span class="var">q("sat", pos 2)</span>: φ = 2×10° = 20°  → (cos20° − 0·sin20°, 0·cos20° + sin20°) = 
+    <span class="eq">(0.940, 0.342)</span>
+  </div>
+  <p>
+    <strong>Step 2 — score each pair with the plain dot product</strong> 
+    <code>q·k = q₁k₁ + q₂k₂</code>, using the numbers from Step 1:
+  </p>
+  <div class="math-box">
+    <span class="eq">q("sat")·k("cat")</span> = 0.940×0.985 + 0.342×0.174 ≈ 
+    <span class="hi">0.985</span>
+    <span class="eq">q("sat")·k("the")</span>  = 0.940×1.000 + 0.342×0.000 ≈ 
+    <span class="hi">0.940</span>
+  </div>
+  <p>
+    <strong>Step 3 — check it against the formula's guarantee.</strong> Because every rotated vector is 
+    <code>(cos φ, sin φ)</code>, the dot product 
+    <code>q₁k₁ + q₂k₂</code> is exactly the trig identity 
+    <code>cos(A)cos(B) + sin(A)sin(B) = cos(A − B)</code>, where 
+    <code>A</code> is the query's angle and 
+    <code>B</code> is the key's angle:
+  </p>
+  <div class="math-box">
+    <span class="eq">q("sat")·k("cat")</span> = cos(20°)cos(10°) + sin(20°)sin(10°) = 
+    <span class="hi">cos(20°−10°)</span> = cos(10°) ≈ 0.985  
+    <span class="comment">// gap = 1 position</span>
+    <span class="eq">q("sat")·k("the")</span>  = cos(20°)cos(0°) + sin(20°)sin(0°)  = 
+    <span class="hi">cos(20°−0°)</span>  = cos(20°) ≈ 0.940  
+    <span class="comment">// gap = 2 positions</span>
+    <span class="comment">// general rule proven above: q(pos_i)·k(pos_j) = cos((pos_i − pos_j)·θ) — depends only on the gap</span>
+  </div>
+  <p>Step 2 and Step 3 are not two different calculations — they are the 
+    <em>same</em> sum, computed the long way (raw components) and the short way (the identity). Every score you get from Step 1's numbers will match Step 3's 
+    <code>cos(gap·θ)</code> exactly, because Step 1's vectors are, by construction, points on the unit circle at angle 
+    <code>pos·θ</code>. In the "sat"–"the" row, 
+    <code>k("the") = (1, 0)</code> sits at angle 0°, so 
+    <code>sin(0°) = 0</code> silently kills the second term of the dot product — that's why the Step 2 sum reduces to a single multiplication, not a different rule.
+  </p>
+  <p>The practical payoff: it wouldn't matter whether "sat" and "cat" sat at positions (2, 1) or (52, 51) in a much longer document — as long as the 
+    <em>gap</em> stays 1, RoPE contributes the exact same positional score, 
+    <code>cos(10°) ≈ 0.985</code>. And it explains why "sat" gets a higher raw positional score toward its immediate neighbour "cat" (gap 1 → cos 10° ≈ 0.985) than toward the more distant "the" (gap 2 → cos 20° ≈ 0.940): the rotation angle grows with distance, so cosine — which shrinks as its angle grows — gives nearby tokens a mild positional boost before content similarity is even factored in.
+  </p>
+  <div class="callout callout-purple">
+    <strong>Exam favourite:</strong> "Why do most modern open-weight LLMs use RoPE instead of the original sinusoidal PE?" — RoPE bakes 
+    <em>relative</em> position directly into the attention dot product itself (no separate addition step), integrates cleanly with KV-caching for fast inference, and empirically extrapolates to longer sequences better than absolute schemes.
+  </div>
+</section>
+<!-- ═══════════════════════════════════════════════════
+     SECTION 5 — DECODER-ONLY DEEP DIVE
+═══════════════════════════════════════════════════ -->
+<section class="section" id="s5">
+  <div class="section-eyebrow">Section 05</div>
+  <h2>Decoder-Only Architecture — What Actually Powers GPT, Llama &amp; Claude</h2>
+  <p>Module 4 covered the full encoder–decoder Transformer. But almost every LLM you use day-to-day — GPT-4, Claude, Llama, Gemini, Mistral — is 
+    <strong>decoder-only</strong>: there is no separate encoder, no cross-attention. Just a stack of causal self-attention blocks, repeated.
+  </p>
+  <h3>Why drop the encoder entirely?</h3>
+  <p>The original encoder–decoder design exists for tasks with two distinct sequences (source language → target language). But a huge fraction of useful tasks — chat, completion, summarization, code generation — can be reframed as 
+    <em>one long sequence</em>: "instruction + context + answer," all predicted left-to-right. If everything is one sequence, you don't need an encoder/decoder split at all — just one stack that attends causally over everything so far.
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;display:block;margin:0 auto">
+      <text x="380" y="24" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#333" font-weight="600" letter-spacing="1.5">THE CAUSAL MASK: WHAT EACH TOKEN CAN SEE</text>
+      <text x="200" y="55" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#888">key position →</text>
+      <text x="80" y="120" font-family="IBM Plex Mono,monospace" font-size="9" fill="#888" transform="rotate(-90 80 120)">query position ↓</text>
+      <!-- column labels -->
+      <text x="220" y="70" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#888">the</text>
+      <text x="260" y="70" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#888">cat</text>
+      <text x="300" y="70" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#888">sat</text>
+      <text x="340" y="70" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#888">down</text>
+      <!-- row labels -->
+      <text x="185" y="92" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="9" fill="#888">the</text>
+      <text x="185" y="118" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="9" fill="#888">cat</text>
+      <text x="185" y="144" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="9" fill="#888">sat</text>
+      <text x="185" y="170" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="9" fill="#888">down</text>
+      <!-- row 1: "the" can see only "the" -->
+      <rect x="200" y="80" width="40" height="24" fill="#2a7a4b" opacity="0.75"></rect>
+      <rect x="240" y="80" width="40" height="24" fill="#eee"></rect>
+      <rect x="280" y="80" width="40" height="24" fill="#eee"></rect>
+      <rect x="320" y="80" width="40" height="24" fill="#eee"></rect>
+      <!-- row 2 -->
+      <rect x="200" y="106" width="40" height="24" fill="#2a7a4b" opacity="0.5"></rect>
+      <rect x="240" y="106" width="40" height="24" fill="#2a7a4b" opacity="0.75"></rect>
+      <rect x="280" y="106" width="40" height="24" fill="#eee"></rect>
+      <rect x="320" y="106" width="40" height="24" fill="#eee"></rect>
+      <!-- row 3 -->
+      <rect x="200" y="132" width="40" height="24" fill="#2a7a4b" opacity="0.35"></rect>
+      <rect x="240" y="132" width="40" height="24" fill="#2a7a4b" opacity="0.5"></rect>
+      <rect x="280" y="132" width="40" height="24" fill="#2a7a4b" opacity="0.75"></rect>
+      <rect x="320" y="132" width="40" height="24" fill="#eee"></rect>
+      <!-- row 4 -->
+      <rect x="200" y="158" width="40" height="24" fill="#2a7a4b" opacity="0.25"></rect>
+      <rect x="240" y="158" width="40" height="24" fill="#2a7a4b" opacity="0.35"></rect>
+      <rect x="280" y="158" width="40" height="24" fill="#2a7a4b" opacity="0.5"></rect>
+      <rect x="320" y="158" width="40" height="24" fill="#2a7a4b" opacity="0.75"></rect>
+      <text x="270" y="200" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#666">green = visible · grey = masked to −∞ before softmax</text>
+      <text x="270" y="216" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#666">lower-triangular matrix — token t sees tokens 1..t only</text>
+      <rect x="440" y="80" width="290" height="140" rx="8" fill="#eef3ff" stroke="#2255aa" stroke-width="1.5"></rect>
+      <text x="585" y="102" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a3a5c" font-weight="700">WHY MASK AT ALL?</text>
+      <text x="455" y="122" font-family="Inter,sans-serif" font-size="9.5" fill="#444">Training predicts EVERY position's next</text>
+      <text x="455" y="138" font-family="Inter,sans-serif" font-size="9.5" fill="#444">token in parallel, in one forward pass.</text>
+      <text x="455" y="154" font-family="Inter,sans-serif" font-size="9.5" fill="#444">Without masking, predicting token 2</text>
+      <text x="455" y="170" font-family="Inter,sans-serif" font-size="9.5" fill="#444">could "cheat" by looking at token 3 —</text>
+      <text x="455" y="186" font-family="Inter,sans-serif" font-size="9.5" fill="#444">which is literally the answer. The mask</text>
+      <text x="455" y="202" font-family="Inter,sans-serif" font-size="9.5" fill="#444">is what makes parallel training match</text>
+      <text x="455" y="215" font-family="Inter,sans-serif" font-size="9.5" fill="#444">sequential, left-to-right generation.</text>
+    </svg>
+    <div class="diagram-caption">FIG 3 — The causal (lower-triangular) mask used in every decoder-only LLM layer: each token can only attend to itself and earlier tokens.</div>
+  </div>
+  <h3>Inference: one token at a time, with a KV cache</h3>
+  <p>Training processes a whole sequence in parallel. 
+    <strong>Generation</strong> is fundamentally different — the model produces one token, appends it to the input, and repeats. Naively, this means recomputing K and V for every past token at every single new step — hugely wasteful. The fix: cache them.
+  </p>
+  <div class="math-box">
+    <span class="comment">// Naive generation (no cache) — recompute everything every step</span>
+step 1: K,V for [the]                              → predict "cat"
+step 2: K,V for [the, cat]           (recomputed!)  → predict "sat"
+step 3: K,V for [the, cat, sat]      (recomputed!)  → predict "down"
+    <span class="comment">// With a KV cache — reuse what's already been computed</span>
+step 1: compute K,V for [the]           → cache them        → predict "cat"
+step 2: compute K,V for [cat] ONLY      → append to cache    → predict "sat"
+step 3: compute K,V for [sat] ONLY      → append to cache    → predict "down"
+    <span class="comment">// Cost per new token drops from O(n²) recomputation to O(n) — this is why</span>
+    <span class="comment">// "context length" directly determines how much GPU memory inference needs:</span>
+    <span class="comment">// cache size = 2 × n_layers × n_heads × d_head × seq_len × 2 (K and V) × batch</span>
+  </div>
+  <div class="callout callout-red">
+    <strong>Exam favourite:</strong> "Why does inference get slower and use more memory as the conversation gets longer?" — the KV cache grows linearly with every token generated; it must hold K and V for every previous token, in every layer, for the whole conversation.
+  </div>
+  <h3>From logits to a token — temperature, top-k, top-p</h3>
+  <p>The last layer of the decoder doesn't output a word. It outputs one raw score — a 
+    <strong>logit</strong> — for every entry in the vocabulary: tens of thousands of numbers, unbounded, not yet a probability. Turning that into one chosen token is a separate step called 
+    <strong>decoding</strong>, and unlike everything else in this module, it's controlled by parameters 
+    <em>you</em> set at inference time — not by trained weights. Here is exactly what happens, in order, before a token is picked:
+  </p>
+  <div class="math-box">
+    <span class="comment">// step-by-step: raw model output → one sampled token</span>
+1. logits  = final_layer(hidden_state)        
+    <span class="comment">// one score per vocab entry, e.g. [−2.1, 4.7, 0.3, ...]</span>
+2. logits' = logits / T                       
+    <span class="hi">// TEMPERATURE — reshape before softmax</span>
+3. probs   = softmax(logits')                 
+    <span class="comment">// now a valid distribution: all ≥ 0, sums to 1</span>
+4. probs'  = filter(probs, top_k / top_p)     
+    <span class="hi">// TOP-K / TOP-P — cut which tokens are even eligible</span>
+5. probs'' = renormalize(probs')              
+    <span class="comment">// what's left is rescaled to sum to 1 again</span>
+6. token   = sample(probs'')                  
+    <span class="comment">// or argmax(probs'') if T→0 — fully greedy, deterministic</span>
+  </div>
+  <p>
+    <strong>Temperature (T)</strong> rescales the logits before softmax: 
+    <code>P(token_i) = exp(logit_i / T) / Σⱼ exp(logit_j / T)</code>. Dividing by a small T (e.g. 0.3) stretches the gaps between logits apart, so softmax pushes almost all the probability mass onto the single highest-scoring token — at the limit, T→0 is identical to always taking 
+    <code>argmax</code> (greedy decoding: fully deterministic, same output every run). Dividing by a large T (e.g. 1.6) compresses the gaps toward zero, so softmax flattens toward a near-uniform distribution — low-probability tokens get a real shot at being picked, which reads as more "creative" but also less reliable. T = 1 leaves the model's own distribution untouched.
+  </p>
+  <p>
+    <strong>Worked example — same 4 logits, four temperatures.</strong> Take raw logits 
+    <code>[2, 3, 4, 1]</code> (logit 4 is the max, so it wins at every T — the question is only 
+    <em>how decisively</em>). Divide by T, then apply softmax:
+  </p>
+  <div class="math-box">
+    <span class="comment">// logits/T, then softmax — same formula as above, T = 0.1, 0.4, 0.5, 0.7</span>
+    <span class="var">logits</span> = [2, 3, 4, 1]
+    <span class="comment">// T = 0.1 — divide by 0.1 = multiply gaps by 10× → 40−30 = 10-point gap before exp()</span>
+logits/T = [20, 30, 40, 10]  →  softmax = [
+    <span class="eq">~0.0000</span>, 
+    <span class="eq">0.00005</span>, 
+    <span class="hi">0.99995</span>, 
+    <span class="eq">~0.0000</span>]
+    <span class="comment">// T = 0.4</span>
+logits/T = [5, 7.5, 10, 2.5]  →  softmax = [
+    <span class="eq">0.0062</span>, 
+    <span class="eq">0.0754</span>, 
+    <span class="hi">0.9180</span>, 
+    <span class="eq">0.0005</span>]
+    <span class="comment">// T = 0.5</span>
+logits/T = [4, 6, 8, 2]  →  softmax = [
+    <span class="eq">0.0158</span>, 
+    <span class="eq">0.1171</span>, 
+    <span class="hi">0.8649</span>, 
+    <span class="eq">0.0021</span>]
+    <span class="comment">// T = 0.7</span>
+logits/T = [2.857, 4.286, 5.714, 1.429]  →  softmax = [
+    <span class="eq">0.0438</span>, 
+    <span class="eq">0.1828</span>, 
+    <span class="hi">0.7629</span>, 
+    <span class="eq">0.0105</span>]
+    <span class="comment">// as T rises from 0.1 → 0.7, P(logit=4) falls 0.99995 → 0.9180 → 0.8649 → 0.7629 —</span>
+    <span class="comment">// the winner never changes, only how much mass everything else is allowed to take from it</span>
+  </div>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 780 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:780px;display:block;margin:0 auto">
+      <text x="390" y="22" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#333" font-weight="600" letter-spacing="1.5">SAME NEXT-TOKEN DISTRIBUTION, FOUR DECODING CONTROLS</text>
+      <line x1="35" y1="235" x2="740" y2="235" stroke="#ccc" stroke-width="1"></line>
+      <line x1="225" y1="55" x2="225" y2="245" stroke="#ddd" stroke-width="1" stroke-dasharray="3,3"></line>
+      <line x1="420" y1="55" x2="420" y2="245" stroke="#ddd" stroke-width="1" stroke-dasharray="3,3"></line>
+      <line x1="615" y1="55" x2="615" y2="245" stroke="#ddd" stroke-width="1" stroke-dasharray="3,3"></line>
+      <!-- Panel A: raw, T=1 -->
+      <text x="105" y="45" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a3a5c" font-weight="700">A · RAW (T = 1.0)</text>
+      <rect x="45" y="172" width="13" height="63" fill="#2255aa"></rect>
+      <text x="51.5" y="167" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="#1a3a5c">.42</text>
+      <rect x="62" y="203.5" width="13" height="31.5" fill="#2255aa"></rect>
+      <text x="68.5" y="199" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="#1a3a5c">.21</text>
+      <rect x="79" y="214" width="13" height="21" fill="#2255aa"></rect>
+      <text x="85.5" y="210" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="#1a3a5c">.14</text>
+      <rect x="96" y="221.5" width="13" height="13.5" fill="#2255aa"></rect>
+      <text x="102.5" y="218" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="#1a3a5c">.09</text>
+      <rect x="113" y="223" width="13" height="12" fill="#2255aa"></rect>
+      <text x="119.5" y="219" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="#1a3a5c">.08</text>
+      <rect x="130" y="226" width="13" height="9" fill="#2255aa"></rect>
+      <text x="136.5" y="222" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="#1a3a5c">.06</text>
+      <text x="51.5" y="246" text-anchor="middle" font-family="Inter,sans-serif" font-size="6.5" fill="#888">mat</text>
+      <text x="68.5" y="246" text-anchor="middle" font-family="Inter,sans-serif" font-size="6.5" fill="#888">flr</text>
+      <text x="85.5" y="246" text-anchor="middle" font-family="Inter,sans-serif" font-size="6.5" fill="#888">chr</text>
+      <text x="102.5" y="246" text-anchor="middle" font-family="Inter,sans-serif" font-size="6.5" fill="#888">rf</text>
+      <text x="119.5" y="246" text-anchor="middle" font-family="Inter,sans-serif" font-size="6.5" fill="#888">mn</text>
+      <text x="136.5" y="246" text-anchor="middle" font-family="Inter,sans-serif" font-size="6.5" fill="#888">air</text>
+      <text x="105" y="260" text-anchor="middle" font-family="Inter,sans-serif" font-size="7" fill="#777">the model's actual output</text>
+      <!-- Panel B: sharpened, T=0.4 -->
+      <text x="300" y="45" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a5c38" font-weight="700">B · SHARPENED (T = 0.4)</text>
+      <rect x="240" y="118" width="13" height="117" fill="#2a7a4b"></rect>
+      <text x="246.5" y="113" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="#1a5c38">.78</text>
+      <rect x="257" y="214" width="13" height="21" fill="#2a7a4b"></rect>
+      <text x="263.5" y="210" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="#1a5c38">.14</text>
+      <rect x="274" y="227.5" width="13" height="7.5" fill="#2a7a4b"></rect>
+      <text x="280.5" y="224" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="#1a5c38">.05</text>
+      <rect x="291" y="233.5" width="13" height="1.5" fill="#2a7a4b"></rect>
+      <rect x="308" y="233.5" width="13" height="1.5" fill="#2a7a4b"></rect>
+      <rect x="325" y="233.5" width="13" height="1.5" fill="#2a7a4b"></rect>
+      <text x="246.5" y="246" text-anchor="middle" font-family="Inter,sans-serif" font-size="6.5" fill="#888">mat</text>
+      <text x="263.5" y="246" text-anchor="middle" font-family="Inter,sans-serif" font-size="6.5" fill="#888">flr</text>
+      <text x="280.5" y="246" text-anchor="middle" font-family="Inter,sans-serif" font-size="6.5" fill="#888">chr</text>
+      <text x="297.5" y="246" text-anchor="middle" font-family="Inter,sans-serif" font-size="6.5" fill="#888">rf</text>
+      <text x="314.5" y="246" text-anchor="middle" font-family="Inter,sans-serif" font-size="6.5" fill="#888">mn</text>
+      <text x="331.5" y="246" text-anchor="middle" font-family="Inter,sans-serif" font-size="6.5" fill="#888">air</text>
+      <text x="300" y="260" text-anchor="middle" font-family="Inter,sans-serif" font-size="7" fill="#777">low T → near-greedy</text>
+      <!-- Panel C: top-k = 3 -->
+      <text x="495" y="45" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#7a5000" font-weight="700">C · TOP-k = 3</text>
+      <rect x="435" y="153.25" width="13" height="81.75" fill="#e8a020"></rect>
+      <text x="441.5" y="149" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="#7a5000">.55</text>
+      <rect x="452" y="194.05" width="13" height="40.95" fill="#e8a020"></rect>
+      <text x="458.5" y="190" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="#7a5000">.27</text>
+      <rect x="469" y="207.7" width="13" height="27.3" fill="#e8a020"></rect>
+      <text x="475.5" y="204" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="#7a5000">.18</text>
+      <rect x="486" y="221.5" width="13" height="13.5" fill="#ccc"></rect>
+      <rect x="503" y="223" width="13" height="12" fill="#ccc"></rect>
+      <rect x="520" y="226" width="13" height="9" fill="#ccc"></rect>
+      <text x="441.5" y="246" text-anchor="middle" font-family="Inter,sans-serif" font-size="6.5" fill="#888">mat</text>
+      <text x="458.5" y="246" text-anchor="middle" font-family="Inter,sans-serif" font-size="6.5" fill="#888">flr</text>
+      <text x="475.5" y="246" text-anchor="middle" font-family="Inter,sans-serif" font-size="6.5" fill="#888">chr</text>
+      <text x="492.5" y="246" text-anchor="middle" font-family="Inter,sans-serif" font-size="6.5" fill="#aaa">rf</text>
+      <text x="509.5" y="246" text-anchor="middle" font-family="Inter,sans-serif" font-size="6.5" fill="#aaa">mn</text>
+      <text x="526.5" y="246" text-anchor="middle" font-family="Inter,sans-serif" font-size="6.5" fill="#aaa">air</text>
+      <text x="495" y="260" text-anchor="middle" font-family="Inter,sans-serif" font-size="7" fill="#777">fixed count, then renormalized</text>
+      <!-- Panel D: top-p = 0.9 -->
+      <text x="690" y="45" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#4a2a70" font-weight="700">D · TOP-p = 0.9</text>
+      <rect x="630" y="167.95" width="13" height="67.05" fill="#6b3fa0"></rect>
+      <text x="636.5" y="163" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="#4a2a70">.45</text>
+      <rect x="647" y="201.55" width="13" height="33.45" fill="#6b3fa0"></rect>
+      <text x="653.5" y="197" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="#4a2a70">.22</text>
+      <rect x="664" y="212.65" width="13" height="22.35" fill="#6b3fa0"></rect>
+      <text x="670.5" y="209" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="#4a2a70">.15</text>
+      <rect x="681" y="220.6" width="13" height="14.4" fill="#6b3fa0"></rect>
+      <text x="687.5" y="217" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="#4a2a70">.10</text>
+      <rect x="698" y="222.25" width="13" height="12.75" fill="#6b3fa0"></rect>
+      <text x="704.5" y="218" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="#4a2a70">.09</text>
+      <rect x="715" y="226" width="13" height="9" fill="#ccc"></rect>
+      <text x="636.5" y="246" text-anchor="middle" font-family="Inter,sans-serif" font-size="6.5" fill="#888">mat</text>
+      <text x="653.5" y="246" text-anchor="middle" font-family="Inter,sans-serif" font-size="6.5" fill="#888">flr</text>
+      <text x="670.5" y="246" text-anchor="middle" font-family="Inter,sans-serif" font-size="6.5" fill="#888">chr</text>
+      <text x="687.5" y="246" text-anchor="middle" font-family="Inter,sans-serif" font-size="6.5" fill="#888">rf</text>
+      <text x="704.5" y="246" text-anchor="middle" font-family="Inter,sans-serif" font-size="6.5" fill="#888">mn</text>
+      <text x="721.5" y="246" text-anchor="middle" font-family="Inter,sans-serif" font-size="6.5" fill="#aaa">air</text>
+      <text x="690" y="260" text-anchor="middle" font-family="Inter,sans-serif" font-size="7" fill="#777">cumulative mass, variable count</text>
+    </svg>
+    <div class="diagram-caption">FIG 4 — The same six-candidate next-token distribution after "The cat sat on the ___", reshaped by each decoding control in turn. A→B: temperature changes the distribution itself, before any filtering. C, D: top-k and top-p don't reshape probabilities at all — they cut which tokens are eligible, then renormalize what's left. Note top-k always keeps exactly 3 tokens regardless of shape; top-p keeps as many as needed to reach 90% cumulative mass — 5 here, because this particular raw distribution isn't very peaked. Grey bars = excluded (probability forced to 0).</div>
+  </div>
+  <p>
+    <strong>Top-k</strong> keeps only the 
+    <code>k</code> highest-probability tokens and renormalizes just those before sampling — a fixed 
+    <em>count</em>, regardless of how the distribution is shaped. 
+    <strong>Top-p</strong> (nucleus sampling) instead keeps the smallest set of tokens whose cumulative probability is ≥ 
+    <code>p</code>, then renormalizes — a fixed 
+    <em>mass</em>, so the count it keeps adapts automatically: very few tokens when the model is confident (one token already near p on its own), many more when it's genuinely uncertain. This is why top-p is generally preferred over top-k in production systems — it doesn't force the same cutoff width onto every prediction.
+  </p>
+  <p>
+    <strong>Worked example — top-k and top-p on the same distribution.</strong> Reuse the 
+    <code>T = 0.5</code> result from above: 
+    <code>probs = [0.0158, 0.1171, 0.8649, 0.0021]</code> for logits 
+    <code>[2, 3, 4, 1]</code>, sorted by confidence 
+    <code>logit4 &gt; logit3 &gt; logit2 &gt; logit1</code>.
+  </p>
+  <div class="math-box">
+    <span class="comment">// TOP-k = 2 — always keep a FIXED COUNT of 2, no matter how confident the model already is</span>
+kept    = {
+    <span class="var">logit4</span>: 0.8649, 
+    <span class="var">logit3</span>: 0.1171}          sum = 0.9820
+renorm  = {
+    <span class="var">logit4</span>: 0.8649/0.9820, 
+    <span class="var">logit3</span>: 0.1171/0.9820}  = [
+    <span class="hi">0.8808</span>, 
+    <span class="eq">0.1192</span>]
+dropped = {logit2, logit1}  →  forced to 0
+    <span class="comment">// TOP-p = 0.85 — keep the SMALLEST set whose cumulative probability ≥ 0.85</span>
+cumulative: logit4 alone = 0.8649  →  already ≥ 0.85, STOP
+kept    = {
+    <span class="var">logit4</span>: 0.8649}                              sum = 0.8649
+renorm  = {
+    <span class="var">logit4</span>: 0.8649/0.8649}                       = [
+    <span class="hi">1.0000</span>]   
+    <span class="comment">← nucleus = 1 token</span>
+dropped = {logit3, logit2, logit1}  →  forced to 0
+    <span class="comment">// same p = 0.85, applied instead to the flatter T = 0.7 distribution from above</span>
+    <span class="comment">// (probs = [0.0438, 0.1828, 0.7629, 0.0105]):</span>
+cumulative: logit4 = 0.7629 (&lt; 0.85)  →  + logit3 = 0.9457 (≥ 0.85), STOP
+kept    = {
+    <span class="var">logit4</span>: 0.7629, 
+    <span class="var">logit3</span>: 0.1828}          →  renorm = [
+    <span class="hi">0.8067</span>, 
+    <span class="eq">0.1933</span>]  
+    <span class="comment">← nucleus = 2 tokens</span>
+  </div>
+  <p>Same 
+    <code>k = 2</code> would have returned two candidates in 
+    <em>both</em> cases, whether the model was confident or not. Top-p = 0.85 didn't: on the peaked T = 0.5 distribution it needed only 
+    <strong>one</strong> token to clear the threshold; on the flatter T = 0.7 distribution it needed 
+    <strong>two</strong>. That's the adaptive behavior the callout below is about — top-p reads the shape of the distribution before deciding how many candidates are even in play.
+  </p>
+  <div class="callout callout-purple">
+    <strong>Exam favourite:</strong> "What's the practical difference between top-k and top-p?" — top-k is a fixed candidate count that ignores confidence (it'll keep 3 tokens even if the model is 99% sure of one answer, or if it's genuinely torn between ten); top-p adapts to confidence by cutting on cumulative probability mass instead of a raw count, which is why most production APIs default to tuning top-p (and/or temperature) rather than top-k.
+  </div>
+  <h3>Why LLMs hallucinate, and how decoding + grounding reduce it</h3>
+  <p>Hallucination isn't a bug that slipped through — it falls directly out of the mechanics above. 
+    <strong>Softmax always outputs a full probability distribution that sums to 1</strong>, whether or not the model actually has good evidence for any of the candidate tokens. There is no "none of the above" option built into the math — step 6 above always samples 
+    <em>something</em>. And because generation is autoregressive (Section 5), one unsupported token that gets sampled early becomes part of the input context for every token that follows — the model then generates a fluent, coherent-sounding continuation that 
+    <em>justifies</em> its own earlier mistake, rather than backtracking. Pretraining's objective (predict the next token in web text, Section 1) rewards fluency and plausibility, not verified truth — a confident wrong answer and a confident right answer are indistinguishable to the loss function that trained the model.
+  </p>
+  <table>
+    <tbody>
+      <tr>
+        <th>Mitigation</th>
+        <th>What it actually does</th>
+        <th>What it targets</th>
+      </tr>
+      <tr>
+        <td>
+          <strong>Lower temperature / lower top-p</strong>
+        </td>
+        <td>Keeps sampling close to the model's highest-confidence path</td>
+        <td>Random 
+          <em>wandering</em> into low-probability, unsupported continuations — not wrong knowledge itself
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Retrieval-Augmented Generation (RAG)</strong>
+        </td>
+        <td>Grounds generation in retrieved, real documents instead of relying on parametric memory alone</td>
+        <td>Gaps and errors in what the model "remembers" from pretraining</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>"Say you don't know" prompting / instruction-tuning</strong>
+        </td>
+        <td>Gives the model an actual token sequence to fall back to instead of confabulating</td>
+        <td>The "softmax must output something" problem, directly</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>RLHF / calibration fine-tuning</strong>
+        </td>
+        <td>Rewards correctly expressed uncertainty over confident wrongness during training</td>
+        <td>What the model considers a "good" continuation — not just how it's sampled at inference</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Self-consistency (sample N times, compare)</strong>
+        </td>
+        <td>Disagreement across independent samples flags a likely-unsupported claim</td>
+        <td>Catches hallucination after generation, at the cost of N× inference compute</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Citation-forcing / attribution</strong>
+        </td>
+        <td>Requires every claim to point at a specific retrieved passage</td>
+        <td>Makes a fabricated claim visibly ungrounded (no citation) instead of silently plausible</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-red">
+    <strong>Exam favourite:</strong> "Does setting temperature to 0 eliminate hallucination?" — No. Temperature and top-p/top-k only control 
+    <em>how</em> the model samples among the tokens it already considers plausible; they cannot fix wrong or missing knowledge inside the model itself. Greedy decoding (T = 0) makes output fully deterministic and less "wandering," but if the model's single top-ranked token is a confidently wrong fact, greedy decoding will pick that same wrong fact every single time. Grounding (RAG) and calibration training address the actual knowledge/confidence gap; decoding parameters only address the sampling noise layered on top of it.
+  </div>
+</section>
+<!-- ═══════════════════════════════════════════════════
+     SECTION 6 — ARCHITECTURE FAMILIES
+═══════════════════════════════════════════════════ -->
+<section class="section" id="s6">
+  <div class="section-eyebrow">Section 06</div>
+  <h2>Encoder-Only vs. Decoder-Only vs. Encoder–Decoder — Recap &amp; When to Use Each</h2>
+  <p>Module 4 introduced this split structurally. Here it is again, task-first — the question you should actually ask is "what shape is my task?", not "what architecture sounds fanciest."</p>
+  <div class="steps">
+    <div class="step-card">
+      <div class="step-num" style="color:#2255aa">E</div>
+      <h4>Encoder-only</h4>
+      <p>
+        <strong>BERT, RoBERTa, DeBERTa.</strong> Bidirectional attention (no causal mask) — every token sees every other token, both directions. Trained with masked-language-modeling, not next-token prediction. Best for: classification, NER, embeddings/retrieval — anything that outputs a label or a vector, not free-form text.
+      </p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#b83232">D</div>
+      <h4>Decoder-only</h4>
+      <p>
+        <strong>GPT-4, Claude, Llama, Gemini, Mistral, Phi, Gemma.</strong> Causal self-attention only, next-token-prediction objective, no cross-attention. Best for: open-ended generation — chat, coding, reasoning, summarization phrased as generation. This is the dominant architecture for modern LLMs.
+      </p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#6b3fa0">ED</div>
+      <h4>Encoder–Decoder</h4>
+      <p>
+        <strong>T5, BART, the original Transformer, Whisper.</strong> Separate bidirectional encoder + causal decoder with cross-attention. Best for: tasks with a clear input→output transformation of different structure — translation, speech-to-text — where the encoder can fully digest the input before generation starts.
+      </p>
+    </div>
+  </div>
+  <table>
+    <tbody>
+      <tr>
+        <th></th>
+        <th>Encoder-only</th>
+        <th>Decoder-only</th>
+        <th>Encoder–Decoder</th>
+      </tr>
+      <tr>
+        <td>Attention direction</td>
+        <td>Bidirectional</td>
+        <td>Causal (left-to-right)</td>
+        <td>Bidirectional (encoder) + Causal (decoder)</td>
+      </tr>
+      <tr>
+        <td>Pretraining objective</td>
+        <td>Masked LM (predict hidden tokens)</td>
+        <td>Next-token prediction</td>
+        <td>Span corruption / seq2seq</td>
+      </tr>
+      <tr>
+        <td>Can it generate free text?</td>
+        <td>No</td>
+        <td>Yes</td>
+        <td>Yes</td>
+      </tr>
+      <tr>
+        <td>Natural output</td>
+        <td>Label / embedding vector</td>
+        <td>Token sequence</td>
+        <td>Token sequence, grounded in a separate input</td>
+      </tr>
+      <tr>
+        <td>Why it's less common for LLMs today</td>
+        <td>n/a — different use case entirely</td>
+        <td>n/a — this is the mainstream choice</td>
+        <td>Extra encoder cost isn't needed once everything is framed as "one sequence in, generate the rest"</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    <strong>The historical shift, in one sentence:</strong> the field moved from "pick the architecture that structurally matches your task" (2018-era BERT vs. GPT vs. T5) to "decoder-only can be prompted to do almost any task, so just scale that up" (2020s). This is exactly why decoder-only dominates the current LLM landscape.
+  </div>
+  <h3>Same task, two mechanisms: how GPT and T5 both translate "Hello world" into French</h3>
+  <p>Both a decoder-only model like GPT and an encoder–decoder model like T5 can take 
+    <code>Hello world</code> and produce 
+    <code>Bonjour le monde</code> — but they get there through structurally different machinery, because they don't share an architecture. GPT has no encoder at all; T5 has nothing but an encoder feeding a decoder. Understanding 
+    <em>how</em> each one manages the same task is the fastest way to see what the architecture split from the previous section actually buys (or costs) you.
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;display:block;margin:0 auto">
+      <text x="380" y="22" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#333" font-weight="600" letter-spacing="1.5">GPT VS. T5: SAME TRANSLATION, TWO ARCHITECTURES</text>
+      <line x1="380" y1="38" x2="380" y2="280" stroke="#ddd" stroke-width="1" stroke-dasharray="3,3"></line>
+      <!-- GPT panel -->
+      <text x="185" y="52" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#b83232" font-weight="700">GPT — DECODER-ONLY</text>
+      <rect x="25" y="108" width="160" height="28" rx="4" fill="#fff8ee" stroke="#e8a020" stroke-width="1.3"></rect>
+      <text x="105" y="126" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" fill="#7a5000">"Translate to French: Hello world"</text>
+      <rect x="195" y="108" width="48" height="28" rx="4" fill="#eef3ff" stroke="#2255aa" stroke-width="1.3"></rect>
+      <text x="219" y="126" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" fill="#1a3a5c">Bonjour</text>
+      <rect x="251" y="108" width="34" height="28" rx="4" fill="#eef3ff" stroke="#2255aa" stroke-width="1.3"></rect>
+      <text x="268" y="126" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" fill="#1a3a5c">le</text>
+      <rect x="293" y="108" width="52" height="28" rx="4" fill="#eef3ff" stroke="#2255aa" stroke-width="1.3"></rect>
+      <text x="319" y="126" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" fill="#1a3a5c">monde</text>
+      <path d="M219 136 Q 162 162 105 136" fill="none" stroke="#b83232" stroke-width="1.3" marker-end="url(#a1)"></path>
+      <path d="M268 136 Q 175 172 105 136" fill="none" stroke="#b83232" stroke-width="1.3" marker-end="url(#a1)"></path>
+      <path d="M319 136 Q 270 158 219 136" fill="none" stroke="#b83232" stroke-width="1.3" marker-end="url(#a1)"></path>
+      <text x="185" y="192" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" fill="#555">one causal stream — prompt and</text>
+      <text x="185" y="206" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" fill="#555">generated words are the SAME sequence</text>
+      <text x="185" y="220" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" fill="#555">no encoder, no cross-attention —</text>
+      <text x="185" y="234" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" fill="#555">just next-token prediction, conditioned</text>
+      <text x="185" y="248" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" fill="#555">on everything written so far</text>
+      <!-- T5 panel -->
+      <text x="577" y="52" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#6b3fa0" font-weight="700">T5 — ENCODER–DECODER</text>
+      <text x="577" y="70" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#2255aa">encoder — bidirectional, reads the whole input first</text>
+      <rect x="405" y="80" width="72" height="26" rx="4" fill="#eef3ff" stroke="#2255aa" stroke-width="1.3"></rect>
+      <text x="441" y="97" text-anchor="middle" font-family="Inter,sans-serif" font-size="7.8" fill="#1a3a5c">translate to</text>
+      <rect x="483" y="80" width="58" height="26" rx="4" fill="#eef3ff" stroke="#2255aa" stroke-width="1.3"></rect>
+      <text x="512" y="97" text-anchor="middle" font-family="Inter,sans-serif" font-size="7.8" fill="#1a3a5c">French:</text>
+      <rect x="547" y="80" width="48" height="26" rx="4" fill="#eef3ff" stroke="#2255aa" stroke-width="1.3"></rect>
+      <text x="571" y="97" text-anchor="middle" font-family="Inter,sans-serif" font-size="7.8" fill="#1a3a5c">Hello</text>
+      <rect x="601" y="80" width="48" height="26" rx="4" fill="#eef3ff" stroke="#2255aa" stroke-width="1.3"></rect>
+      <text x="625" y="97" text-anchor="middle" font-family="Inter,sans-serif" font-size="7.8" fill="#1a3a5c">world</text>
+      <path d="M441 80 Q 500 55 571 80" fill="none" stroke="#2255aa" stroke-width="1.1" stroke-dasharray="2,2"></path>
+      <path d="M512 80 Q 560 60 625 80" fill="none" stroke="#2255aa" stroke-width="1.1" stroke-dasharray="2,2"></path>
+      <text x="577" y="128" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#6b3fa0">cross-attention — decoder reads</text>
+      <text x="577" y="140" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#6b3fa0">the FINISHED encoder output every step</text>
+      <path d="M500 190 L 527 116" fill="none" stroke="#6b3fa0" stroke-width="1.1" stroke-dasharray="3,2" marker-end="url(#a1)"></path>
+      <path d="M550 190 L 527 116" fill="none" stroke="#6b3fa0" stroke-width="1.1" stroke-dasharray="3,2" marker-end="url(#a1)"></path>
+      <path d="M598 190 L 527 116" fill="none" stroke="#6b3fa0" stroke-width="1.1" stroke-dasharray="3,2" marker-end="url(#a1)"></path>
+      <rect x="470" y="192" width="60" height="26" rx="4" fill="#f5f0ff" stroke="#6b3fa0" stroke-width="1.3"></rect>
+      <text x="500" y="209" text-anchor="middle" font-family="Inter,sans-serif" font-size="7.8" fill="#3d2461">Bonjour</text>
+      <rect x="536" y="192" width="30" height="26" rx="4" fill="#f5f0ff" stroke="#6b3fa0" stroke-width="1.3"></rect>
+      <text x="551" y="209" text-anchor="middle" font-family="Inter,sans-serif" font-size="7.8" fill="#3d2461">le</text>
+      <rect x="572" y="192" width="52" height="26" rx="4" fill="#f5f0ff" stroke="#6b3fa0" stroke-width="1.3"></rect>
+      <text x="598" y="209" text-anchor="middle" font-family="Inter,sans-serif" font-size="7.8" fill="#3d2461">monde</text>
+      <path d="M551 218 Q 525 240 500 218" fill="none" stroke="#b83232" stroke-width="1.1" marker-end="url(#a1)"></path>
+      <path d="M598 218 Q 545 248 500 218" fill="none" stroke="#b83232" stroke-width="1.1" marker-end="url(#a1)"></path>
+      <text x="577" y="250" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#555">decoder — causal among itself,</text>
+      <text x="577" y="263" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#555">generates left-to-right like GPT does</text>
+    </svg>
+    <div class="diagram-caption">FIG 5 — Same prompt, same output, two different mechanisms. GPT keeps the instruction and the translation in one causal stream and just predicts forward. T5 fully digests the source sentence in a separate bidirectional encoder first, then a causal decoder cross-attends into that finished representation at every generation step.</div>
+  </div>
+  <div class="steps">
+    <div class="step-card">
+      <div class="step-num" style="color:#b83232">G</div>
+      <h4>How GPT translates</h4>
+      <p>
+        <strong>Architecture:</strong> one causal decoder stack, no encoder, no cross-attention. 
+        <strong>Pretraining objective:</strong> plain next-token prediction on raw text — translation is never a named training task. 
+        <strong>How the task is framed:</strong> the instruction and source sentence ("Translate to French: Hello world") are just the first tokens of the sequence; the model wasn't taught "translation," it learned — from seeing enough parallel text during pretraining/instruction-tuning — that this prompt shape is usually followed by a French continuation. 
+        <strong>Mechanism:</strong> at each step it predicts the next token conditioned on everything before it (prompt + whatever it has generated so far), via the KV-cached causal attention from Section 5. Nothing structurally distinguishes "reading the prompt" from "writing the answer" — it's all one stream.
+      </p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#6b3fa0">T</div>
+      <h4>How T5 translates</h4>
+      <p>
+        <strong>Architecture:</strong> a bidirectional encoder feeding a causal decoder through cross-attention (Section 6's Encoder–Decoder row). 
+        <strong>Pretraining objective:</strong> span corruption — mask out chunks of text and train the model to reconstruct them — then fine-tuned on explicit seq2seq pairs, with translation as one of many tasks selected by a text prefix (T5's "text-to-text" framing, e.g. 
+        <code>"translate English to French: Hello world"</code>). 
+        <strong>How the task is framed:</strong> the prefix routes the input to behave like a translation example the model was directly fine-tuned on, not an emergent pattern. 
+        <strong>Mechanism:</strong> the encoder reads "Hello world" bidirectionally — every source token sees every other source token, both directions — and produces a finished representation before generation starts. The decoder then generates "Bonjour le monde" causally, and at every single step also cross-attends into 
+        <em>all</em> of the encoder's finished output, not just what it has generated itself.
+      </p>
+    </div>
+  </div>
+  <table>
+    <tbody>
+      <tr>
+        <th></th>
+        <th>GPT (decoder-only)</th>
+        <th>T5 (encoder–decoder)</th>
+      </tr>
+      <tr>
+        <td>Source-sentence attention</td>
+        <td>Causal — later prompt tokens can't look ahead either; the whole prompt is processed left-to-right like everything else</td>
+        <td>Bidirectional — full context of "Hello world" in both directions, finished before decoding starts</td>
+      </tr>
+      <tr>
+        <td>How the model reaches the output</td>
+        <td>Same causal self-attention mechanism used for source and target — no separate pathway</td>
+        <td>Decoder uses causal self-attention among its own tokens 
+          <em>plus</em> a separate cross-attention into the encoder's output
+        </td>
+      </tr>
+      <tr>
+        <td>Where "translation" lives</td>
+        <td>Implicitly, in patterns learned across the whole pretraining/instruction-tuning corpus</td>
+        <td>Explicitly, as one of the seq2seq tasks selected by a training-time text prefix</td>
+      </tr>
+      <tr>
+        <td>Cross-attention?</td>
+        <td>None — there is no second sequence to attend into</td>
+        <td>Yes — the defining mechanism of the architecture</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-blue">
+    <strong>Exam favourite:</strong> "If T5's encoder gives it a structural advantage for translation, why do decoder-only LLMs like GPT-4 now translate just as well or better?" — scale and instruction-tuning close the gap: a large enough decoder-only model, trained on enough parallel and instruction data, learns the same "attend fully to the source before committing to output" behavior 
+    <em>within</em> its single causal stream — it just isn't forced to by the architecture the way T5's encoder forces it. T5's advantage was structural efficiency at a given size, not a capability decoder-only models are structurally incapable of reaching.
+  </div>
+</section>
+<!-- ═══════════════════════════════════════════════════
+     SECTION 7 — FOUNDATION MODELS
+═══════════════════════════════════════════════════ -->
+<section class="section" id="s7">
+  <div class="section-eyebrow">Section 07</div>
+  <h2>Foundation Models — One Pretraining Run, Many Downstream Tasks</h2>
+  <p>A 
+    <strong>foundation model</strong> is a model pretrained once, at large scale, on broad data, intended to be 
+    <em>adapted</em> — via prompting or fine-tuning (Module 6) — to many downstream tasks, rather than trained from scratch for each one. This is the economic and technical core of the modern LLM ecosystem.
+  </p>
+  <h3>Scaling laws: why bigger (done right) keeps helping</h3>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 700 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;display:block;margin:0 auto">
+      <text x="350" y="24" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#333" font-weight="600" letter-spacing="1.5">LOSS VS. COMPUTE (SCHEMATIC)</text>
+      <line x1="80" y1="220" x2="80" y2="50" stroke="#888" stroke-width="1.3"></line>
+      <line x1="80" y1="220" x2="620" y2="220" stroke="#888" stroke-width="1.3"></line>
+      <text x="60" y="55" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="9" fill="#888">loss</text>
+      <text x="600" y="238" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#888">compute (log scale) →</text>
+      <path d="M90 60 Q 200 90 300 130 T 500 190 T 610 210" fill="none" stroke="#2255aa" stroke-width="2.5"></path>
+      <text x="340" y="120" font-family="IBM Plex Mono,monospace" font-size="9" fill="#2255aa">well-scaled: params &amp; data grow together</text>
+      <path d="M90 60 Q 180 70 260 100 T 400 175 L 610 178" fill="none" stroke="#b83232" stroke-width="2" stroke-dasharray="4,3"></path>
+      <text x="420" y="195" font-family="IBM Plex Mono,monospace" font-size="9" fill="#b83232">params grown, data held fixed → plateaus early</text>
+    </svg>
+    <div class="diagram-caption">FIG 6 — Schematic view of the Chinchilla finding: loss keeps improving smoothly with compute only when parameter count and training-data volume scale together — a model with too many parameters for too little data plateaus early, wasting compute.</div>
+  </div>
+  <div class="callout callout-blue">
+    <strong>The Chinchilla result (Hoffmann et al., 2022):</strong> for a fixed compute budget, most earlier LLMs (GPT-3 included) were 
+    <em>over-parameterized and under-trained</em> — a smaller model trained on proportionally more tokens reaches lower loss for the same compute. Rule of thumb from that paper: roughly 20 training tokens per parameter is compute-optimal.
+  </div>
+  <h3>Emergent abilities</h3>
+  <p>Some capabilities — multi-step arithmetic, chain-of-thought reasoning, in-context learning itself — appear to show up fairly abruptly past a certain scale threshold, rather than improving smoothly. This is one of the more debated claims in the field: some of it may be a genuine phase transition in capability, some of it may be a measurement artifact of using metrics (like exact-match accuracy) that are themselves discontinuous. Either way, it's the empirical reason scale kept being pushed even after diminishing returns on perplexity alone.</p>
+  <h3>Pretrain → adapt: the two-stage recipe</h3>
+  <div class="compare-grid">
+    <div class="compare-card">
+      <div class="compare-card-header" style="background:#1a3a5c;color:#fff">Stage 1 — Pretraining</div>
+      <div class="compare-card-body">
+        <ul>
+          <li>Next-token prediction on trillions of tokens of broad text/code</li>
+          <li>Extremely expensive: weeks on thousands of GPUs</li>
+          <li>Produces a "base model" — fluent, knowledgeable, not yet obedient</li>
+          <li>Done once, by a handful of labs (OpenAI, Meta, Google, Anthropic, Mistral, ...)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="compare-card">
+      <div class="compare-card-header" style="background:#2a7a4b;color:#fff">Stage 2 — Adaptation</div>
+      <div class="compare-card-body">
+        <ul>
+          <li>Instruction tuning, RLHF/DPO (turns base model into a chat assistant)</li>
+          <li>Task-specific fine-tuning — full or parameter-efficient (Module 6)</li>
+          <li>In-context learning / prompting — no weight updates at all</li>
+          <li>Cheap enough for individual teams, sometimes a single GPU</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ═══════════════════════════════════════════════════
+     SECTION 8 — OPEN VS CLOSED SOURCE
+═══════════════════════════════════════════════════ -->
+<section class="section" id="s8">
+  <div class="section-eyebrow">Section 08</div>
+  <h2>Open-Source vs. Closed-Source Models</h2>
+  <p>"Open-source LLM" is a loaded term — most released weights come with usage restrictions that don't meet the strict open-source definition. The practically useful axis is: 
+    <strong>can you download and run the weights yourself, or only call an API?</strong>
+  </p>
+  <table>
+    <tbody>
+      <tr>
+        <th></th>
+        <th>Open-weight</th>
+        <th>Closed / API-only</th>
+      </tr>
+      <tr>
+        <td>Examples</td>
+        <td>Llama 3/4, Mistral, Gemma, Phi, DeepSeek, Qwen</td>
+        <td>GPT-4/5, Claude, Gemini (API-served versions)</td>
+      </tr>
+      <tr>
+        <td>Deployment</td>
+        <td>Self-host: your infra, your GPUs (or CPU, for small models)</td>
+        <td>Vendor's infra only, via API</td>
+      </tr>
+      <tr>
+        <td>Data privacy</td>
+        <td>Full control — nothing leaves your environment</td>
+        <td>Data sent to a third party (subject to their policy)</td>
+      </tr>
+      <tr>
+        <td>Fine-tuning</td>
+        <td>Full access to weights → full fine-tuning or PEFT (Module 6)</td>
+        <td>Only vendor-provided fine-tuning APIs, if offered, on their terms</td>
+      </tr>
+      <tr>
+        <td>Cost model</td>
+        <td>Upfront/ongoing infra cost, no per-token fee</td>
+        <td>Pay-per-token, zero infra to manage</td>
+      </tr>
+      <tr>
+        <td>Frontier capability</td>
+        <td>Narrowing gap, but closed models often lead on hardest benchmarks</td>
+        <td>Typically at or near the capability frontier</td>
+      </tr>
+      <tr>
+        <td>Licensing</td>
+        <td>Varies — Llama's license has usage-scale restrictions; Apache 2.0 (Mistral, some Qwen) is truly permissive</td>
+        <td>Commercial terms of service, not a software license</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-green">
+    <strong>Why this course fine-tunes an open-weight model:</strong> fine-tuning (Module 6) requires access to the weights themselves — you cannot LoRA-tune a model you can only call through an API. Small open-weight models (Phi, Gemma, Flan-T5) are specifically chosen because they're capable enough to be useful, and small enough to fine-tune without a data-center GPU.
+  </div>
+  <h3>Choosing between them — a practical checklist</h3>
+  <div class="steps">
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">?</div>
+      <h4>Data sensitivity</h4>
+      <p>Regulated/private data → strong pull toward self-hosted open-weight models.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">?</div>
+      <h4>Need for fine-tuning</h4>
+      <p>Deep task specialization on your own data → needs open weights.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">?</div>
+      <h4>Engineering capacity</h4>
+      <p>No ML infra team → API is operationally simpler, at a per-token cost.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">?</div>
+      <h4>Raw capability ceiling</h4>
+      <p>Hardest reasoning/coding tasks → closed frontier models often still lead.</p>
+    </div>
+  </div>
+</section>
+<!-- ═══════════════════════════════════════════════════
+     SECTION 9 — TAKEAWAYS
+═══════════════════════════════════════════════════ -->
+<section class="section" id="s9">
+  <div class="section-eyebrow">Section 09</div>
+  <h2>Key Takeaways &amp; Exam Prep</h2>
+  <div class="steps">
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>LLMs are one objective, scaled up</h4>
+      <p>Next-token prediction, self-supervised, on trillions of tokens. Every downstream capability sits on top of this.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Tokenization shapes behavior</h4>
+      <p>Subword schemes (BPE/WordPiece/Unigram) balance vocabulary size against sequence length — and explain real model quirks.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Embeddings encode meaning geometrically</h4>
+      <p>A learned lookup table where direction and distance carry semantic relationships.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>RoPE is the modern positional default</h4>
+      <p>Rotates Q/K by position; scores depend on relative distance, not absolute position.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Decoder-only dominates</h4>
+      <p>Causal masking + KV-caching is the architecture behind essentially every LLM you talk to.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Scale must be balanced</h4>
+      <p>Chinchilla: parameters and training tokens must grow together, or compute is wasted.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Foundation models separate pretrain from adapt</h4>
+      <p>One expensive pretraining run, many cheap downstream adaptations — the subject of Module 6.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Open weights are a prerequisite for fine-tuning</h4>
+      <p>You cannot LoRA-tune what you can only call through an API.</p>
+    </div>
+  </div>
+  <h3>Common exam questions</h3>
+  <table>
+    <tbody>
+      <tr>
+        <th>Question</th>
+        <th>Short answer</th>
+      </tr>
+      <tr>
+        <td>What is the pretraining objective for a decoder-only LLM?</td>
+        <td>Autoregressive next-token prediction — maximize P(token_t | token_&lt;t)</td>
+      </tr>
+      <tr>
+        <td>Why subword tokenization instead of word- or character-level?</td>
+        <td>Bounded vocabulary, no &lt;UNK&gt; tokens, and much shorter sequences than character-level for the same text</td>
+      </tr>
+      <tr>
+        <td>What does RoPE rotate, and why?</td>
+        <td>Query and Key vectors, by an angle proportional to position — so attention scores depend only on relative distance</td>
+      </tr>
+      <tr>
+        <td>Why is a causal mask needed during training but not at the embedding layer?</td>
+        <td>It prevents a position from attending to future tokens during the parallel forward pass, which would let training "see the answer"</td>
+      </tr>
+      <tr>
+        <td>What is a KV cache and why does it matter?</td>
+        <td>Stores previously computed Key/Value vectors during generation so they aren't recomputed every step — turns O(n²) generation into O(n)</td>
+      </tr>
+      <tr>
+        <td>What did the Chinchilla paper show?</td>
+        <td>For fixed compute, model size and training-token count should scale together (~20 tokens/parameter) — many earlier LLMs were over-sized relative to their training data</td>
+      </tr>
+      <tr>
+        <td>Why is almost every modern LLM decoder-only rather than encoder–decoder?</td>
+        <td>Prompting can reframe most tasks as one sequence to continue, removing the need for a separate encoder + cross-attention</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout" style="margin-top:2rem">
+    <strong>References:</strong>
+    <br>
+    Radford et al. (2018/2019) — Improving Language Understanding by Generative Pre-Training (GPT-1/GPT-2).
+    <br>
+    Sennrich et al. (2016) — Neural Machine Translation of Rare Words with Subword Units (BPE).
+    <br>
+    Kudo &amp; Richardson (2018) — SentencePiece: A simple and language independent subword tokenizer.
+    <br>
+    Su et al. (2021) — RoFormer: Enhanced Transformer with Rotary Position Embedding.
+    <br>
+    Press, Smith &amp; Lewis (2021) — Train Short, Test Long (ALiBi).
+    <br>
+    Kaplan et al. (2020) — Scaling Laws for Neural Language Models.
+    <br>
+    Hoffmann et al. (2022) — Training Compute-Optimal Large Language Models (Chinchilla).
+    <br>
+    Bommasani et al. (2021) — On the Opportunities and Risks of Foundation Models.
+    <br>
+    Wei et al. (2022) — Emergent Abilities of Large Language Models.
+  </div>
+</section>
+<footer style="text-align:center;padding:2rem;font-family:var(--mono);font-size:0.75rem;color:#aaa;border-top:1px solid var(--rule)">Module 1 · Part 7 · Part 4 — Large Language Models &amp; LLM Architecture · Companion to Module 6 (Fine-Tuning)</footer>

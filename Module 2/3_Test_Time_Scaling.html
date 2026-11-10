@@ -1,0 +1,314 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test-Time Scaling — Study Guide</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Fraunces:ital,wght@0,300;0,700;1,300&family=Inter:wght@400;500;600&display=swap');
+  :root {
+    --ink: #0f1117; --paper: #f7f6f2; --mid: #e8e5dd; --rule: #c9c4b8; --accent: #1a3a5c;
+    --highlight: #e8a020; --green: #2a7a4b; --red: #b83232; --blue: #2255aa; --purple: #6b3fa0; --teal: #0d7a7a;
+    --mono: 'IBM Plex Mono', monospace; --display: 'Fraunces', Georgia, serif; --body: 'Inter', system-ui, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--body); background: var(--paper); color: var(--ink); line-height: 1.7; font-size: 16px; }
+  .hero { background: linear-gradient(160deg, #0f1117 0%, #1a3a5c 100%); color: #fff; padding: 4rem 2rem 3rem; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 20% 30%, rgba(232,160,32,0.10), transparent 40%), radial-gradient(circle at 80% 70%, rgba(42,122,75,0.12), transparent 40%); }
+  .hero-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--highlight); margin-bottom: 1rem; position: relative; }
+  .hero h1 { font-family: var(--display); font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; line-height: 1.1; margin-bottom: 1rem; position: relative; }
+  .hero p { font-size: 1.1rem; opacity: 0.82; max-width: 640px; margin: 0 auto; position: relative; }
+  .toc { background: var(--ink); color: #fff; padding: 1.2rem 2rem; display: flex; gap: 1.3rem; flex-wrap: wrap; justify-content: center; position: sticky; top: 0; z-index: 100; }
+  .toc a { color: rgba(255,255,255,0.7); text-decoration: none; font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.04em; transition: color 0.2s; }
+  .toc a:hover { color: var(--highlight); }
+  .section { max-width: 900px; margin: 0 auto; padding: 4rem 2rem; border-bottom: 1px solid var(--rule); }
+  .section-eyebrow { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.5rem; }
+  .section h2 { font-family: var(--display); font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 700; margin-bottom: 1.5rem; color: var(--ink); }
+  .section h3 { font-family: var(--display); font-size: 1.25rem; font-weight: 700; margin: 2rem 0 0.8rem; color: var(--accent); }
+  .section p { margin-bottom: 1rem; color: #333; }
+  .callout { border-left: 4px solid var(--highlight); background: #fff8ee; padding: 1rem 1.25rem; border-radius: 0 6px 6px 0; margin: 1.5rem 0; font-size: 0.95rem; }
+  .callout strong { color: var(--accent); }
+  .callout-blue  { border-left-color: var(--blue);   background: #eef3ff; }
+  .callout-green { border-left-color: var(--green);  background: #edfaf3; }
+  .callout-red   { border-left-color: var(--red);    background: #fff0f0; }
+  .callout-purple{ border-left-color: var(--purple); background: #f5f0ff; }
+  .math-box { background: var(--ink); color: #e8e8e8; font-family: var(--mono); font-size: 0.86rem; line-height: 1.9; padding: 1.5rem; border-radius: 8px; margin: 1.5rem 0; overflow-x: auto; white-space: pre; }
+  .math-box .comment { color: #6a9f6a; } .math-box .var { color: #f0b060; } .math-box .eq { color: #7ab8f5; } .math-box .hi { color: #ff9090; }
+  table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.88rem; }
+  th { background: var(--accent); color: #fff; padding: 0.6rem 0.9rem; text-align: left; font-family: var(--mono); font-size: 0.76rem; letter-spacing: 0.04em; }
+  td { padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--mid); vertical-align: top; }
+  tr:nth-child(even) td { background: #fafaf7; }
+  .diagram-wrap { background: #fff; border: 1px solid var(--rule); border-radius: 10px; padding: 1.5rem; margin: 2rem 0; overflow-x: auto; }
+  .diagram-caption { text-align: center; font-family: var(--mono); font-size: 0.74rem; color: #777; margin-top: 0.75rem; letter-spacing: 0.04em; line-height: 1.6; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+  .step-card { background: #fff; border: 1px solid var(--rule); border-radius: 8px; padding: 1.1rem; }
+  .step-num { font-family: var(--mono); font-size: 1.9rem; font-weight: 600; color: var(--mid); line-height: 1; margin-bottom: 0.4rem; }
+  .step-card h4 { font-size: 0.88rem; font-weight: 600; color: var(--accent); margin-bottom: 0.35rem; }
+  .step-card p { font-size: 0.82rem; margin: 0; color: #444; }
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+  .compare-card { border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; background: #fff; }
+  .compare-card-header { padding: 0.6rem 1rem; font-family: var(--mono); font-size: 0.76rem; font-weight: 600; letter-spacing: 0.04em; }
+  .compare-card-body { padding: 1rem; font-size: 0.86rem; }
+  .compare-card-body ul { list-style: none; }
+  .compare-card-body li { margin-bottom: 0.4rem; padding-left: 1.1rem; position: relative; }
+  .compare-card-body li::before { content: '→'; position: absolute; left: 0; color: var(--highlight); }
+  @media (max-width: 620px) { .compare-grid { grid-template-columns: 1fr; } .steps { grid-template-columns: 1fr 1fr; } .section { padding: 2.5rem 1.2rem; } }</style>
+<div class="hero">
+  <div class="hero-label">Module 2 · Part 3 — Study Guide</div>
+  <h1>Test-Time Scaling</h1>
+  <p>A second axis for buying model capability — not more parameters or training data, but more compute spent 
+    <em>thinking</em> at inference time. Deliberate reasoning, majority voting, self-reflection, and the scaling curves that govern all three.
+  </p>
+</div>
+<nav class="toc">
+  <a href="#s1">01 What Is It</a>
+  <a href="#s2">02 Deliberate Reasoning</a>
+  <a href="#s3">03 Majority Voting</a>
+  <a href="#s4">04 Self-Reflection</a>
+  <a href="#s5">05 Scaling Laws</a>
+  <a href="#s6">06 Takeaways</a>
+</nav>
+<section class="section" id="s1">
+  <div class="section-eyebrow">Section 01</div>
+  <h2>What Is Test-Time Scaling?</h2>
+  <p>Module 1 §07 covered 
+    <strong>train-time scaling</strong>: more parameters and more training tokens (Chinchilla) buy a better base model — paid for once, before deployment. 
+    <strong>Test-time scaling</strong> (also called inference-time compute scaling) is a second, independent lever: spend 
+    <em>more compute per query, at answer time</em> — more sampled reasoning paths, longer reasoning chains, more search — to buy higher accuracy on that one query, without changing the model's weights at all.
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 760 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;display:block;margin:0 auto">
+      <text x="380" y="24" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#333" font-weight="600" letter-spacing="1.5">TWO INDEPENDENT AXES OF COMPUTE</text>
+      <rect x="40" y="55" width="320" height="170" rx="10" fill="#eef3ff" stroke="#2255aa" stroke-width="1.5"></rect>
+      <text x="200" y="80" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a3a5c" font-weight="700">TRAIN-TIME SCALING</text>
+      <text x="200" y="102" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#444">Spent ONCE, before deployment</text>
+      <text x="200" y="122" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a3a5c">↑ parameters, ↑ training tokens</text>
+      <text x="200" y="142" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#444">Produces: a more capable base model</text>
+      <text x="200" y="162" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#444">Cost: weeks, thousands of GPUs</text>
+      <text x="200" y="182" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#444">Same for every future query</text>
+      <text x="200" y="204" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#2255aa">Module 1 §07</text>
+      <rect x="400" y="55" width="320" height="170" rx="10" fill="#edfaf3" stroke="#2a7a4b" stroke-width="1.5"></rect>
+      <text x="560" y="80" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a5c38" font-weight="700">TEST-TIME SCALING</text>
+      <text x="560" y="102" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#444">Spent PER QUERY, at answer time</text>
+      <text x="560" y="122" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a5c38">↑ samples, ↑ reasoning tokens, ↑ search</text>
+      <text x="560" y="142" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#444">Produces: a more accurate ANSWER</text>
+      <text x="560" y="162" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#444">Cost: seconds, one query's worth of GPU</text>
+      <text x="560" y="182" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#444">Tunable per-query, on demand</text>
+      <text x="560" y="204" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#2a7a4b">this Part 3</text>
+    </svg>
+    <div class="diagram-caption">FIG 1 — The two axes are independent and stackable: a bigger/better-trained model AND more inference-time compute per query both improve accuracy, through completely different mechanisms and cost structures.</div>
+  </div>
+  <div class="callout callout-blue">
+    <strong>Why this became a big deal:</strong> OpenAI's o1/o3 and similar "reasoning models" made explicit what self-consistency (Module 2 Part 1 §04) had already hinted at — letting a model spend more tokens/samples "thinking" before answering can improve accuracy by more, for a given dollar, than simply training a bigger model. It reframes "how good is this model" into "how good is this model 
+    <em>at a given inference budget</em>" — the right comparison is a curve, not a single number.
+  </div>
+</section>
+<section class="section" id="s2">
+  <div class="section-eyebrow">Section 02</div>
+  <h2>Deliberate Reasoning</h2>
+  <p>
+    <strong>Deliberate reasoning</strong> is simply allowing (or explicitly instructing) the model to generate a longer chain of intermediate reasoning before committing to a final answer — trading generation length for accuracy. "Reasoning models" are trained (via RL on verifiable reward, e.g. correct/incorrect on math and code problems) to 
+    <em>learn when to keep reasoning</em> rather than stopping early, often producing reasoning traces many times longer than a direct answer would need.
+  </p>
+  <table>
+    <tbody>
+      <tr>
+        <th>Approach</th>
+        <th>How reasoning length is controlled</th>
+      </tr>
+      <tr>
+        <td>Prompted CoT (Module 2 Part 1 §03)</td>
+        <td>Length follows naturally from "think step by step" — no explicit budget</td>
+      </tr>
+      <tr>
+        <td>Budget forcing</td>
+        <td>Explicitly force the model to continue reasoning past its natural stopping point (e.g. append "Wait, let me double check" and continue generating) or cut it off at a token budget</td>
+      </tr>
+      <tr>
+        <td>RL-trained reasoning models</td>
+        <td>Reasoning length is itself learned — the model is rewarded for correct final answers and implicitly learns how much deliberation different problem difficulties need</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-purple">
+    <strong>The trade-off is explicit, not hidden:</strong> longer reasoning traces cost more tokens (latency + money) in direct proportion to their length. Deliberate reasoning is a dial, not a free upgrade — the question test-time scaling as a field is really asking is "for a fixed accuracy target, what's the cheapest way to spend inference compute to reach it?"
+  </div>
+</section>
+<section class="section" id="s3">
+  <div class="section-eyebrow">Section 03</div>
+  <h2>Majority Voting, at Scale</h2>
+  <p>Self-consistency (Module 2 Part 1 §04) is the simplest test-time scaling method: sample K independent reasoning paths, vote on the final answer. This section asks the natural follow-up — how does accuracy actually behave as K grows, and where are the practical limits?</p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 700 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;display:block;margin:0 auto">
+      <text x="350" y="24" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#333" font-weight="600" letter-spacing="1.5">ACCURACY VS. K (SAMPLES), SCHEMATIC</text>
+      <line x1="80" y1="220" x2="80" y2="50" stroke="#888" stroke-width="1.3"></line>
+      <line x1="80" y1="220" x2="620" y2="220" stroke="#888" stroke-width="1.3"></line>
+      <text x="60" y="55" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="9" fill="#888">accuracy</text>
+      <text x="600" y="238" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#888">K (samples voted) →</text>
+      <path d="M90 195 Q 150 100 220 78 Q 320 58 420 50 Q 520 46 610 44" fill="none" stroke="#2a7a4b" stroke-width="2.5"></path>
+      <text x="200" y="95" font-family="IBM Plex Mono,monospace" font-size="9" fill="#2a7a4b">log-linear-ish gains early</text>
+      <text x="470" y="38" font-family="IBM Plex Mono,monospace" font-size="9" fill="#2a7a4b">flattens — ceiling set by the base model's per-sample accuracy</text>
+      <line x1="80" y1="220" x2="80" y2="220" stroke="#ccc"></line>
+    </svg>
+    <div class="diagram-caption">FIG 2 — Majority voting accuracy climbs quickly at low K, then flattens toward a ceiling. That ceiling is set by whether the model's 
+      <em>correct</em> answer distribution actually outweighs any single wrong-but-plausible answer — if the model is systematically wrong (not just noisy), no amount of voting fixes it.
+    </div>
+  </div>
+  <div class="callout callout-red">
+    <strong>Exam favourite:</strong> "Does majority voting always improve accuracy as K increases?" — No. It helps when errors are 
+    <em>diverse and unbiased</em> (each wrong path tends to land on a different wrong answer, so the correct answer still wins the plurality). It does 
+    <em>not</em> help against a 
+    <em>systematic</em> error — if the model consistently reasons its way to the same wrong answer, voting more just gets a more confident wrong answer.
+  </div>
+</section>
+<section class="section" id="s4">
+  <div class="section-eyebrow">Section 04</div>
+  <h2>Self-Reflection as Compute Allocation</h2>
+  <p>Module 2 Part 2 §05 introduced reflection as a way to 
+    <em>improve correctness</em> through iterative self-critique. Viewed through the test-time scaling lens, reflection is really a different way of 
+    <strong>spending the same inference budget</strong>: instead of K parallel independent samples (majority voting), spend those tokens on a smaller number of 
+    <em>sequential, informed</em> attempts.
+  </p>
+  <table>
+    <tbody>
+      <tr>
+        <th></th>
+        <th>Majority voting (parallel)</th>
+        <th>Reflection (sequential)</th>
+      </tr>
+      <tr>
+        <td>Attempts</td>
+        <td>K independent, simultaneous</td>
+        <td>Fewer, each informed by the previous one's failure</td>
+      </tr>
+      <tr>
+        <td>Information sharing between attempts</td>
+        <td>None</td>
+        <td>Explicit — a natural-language critique carried forward</td>
+      </tr>
+      <tr>
+        <td>Best when</td>
+        <td>Errors are diverse/random across samples</td>
+        <td>Errors are diagnosable — a critique can identify what specifically went wrong</td>
+      </tr>
+      <tr>
+        <td>Failure mode</td>
+        <td>Systematic bias survives voting (§03)</td>
+        <td>Reflection can loop without converging if the critique itself is flawed</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-green">
+    <strong>They're not mutually exclusive.</strong> A practical system can combine both: sample several independent attempts (parallel), and within each, allow a couple of reflection rounds (sequential) — spending a fixed total inference budget along whichever axis the task responds to better.
+  </div>
+</section>
+<section class="section" id="s5">
+  <div class="section-eyebrow">Section 05</div>
+  <h2>Inference-Time Compute Scaling Laws</h2>
+  <p>Just as Module 1 §07 showed loss decreasing predictably with training compute (Chinchilla), research on test-time scaling (notably Snell et al., 2024, and OpenAI's o1 report) shows a similar pattern for 
+    <em>inference</em> compute: plotted on a log scale, accuracy tends to improve roughly linearly with the log of inference-time compute spent per query — up to a point.
+  </p>
+  <div class="math-box">
+    <span class="comment">// Schematic relationship (not a universal law — task- and model-dependent)</span>
+    <span class="var">accuracy</span> ≈ 
+    <span class="eq">a · log(inference_compute) + b</span>     
+    <span class="comment">// up to a ceiling</span>
+    <span class="comment">// "Inference compute" here bundles several knobs that all cost tokens:</span>
+    <span class="comment">//   - K, the number of sampled reasoning paths (§03)</span>
+    <span class="comment">//   - reasoning chain length per sample (§02, "deliberate reasoning")</span>
+    <span class="comment">//   - search breadth/depth if using Tree-of-Thoughts (Module 2 Part 2 §01)</span>
+  </div>
+  <h3>A key finding: small model + test-time compute can beat a bigger model</h3>
+  <p>Snell et al. (2024) showed that, on math benchmarks, a 
+    <strong>smaller</strong> model given a larger inference-time compute budget (more sampling/search) can outperform a substantially larger model given a smaller inference budget, 
+    <em>for the same total compute</em>. This is the practical reason test-time scaling matters as a design decision, not just a research curiosity: it changes where the compute budget is best spent.
+  </p>
+  <div class="callout callout-blue">
+    <strong>The caveat that makes this a genuine trade-off, not a free lunch:</strong> train-time compute is paid once and amortized across every future query forever; test-time compute is paid 
+    <em>again, every single query</em>. A cheap-to-train, expensive-to-run model can be the wrong choice for a high-volume production system even if it's the right choice for a low-volume, accuracy-critical one (e.g. a hard one-off math problem vs. a customer-support chatbot serving millions of requests).
+  </div>
+  <table>
+    <tbody>
+      <tr>
+        <th>Scenario</th>
+        <th>Favors</th>
+      </tr>
+      <tr>
+        <td>Low query volume, high accuracy stakes (research, hard one-off problems)</td>
+        <td>Heavier test-time compute — sample more, reason longer</td>
+      </tr>
+      <tr>
+        <td>High query volume, cost-sensitive (consumer chat, high-traffic APIs)</td>
+        <td>Heavier train-time investment in a better base model, lighter test-time budget per query</td>
+      </tr>
+      <tr>
+        <td>Unknown query difficulty ahead of time</td>
+        <td>Adaptive compute — spend more only when an easy first pass indicates the problem is actually hard</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+<section class="section" id="s6">
+  <div class="section-eyebrow">Section 06</div>
+  <h2>Key Takeaways &amp; Exam Prep</h2>
+  <div class="steps">
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>A second, independent axis</h4>
+      <p>Test-time compute buys accuracy on one query; train-time compute buys a better model for every future query.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Deliberate reasoning is a length dial</h4>
+      <p>Longer reasoning traces cost proportionally more tokens — an explicit, tunable trade-off.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Majority voting has a ceiling</h4>
+      <p>Helps against diverse/random errors; does nothing against systematic bias.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Reflection reallocates the same budget sequentially</h4>
+      <p>Fewer, informed attempts instead of many independent ones.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Small model + big inference budget can beat big model + small budget</h4>
+      <p>For fixed total compute — but train-time cost amortizes, test-time cost doesn't.</p>
+    </div>
+  </div>
+  <h3>Common exam questions</h3>
+  <table>
+    <tbody>
+      <tr>
+        <th>Question</th>
+        <th>Short answer</th>
+      </tr>
+      <tr>
+        <td>What's the fundamental difference between train-time and test-time scaling?</td>
+        <td>Train-time compute is spent once, before deployment, improving the model for all future queries; test-time compute is spent per query, at inference, improving the answer to that one query</td>
+      </tr>
+      <tr>
+        <td>Why doesn't majority voting always improve with more samples?</td>
+        <td>It corrects for diverse/random errors across samples, but not for a systematic bias the model consistently reasons into — voting more just increases confidence in the same wrong answer</td>
+      </tr>
+      <tr>
+        <td>Why might a smaller model with a larger test-time budget beat a larger model with a smaller one?</td>
+        <td>For a fixed total compute budget, spending it on more inference-time reasoning/search can yield higher accuracy than spending the same compute on training a bigger model — shown empirically on math benchmarks (Snell et al., 2024)</td>
+      </tr>
+      <tr>
+        <td>When should you prefer investing in train-time over test-time compute?</td>
+        <td>High query volume, cost-sensitive deployments — train-time cost amortizes across all future queries, while test-time cost repeats every single query</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout" style="margin-top:2rem">
+    <strong>References:</strong>
+    <br>
+    Wang et al. (2022) — Self-Consistency Improves Chain of Thought Reasoning in Language Models.
+    <br>
+    Snell et al. (2024) — Scaling LLM Test-Time Compute Optimally can be More Effective than Scaling Parameters.
+    <br>
+    OpenAI (2024) — Learning to Reason with LLMs (o1 system card).
+    <br>
+    Hoffmann et al. (2022) — Training Compute-Optimal Large Language Models (Chinchilla) — the train-time analogue.
+  </div>
+</section>
+<footer style="text-align:center;padding:2rem;font-family:var(--mono);font-size:0.75rem;color:#aaa;border-top:1px solid var(--rule)">Module 2 · Part 3 — Test-Time Scaling · Companion to Part 2 (Advanced Reasoning) and Part 4 (Structured Generation)</footer>

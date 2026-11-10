@@ -1,0 +1,453 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt Engineering — Study Guide</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Fraunces:ital,wght@0,300;0,700;1,300&family=Inter:wght@400;500;600&display=swap');
+  :root {
+    --ink:       #0f1117;
+    --paper:     #f7f6f2;
+    --mid:       #e8e5dd;
+    --rule:      #c9c4b8;
+    --accent:    #1a3a5c;
+    --highlight: #e8a020;
+    --green:     #2a7a4b;
+    --red:       #b83232;
+    --blue:      #2255aa;
+    --purple:    #6b3fa0;
+    --teal:      #0d7a7a;
+    --mono:      'IBM Plex Mono', monospace;
+    --display:   'Fraunces', Georgia, serif;
+    --body:      'Inter', system-ui, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--body); background: var(--paper); color: var(--ink); line-height: 1.7; font-size: 16px; }
+  .hero { background: linear-gradient(160deg, #0f1117 0%, #1a3a5c 100%); color: #fff; padding: 4rem 2rem 3rem; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 20% 30%, rgba(232,160,32,0.10), transparent 40%), radial-gradient(circle at 80% 70%, rgba(42,122,75,0.12), transparent 40%); }
+  .hero-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--highlight); margin-bottom: 1rem; position: relative; }
+  .hero h1 { font-family: var(--display); font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; line-height: 1.1; margin-bottom: 1rem; position: relative; }
+  .hero p { font-size: 1.1rem; opacity: 0.82; max-width: 640px; margin: 0 auto; position: relative; }
+  .toc { background: var(--ink); color: #fff; padding: 1.2rem 2rem; display: flex; gap: 1.3rem; flex-wrap: wrap; justify-content: center; position: sticky; top: 0; z-index: 100; }
+  .toc a { color: rgba(255,255,255,0.7); text-decoration: none; font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.04em; transition: color 0.2s; }
+  .toc a:hover { color: var(--highlight); }
+  .section { max-width: 900px; margin: 0 auto; padding: 4rem 2rem; border-bottom: 1px solid var(--rule); }
+  .section-eyebrow { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.5rem; }
+  .section h2 { font-family: var(--display); font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 700; margin-bottom: 1.5rem; color: var(--ink); }
+  .section h3 { font-family: var(--display); font-size: 1.25rem; font-weight: 700; margin: 2rem 0 0.8rem; color: var(--accent); }
+  .section p { margin-bottom: 1rem; color: #333; }
+  .callout { border-left: 4px solid var(--highlight); background: #fff8ee; padding: 1rem 1.25rem; border-radius: 0 6px 6px 0; margin: 1.5rem 0; font-size: 0.95rem; }
+  .callout strong { color: var(--accent); }
+  .callout-blue  { border-left-color: var(--blue);   background: #eef3ff; }
+  .callout-green { border-left-color: var(--green);  background: #edfaf3; }
+  .callout-red   { border-left-color: var(--red);    background: #fff0f0; }
+  .callout-purple{ border-left-color: var(--purple); background: #f5f0ff; }
+  .math-box { background: var(--ink); color: #e8e8e8; font-family: var(--mono); font-size: 0.86rem; line-height: 1.9; padding: 1.5rem; border-radius: 8px; margin: 1.5rem 0; overflow-x: auto; white-space: pre; }
+  .math-box .comment { color: #6a9f6a; }
+  .math-box .var     { color: #f0b060; }
+  .math-box .eq      { color: #7ab8f5; }
+  .math-box .hi      { color: #ff9090; }
+  table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.88rem; }
+  th { background: var(--accent); color: #fff; padding: 0.6rem 0.9rem; text-align: left; font-family: var(--mono); font-size: 0.76rem; letter-spacing: 0.04em; }
+  td { padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--mid); vertical-align: top; }
+  tr:nth-child(even) td { background: #fafaf7; }
+  .diagram-wrap { background: #fff; border: 1px solid var(--rule); border-radius: 10px; padding: 1.5rem; margin: 2rem 0; overflow-x: auto; }
+  .diagram-caption { text-align: center; font-family: var(--mono); font-size: 0.74rem; color: #777; margin-top: 0.75rem; letter-spacing: 0.04em; line-height: 1.6; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+  .step-card { background: #fff; border: 1px solid var(--rule); border-radius: 8px; padding: 1.1rem; }
+  .step-num { font-family: var(--mono); font-size: 1.9rem; font-weight: 600; color: var(--mid); line-height: 1; margin-bottom: 0.4rem; }
+  .step-card h4 { font-size: 0.88rem; font-weight: 600; color: var(--accent); margin-bottom: 0.35rem; }
+  .step-card p { font-size: 0.82rem; margin: 0; color: #444; }
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+  .compare-card { border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; background: #fff; }
+  .compare-card-header { padding: 0.6rem 1rem; font-family: var(--mono); font-size: 0.76rem; font-weight: 600; letter-spacing: 0.04em; }
+  .compare-card-body { padding: 1rem; font-size: 0.86rem; }
+  .compare-card-body ul { list-style: none; }
+  .compare-card-body li { margin-bottom: 0.4rem; padding-left: 1.1rem; position: relative; }
+  .compare-card-body li::before { content: '→'; position: absolute; left: 0; color: var(--highlight); }
+  .promptbox { background: #fff; border: 1px solid var(--rule); border-radius: 8px; padding: 1.1rem 1.3rem; margin: 1.2rem 0; font-family: var(--mono); font-size: 0.85rem; line-height: 1.75; white-space: pre-wrap; }
+  .promptbox .role { color: var(--purple); font-weight: 600; }
+  .promptbox .user { color: var(--blue); font-weight: 600; }
+  .promptbox .out   { color: var(--green); font-weight: 600; }
+  @media (max-width: 620px) {
+    .compare-grid { grid-template-columns: 1fr; }
+    .steps { grid-template-columns: 1fr 1fr; }
+    .section { padding: 2.5rem 1.2rem; }
+  }</style>
+<div class="hero">
+  <div class="hero-label">Module 2 · Part 1 — Study Guide</div>
+  <h1>Prompt Engineering</h1>
+  <p>Zero-shot, few-shot, chain-of-thought, and self-consistency — the four techniques every other Module 2 topic (advanced reasoning, test-time scaling, structured generation) builds on top of.</p>
+</div>
+<nav class="toc">
+  <a href="#s1">01 Zero-Shot</a>
+  <a href="#s2">02 Few-Shot</a>
+  <a href="#s3">03 Chain-of-Thought</a>
+  <a href="#s4">04 Self-Consistency</a>
+  <a href="#s5">05 Prompt Anatomy</a>
+  <a href="#s6">06 Takeaways</a>
+</nav>
+<section class="section" id="s1">
+  <div class="section-eyebrow">Section 01</div>
+  <h2>Zero-Shot Prompting</h2>
+  <p>
+    <strong>Zero-shot prompting</strong> means asking an instruction-tuned LLM to perform a task by describing it in natural language alone — no worked examples included. It works because instruction-tuning (Module 1 §07's "adaptation" step) already exposed the model to millions of instruction→response pairs across countless task types; a new instruction at inference time is just another point in a space the model has already learned to navigate.
+  </p>
+  <div class="promptbox">
+    <span class="role">System:</span> You are a helpful assistant.
+    <span class="user">User:</span> Classify the sentiment of this review as Positive, Negative, or Neutral.
+Review: "The battery life is incredible but the camera is disappointing."
+    <span class="out">Model:</span> Neutral — the review expresses both a strong positive (battery) and a negative (camera), balancing out overall.
+  </div>
+  <h3>When zero-shot works — and when it doesn't</h3>
+  <table>
+    <tbody>
+      <tr>
+        <th>Zero-shot tends to work when...</th>
+        <th>Zero-shot tends to fail when...</th>
+      </tr>
+      <tr>
+        <td>The task is common and well-represented in pretraining/instruction data (translation, summarization, sentiment)</td>
+        <td>The task requires a specific, unusual output format the model has to infer correctly on the first try</td>
+      </tr>
+      <tr>
+        <td>The instruction is unambiguous and self-contained</td>
+        <td>The task is domain-specific with conventions the model can't guess (your company's ticket taxonomy, a niche schema)</td>
+      </tr>
+      <tr>
+        <td>You need speed/cost — no examples means a shorter, cheaper prompt</td>
+        <td>Edge cases and boundary behavior matter and need to be demonstrated, not just described</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    <strong>The core trade-off across this entire section:</strong> zero-shot → few-shot → chain-of-thought → self-consistency is a ladder of increasing prompt length (and therefore cost and latency) in exchange for increasing reliability. Always start at zero-shot and climb only as far as accuracy demands — see §05 for how to decide when to stop.
+  </div>
+</section>
+<section class="section" id="s2">
+  <div class="section-eyebrow">Section 02</div>
+  <h2>Few-Shot Prompting</h2>
+  <p>
+    <strong>Few-shot prompting</strong> adds K worked examples (input→output pairs) directly into the prompt before the real query. The model performs the task purely via in-context learning — no weight updates, exactly as introduced in Module 1 §02.
+  </p>
+  <div class="promptbox">
+    <span class="user">User:</span> Classify sentiment as Positive, Negative, or Neutral.
+Review: "Best purchase I've made all year." → Positive
+Review: "Stopped working after two days." → Negative
+Review: "It's fine, does what it says." → Neutral
+Review: "Works okay I guess, nothing special." → 
+    <span class="out">Neutral</span>
+  </div>
+  <h3>What actually changes with more examples</h3>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 700 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;display:block;margin:0 auto">
+      <text x="350" y="24" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#333" font-weight="600" letter-spacing="1.5">ACCURACY VS. NUMBER OF SHOTS (SCHEMATIC)</text>
+      <line x1="80" y1="220" x2="80" y2="50" stroke="#888" stroke-width="1.3"></line>
+      <line x1="80" y1="220" x2="620" y2="220" stroke="#888" stroke-width="1.3"></line>
+      <text x="60" y="55" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="9" fill="#888">accuracy</text>
+      <text x="600" y="238" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#888">k (number of examples) →</text>
+      <path d="M90 200 Q 160 90 260 75 Q 380 65 480 62 Q 550 60 610 60" fill="none" stroke="#2255aa" stroke-width="2.5"></path>
+      <text x="130" y="90" font-family="IBM Plex Mono,monospace" font-size="9" fill="#2255aa">0→4 shots: biggest jump</text>
+      <text x="420" y="50" font-family="IBM Plex Mono,monospace" font-size="9" fill="#2255aa">diminishing returns, then plateau/noise</text>
+      <line x1="80" y1="220" x2="80" y2="220" stroke="#ccc"></line>
+      <text x="80" y="235" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#888">0</text>
+    </svg>
+    <div class="diagram-caption">FIG 1 — The typical shape: going from 0 to a handful of examples yields the largest accuracy gain; beyond roughly 4–8 shots, returns diminish and can even reverse (context dilution, recency bias toward the last example).</div>
+  </div>
+  <table>
+    <tbody>
+      <tr>
+        <th>Factor</th>
+        <th>Why it matters</th>
+      </tr>
+      <tr>
+        <td>
+          <strong>Example selection</strong>
+        </td>
+        <td>Examples close to the actual query (in topic, difficulty, format) transfer better than generic ones — this is the entire idea behind retrieval-augmented few-shot prompting</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Example order</strong>
+        </td>
+        <td>LLMs show measurable sensitivity to ordering — models tend to weight the most recent example more heavily (recency bias)</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Label balance</strong>
+        </td>
+        <td>An unbalanced set of examples (e.g. 3 Positive, 1 Negative) can bias the model's output distribution even when the instruction is neutral</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Format consistency</strong>
+        </td>
+        <td>Every example should use the exact same input/output template — inconsistent formatting is one of the most common few-shot failure modes</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-red">
+    <strong>Exam favourite:</strong> "Why doesn't few-shot performance keep improving as you add more examples?" — context dilution (the query gets buried among many examples), increased chance of an unhelpful or misleading example sneaking in, and the fixed context window making room for fewer, less-relevant examples as k grows.
+  </div>
+</section>
+<section class="section" id="s3">
+  <div class="section-eyebrow">Section 03</div>
+  <h2>Chain-of-Thought (CoT) Prompting</h2>
+  <p>Standard few-shot prompting shows input→output pairs. 
+    <strong>Chain-of-thought prompting</strong> shows input→
+    <em>reasoning</em>→output instead — the worked examples include the intermediate steps, not just the final answer. This alone produces large accuracy gains on multi-step tasks (arithmetic, logic, multi-hop QA).
+  </p>
+  <div class="compare-grid">
+    <div class="compare-card">
+      <div class="compare-card-header" style="background:#888;color:#fff">Standard prompting</div>
+      <div class="compare-card-body">
+        <p style="margin:0 0 8px">
+          <strong>Q:</strong> Roger has 5 tennis balls. He buys 2 more cans of 3 balls each. How many does he have now?
+        </p>
+        <p style="margin:0">
+          <strong>A:</strong> 11
+        </p>
+      </div>
+    </div>
+    <div class="compare-card">
+      <div class="compare-card-header" style="background:#2a7a4b;color:#fff">Chain-of-thought prompting</div>
+      <div class="compare-card-body">
+        <p style="margin:0 0 8px">
+          <strong>Q:</strong> Roger has 5 tennis balls. He buys 2 more cans of 3 balls each. How many does he have now?
+        </p>
+        <p style="margin:0">
+          <strong>A:</strong> Roger started with 5 balls. 2 cans × 3 balls = 6 more balls. 5 + 6 = 11. The answer is 11.
+        </p>
+      </div>
+    </div>
+  </div>
+  <h3>Zero-shot CoT: the "magic phrase"</h3>
+  <p>You don't need worked examples to trigger step-by-step reasoning — appending a simple instruction is often enough (Kojima et al., 2022):</p>
+  <div class="promptbox">
+    <span class="user">User:</span> A juggler can juggle 16 balls. Half are golf balls, and half of the golf balls are blue. How many blue golf balls are there?
+    <span class="out">Let's think step by step.</span>
+  </div>
+  <div class="math-box">
+    <span class="comment">// Why this works — the leading hypothesis</span>
+    <span class="comment">// Next-token prediction was trained on huge amounts of text where reasoning</span>
+    <span class="comment">// IS spelled out before a conclusion (math solutions, proofs, explanations,</span>
+    <span class="comment">// forum answers). "Let's think step by step" pattern-matches the model into</span>
+    <span class="comment">// that distribution of text — and once it starts generating intermediate</span>
+    <span class="comment">// steps, each step becomes part of the CONTEXT for predicting the next one.</span>
+    <span class="comment">// The model is effectively using its own output as scratch space.</span>
+  </div>
+  <div class="callout callout-blue">
+    <strong>Why CoT actually improves accuracy, mechanically:</strong> a decoder-only LLM (Module 1 §05) can only do a fixed amount of "computation" per generated token — one forward pass, one shot at the next token. A hard multi-step problem solved in a single token has no room for intermediate computation. Spreading the reasoning across many generated tokens gives the model many forward passes worth of computation for one problem — each token can attend back to every prior reasoning step via self-attention.
+  </div>
+  <table>
+    <tbody>
+      <tr>
+        <th>Variant</th>
+        <th>How it's triggered</th>
+        <th>Best for</th>
+      </tr>
+      <tr>
+        <td>Few-shot CoT</td>
+        <td>Worked examples include full reasoning chains</td>
+        <td>Highest reliability; costs more prompt tokens</td>
+      </tr>
+      <tr>
+        <td>Zero-shot CoT</td>
+        <td>"Let's think step by step" (or similar) appended, no examples</td>
+        <td>Quick reliability boost with no example-writing effort</td>
+      </tr>
+      <tr>
+        <td>Auto-CoT</td>
+        <td>Automatically generates and selects diverse CoT exemplars</td>
+        <td>Removes manual example-writing while keeping few-shot's reliability</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+<section class="section" id="s4">
+  <div class="section-eyebrow">Section 04</div>
+  <h2>Self-Consistency</h2>
+  <p>A single chain-of-thought can go down a wrong reasoning path. 
+    <strong>Self-consistency</strong> (Wang et al., 2022) samples 
+    <em>multiple</em> independent CoT reasoning paths for the same question (using temperature &gt; 0 for diversity), then takes a 
+    <strong>majority vote</strong> over the final answers — discarding the reasoning paths themselves.
+  </p>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;display:block;margin:0 auto">
+      <defs>
+        <marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#555"></polygon>
+        </marker>
+      </defs>
+      <rect x="300" y="15" width="160" height="40" rx="8" fill="#1a3a5c"></rect>
+      <text x="380" y="40" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="600">Same question, T&gt;0</text>
+      <line x1="330" y1="55" x2="130" y2="95" stroke="#888" stroke-width="1.5" marker-end="url(#a1)"></line>
+      <line x1="360" y1="55" x2="310" y2="95" stroke="#888" stroke-width="1.5" marker-end="url(#a1)"></line>
+      <line x1="400" y1="55" x2="470" y2="95" stroke="#888" stroke-width="1.5" marker-end="url(#a1)"></line>
+      <line x1="430" y1="55" x2="650" y2="95" stroke="#888" stroke-width="1.5" marker-end="url(#a1)"></line>
+      <rect x="40" y="100" width="180" height="70" rx="8" fill="#fff3cc" stroke="#e8a020" stroke-width="1.5"></rect>
+      <text x="130" y="125" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#7a5000" font-weight="700">Path 1</text>
+      <text x="130" y="145" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#7a5000">→ answer: 11</text>
+      <rect x="220" y="100" width="180" height="70" rx="8" fill="#edfaf3" stroke="#2a7a4b" stroke-width="1.5"></rect>
+      <text x="310" y="125" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a5c38" font-weight="700">Path 2</text>
+      <text x="310" y="145" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a5c38">→ answer: 11</text>
+      <rect x="400" y="100" width="180" height="70" rx="8" fill="#fff0f0" stroke="#b83232" stroke-width="1.5"></rect>
+      <text x="490" y="125" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#7a0000" font-weight="700">Path 3</text>
+      <text x="490" y="145" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#7a0000">→ answer: 9 (arithmetic slip)</text>
+      <rect x="580" y="100" width="180" height="70" rx="8" fill="#edfaf3" stroke="#2a7a4b" stroke-width="1.5"></rect>
+      <text x="670" y="125" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a5c38" font-weight="700">Path 4</text>
+      <text x="670" y="145" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a5c38">→ answer: 11</text>
+      <line x1="130" y1="170" x2="360" y2="230" stroke="#999" stroke-width="1.5" marker-end="url(#a1)"></line>
+      <line x1="310" y1="170" x2="370" y2="230" stroke="#999" stroke-width="1.5" marker-end="url(#a1)"></line>
+      <line x1="490" y1="170" x2="400" y2="230" stroke="#999" stroke-width="1.5" marker-end="url(#a1)"></line>
+      <line x1="670" y1="170" x2="420" y2="230" stroke="#999" stroke-width="1.5" marker-end="url(#a1)"></line>
+      <rect x="300" y="235" width="160" height="50" rx="8" fill="#333"></rect>
+      <text x="380" y="256" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">Majority vote</text>
+      <text x="380" y="272" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#8f8">→ 11 (3 of 4)</text>
+    </svg>
+    <div class="diagram-caption">FIG 2 — Self-consistency: sample K independent reasoning paths, keep only the final answers, and return the most frequent one. One flawed path (Path 3) gets outvoted rather than trusted.</div>
+  </div>
+  <div class="math-box">
+    <span class="comment">// Self-consistency, formally</span>
+    <span class="var">answer</span> = 
+    <span class="eq">mode( {a₁, a₂, ..., a_K} )</span>   
+    <span class="comment">// K independently sampled CoT paths, T &gt; 0</span>
+    <span class="comment">// Cost: K× the inference cost of a single CoT call</span>
+    <span class="comment">// Typical K in papers: 5–40, with accuracy gains flattening past ~20</span>
+  </div>
+  <div class="callout callout-purple">
+    <strong>Why voting on the ANSWER (not the reasoning) is the key design choice:</strong> reasoning paths can differ wildly in wording while converging on the same correct answer, or share superficial similarity while being wrong. Voting on the final extracted answer sidesteps having to judge reasoning quality — it only requires that 
+    <em>correct</em> reasoning paths are more common than any single 
+    <em>specific</em> wrong path, which holds empirically for most well-posed problems.
+  </div>
+  <div class="callout">
+    <strong>Preview — this is test-time compute scaling.</strong> Self-consistency spends more 
+    <em>inference-time</em> compute (K samples) to buy higher accuracy, with zero retraining. Module 2 §03 (Test-Time Scaling) generalizes this exact idea — more samples, more reasoning tokens, more inference compute — into a full framework for trading inference cost against accuracy.
+  </div>
+</section>
+<section class="section" id="s5">
+  <div class="section-eyebrow">Section 05</div>
+  <h2>Prompt Anatomy &amp; Best Practices</h2>
+  <p>Every technique above is really one skill: structuring a prompt so the model has everything it needs, and nothing that misleads it. A reliable prompt separates into distinct parts:</p>
+  <div class="steps">
+    <div class="step-card">
+      <div class="step-num" style="color:#2255aa">1</div>
+      <h4>Role / Persona</h4>
+      <p>Sets tone and domain framing ("You are a senior tax accountant...")</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">2</div>
+      <h4>Task instruction</h4>
+      <p>The single, unambiguous action to perform</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#2a7a4b">3</div>
+      <h4>Context</h4>
+      <p>Background data the model needs but doesn't have (a document, a schema, prior turns)</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#6b3fa0">4</div>
+      <h4>Examples</h4>
+      <p>Few-shot demonstrations, if the task needs them (§02)</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#b83232">5</div>
+      <h4>Output format constraints</h4>
+      <p>Exact shape of the expected answer — sets up §04's structured-generation topic</p>
+    </div>
+  </div>
+  <table>
+    <tbody>
+      <tr>
+        <th>Common pitfall</th>
+        <th>Fix</th>
+      </tr>
+      <tr>
+        <td>Vague verbs ("handle", "deal with", "look at")</td>
+        <td>Name the exact action ("classify", "summarize in 3 bullet points", "extract the date field")</td>
+      </tr>
+      <tr>
+        <td>Instruction and examples disagree on format</td>
+        <td>Make every example follow the exact format stated in the instruction, character-for-character</td>
+      </tr>
+      <tr>
+        <td>Negative instructions only ("don't be verbose")</td>
+        <td>State the positive target instead ("respond in exactly 2 sentences") — models follow positive constraints more reliably</td>
+      </tr>
+      <tr>
+        <td>Burying the actual question under a long preamble</td>
+        <td>Put the task/question close to the end of the prompt, right before generation starts</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout callout-green">
+    <strong>The decision rule for this whole section:</strong> start zero-shot. If accuracy is insufficient, add 2–4 well-chosen few-shot examples. If the task involves multiple reasoning steps, add chain-of-thought (few-shot or zero-shot). If a single CoT pass is still unreliable and the cost is acceptable, add self-consistency. Each step up this ladder costs more tokens — climb only as far as the accuracy bar requires.
+  </div>
+</section>
+<section class="section" id="s6">
+  <div class="section-eyebrow">Section 06</div>
+  <h2>Key Takeaways &amp; Exam Prep</h2>
+  <div class="steps">
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Zero-shot exploits instruction-tuning</h4>
+      <p>Works when the task is common and the instruction is unambiguous.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Few-shot is in-context learning</h4>
+      <p>No weight updates; sensitive to example choice, order, and label balance.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>CoT trades tokens for computation</h4>
+      <p>Spreading reasoning across generated tokens gives the model more forward passes per problem.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Self-consistency votes on answers, not reasoning</h4>
+      <p>K sampled paths, majority vote on the final extracted answer — an early form of test-time compute scaling.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="color:#e8a020">✓</div>
+      <h4>Climb the ladder only as needed</h4>
+      <p>Zero-shot → few-shot → CoT → self-consistency, stopping as soon as accuracy is sufficient.</p>
+    </div>
+  </div>
+  <h3>Common exam questions</h3>
+  <table>
+    <tbody>
+      <tr>
+        <th>Question</th>
+        <th>Short answer</th>
+      </tr>
+      <tr>
+        <td>What's the difference between few-shot prompting and fine-tuning?</td>
+        <td>Few-shot changes behavior temporarily via the prompt, no weight updates; fine-tuning (Module 1 §§03–06) permanently updates weights</td>
+      </tr>
+      <tr>
+        <td>Why does "let's think step by step" improve accuracy with zero examples?</td>
+        <td>It pattern-matches the model into generating explicit intermediate reasoning tokens, which then serve as additional context/computation for the final answer</td>
+      </tr>
+      <tr>
+        <td>Why vote on the final answer instead of the full reasoning chain in self-consistency?</td>
+        <td>Reasoning chains vary in wording even when correct; voting on the extracted final answer avoids needing to judge reasoning quality directly</td>
+      </tr>
+      <tr>
+        <td>What's the main risk of adding too many few-shot examples?</td>
+        <td>Context dilution and diminishing/reversing returns — the actual query gets buried and irrelevant examples can bias output</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout" style="margin-top:2rem">
+    <strong>References:</strong>
+    <br>
+    Brown et al. (2020) — Language Models are Few-Shot Learners.
+    <br>
+    Wei et al. (2022) — Chain-of-Thought Prompting Elicits Reasoning in Large Language Models.
+    <br>
+    Kojima et al. (2022) — Large Language Models are Zero-Shot Reasoners.
+    <br>
+    Wang et al. (2022) — Self-Consistency Improves Chain of Thought Reasoning in Language Models.
+    <br>
+    Zhang et al. (2022) — Automatic Chain of Thought Prompting in Large Language Models (Auto-CoT).
+  </div>
+</section>
+<footer style="text-align:center;padding:2rem;font-family:var(--mono);font-size:0.75rem;color:#aaa;border-top:1px solid var(--rule)">Module 2 · Part 1 — Prompt Engineering · Companion to Part 2 (Advanced Reasoning)</footer>

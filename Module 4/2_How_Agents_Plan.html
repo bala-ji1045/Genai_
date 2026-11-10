@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Agents Plan — Study Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Fraunces:ital,wght@0,300;0,700;1,300&family=Inter:wght@400;500;600&display=swap');
+  :root {
+    --ink: #0f1117; --paper: #f7f6f2; --mid: #e8e5dd; --rule: #c9c4b8; --accent: #1a3a5c;
+    --highlight: #e8a020; --green: #2a7a4b; --red: #b83232; --blue: #2255aa; --purple: #6b3fa0; --teal: #0d7a7a;
+    --mono: 'IBM Plex Mono', monospace; --display: 'Fraunces', Georgia, serif; --body: 'Inter', system-ui, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--body); background: var(--paper); color: var(--ink); line-height: 1.7; font-size: 16px; }
+  .hero { background: linear-gradient(160deg, #0f1117 0%, #1a3a5c 100%); color: #fff; padding: 4rem 2rem 3rem; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 20% 30%, rgba(232,160,32,0.10), transparent 40%), radial-gradient(circle at 80% 70%, rgba(42,122,75,0.12), transparent 40%); }
+  .hero-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--highlight); margin-bottom: 1rem; position: relative; }
+  .hero h1 { font-family: var(--display); font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; line-height: 1.1; margin-bottom: 1rem; position: relative; }
+  .hero p { font-size: 1.1rem; opacity: 0.82; max-width: 680px; margin: 0 auto; position: relative; }
+  .toc { background: var(--ink); color: #fff; padding: 1.2rem 2rem; display: flex; gap: 1.2rem; flex-wrap: wrap; justify-content: center; position: sticky; top: 0; z-index: 100; }
+  .toc a { color: rgba(255,255,255,0.7); text-decoration: none; font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.03em; transition: color 0.2s; }
+  .toc a:hover { color: var(--highlight); }
+  .section { max-width: 900px; margin: 0 auto; padding: 4rem 2rem; border-bottom: 1px solid var(--rule); }
+  .section-eyebrow { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.5rem; }
+  .section h2 { font-family: var(--display); font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 700; margin-bottom: 1.5rem; color: var(--ink); }
+  .section h3 { font-family: var(--display); font-size: 1.25rem; font-weight: 700; margin: 2rem 0 0.8rem; color: var(--accent); }
+  .section p { margin-bottom: 1rem; color: #333; }
+  .callout { border-left: 4px solid var(--highlight); background: #fff8ee; padding: 1rem 1.25rem; border-radius: 0 6px 6px 0; margin: 1.5rem 0; font-size: 0.95rem; }
+  .callout strong { color: var(--accent); }
+  .callout-blue  { border-left-color: var(--blue);   background: #eef3ff; }
+  .callout-green { border-left-color: var(--green);  background: #edfaf3; }
+  .callout-red   { border-left-color: var(--red);    background: #fff0f0; }
+  .callout-purple{ border-left-color: var(--purple); background: #f5f0ff; }
+  .callout-teal  { border-left-color: var(--teal);   background: #e9fafa; }
+  .math-box { background: var(--ink); color: #e8e8e8; font-family: var(--mono); font-size: 0.86rem; line-height: 1.9; padding: 1.5rem; border-radius: 8px; margin: 1.5rem 0; overflow-x: auto; white-space: pre; }
+  .math-box .comment { color: #6a9f6a; } .math-box .var { color: #f0b060; } .math-box .eq { color: #7ab8f5; } .math-box .hi { color: #ff9090; }
+  .codebox { background: #1c2333; color: #d8dee9; font-family: var(--mono); font-size: 0.8rem; line-height: 1.75; padding: 1.25rem 1.5rem; border-radius: 8px; margin: 1.5rem 0; overflow-x: auto; white-space: pre; }
+  .codebox .kw { color: #c792ea; } .codebox .str { color: #c3e88d; } .codebox .cm { color: #6a80a4; } .codebox .fn { color: #82aaff; } .codebox .num { color: #f78c6c; }
+  table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.88rem; }
+  th { background: var(--accent); color: #fff; padding: 0.6rem 0.9rem; text-align: left; font-family: var(--mono); font-size: 0.76rem; letter-spacing: 0.04em; }
+  td { padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--mid); vertical-align: top; }
+  tr:nth-child(even) td { background: #fafaf7; }
+  code { font-family: var(--mono); font-size: 0.85em; }
+  .diagram-wrap { background: #fff; border: 1px solid var(--rule); border-radius: 10px; padding: 1.5rem; margin: 2rem 0; overflow-x: auto; }
+  .diagram-caption { text-align: center; font-family: var(--mono); font-size: 0.74rem; color: #777; margin-top: 0.75rem; letter-spacing: 0.04em; line-height: 1.6; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+  .step-card { background: #fff; border: 1px solid var(--rule); border-radius: 8px; padding: 1.1rem; }
+  .step-num { font-family: var(--mono); font-size: 1.9rem; font-weight: 600; color: var(--mid); line-height: 1; margin-bottom: 0.4rem; }
+  .step-card h4 { font-size: 0.88rem; font-weight: 600; color: var(--accent); margin-bottom: 0.35rem; }
+  .step-card p { font-size: 0.82rem; margin: 0; color: #444; }
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+  .compare-card { border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; background: #fff; }
+  .compare-card-header { padding: 0.6rem 1rem; font-family: var(--mono); font-size: 0.76rem; font-weight: 600; letter-spacing: 0.04em; }
+  .compare-card-body { padding: 1rem; font-size: 0.86rem; }
+  .compare-card-body ul { list-style: none; }
+  .compare-card-body li { margin-bottom: 0.4rem; padding-left: 1.1rem; position: relative; }
+  .compare-card-body li::before { content: '→'; position: absolute; left: 0; color: var(--highlight); }
+  .section ul:not(.compare-card-body ul), .section ol { margin: 0 0 1rem 1.4rem; }
+  .family-banner { background: linear-gradient(160deg, #0f1117 0%, #1a3a5c 100%); color: #fff; text-align: center; padding: 2.2rem 1.5rem; }
+  .family-tag { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--highlight); margin-bottom: 0.4rem; }
+  .family-title { font-family: var(--display); font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 700; }
+  .family-sub { font-family: var(--mono); font-size: 0.76rem; opacity: 0.75; margin-top: 0.4rem; }
+  footer { text-align: center; padding: 2rem; font-family: var(--mono); font-size: 0.75rem; color: #aaa; border-top: 1px solid var(--rule); }
+  @media (max-width: 620px) { .compare-grid { grid-template-columns: 1fr; } .steps { grid-template-columns: 1fr 1fr; } .section { padding: 2.5rem 1.2rem; } }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-label">Module 4 · Part 2 — Study Guide</div>
+  <h1>How Agents Plan</h1>
+  <p>Part 1 named the goal-based agent. This Part is about <em>how</em> it decides what to do. First the classical answer, search and STRIPS planning, with worked examples. Then the modern answer: how LLM agents plan, using ReAct, plan-and-execute, reflection and tree search.</p>
+</div>
+
+<nav class="toc">
+  <a href="#s1">01 Two Families</a>
+  <a href="#s2">F1·02 Atomic States</a>
+  <a href="#s3">F1·03 Search</a>
+  <a href="#s4">F2·04 Classical Planning</a>
+  <a href="#s5">F2·05 STRIPS</a>
+  <a href="#s6">F2·06 Forward &amp; Backward</a>
+  <a href="#s7">07 Classical → LLM</a>
+  <a href="#s8">08 ReAct</a>
+  <a href="#s9">09 Plan-and-Execute</a>
+  <a href="#s10">10 Reflection</a>
+  <a href="#s11">11 Tree Search</a>
+  <a href="#s12">12 Choosing</a>
+  <a href="#s13">13 Takeaways</a>
+</nav>
+
+<section class="section" id="s1">
+  <div class="section-eyebrow">Section 01</div>
+  <h2>Planning &amp; the Two Families of Planners</h2>
+
+  <p><strong>Planning</strong> is the problem of finding a sequence of actions that transforms an initial state into a goal state. Every planning problem has the same four ingredients:</p>
+
+  <div class="steps">
+    <div class="step-card"><div class="step-num" style="color:#2255aa">1</div><h4>Initial state</h4><p>A complete description of the world before any action is taken.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">2</div><h4>Actions</h4><p>Operators that transform one state into another, each with conditions for when it applies.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#2a7a4b">3</div><h4>Goal state</h4><p>A description of what must be true when the plan finishes (often partial, not a full state).</p></div>
+    <div class="step-card"><div class="step-num" style="color:#6b3fa0">4</div><h4>Plan</h4><p>An ordered sequence of actions connecting initial → goal, found by search.</p></div>
+  </div>
+
+  <p><strong>Recap from Part 1, Section 03:</strong> a <strong>goal-based agent</strong> is type 3 on the Russell &amp; Norvig ladder. Unlike a reflex agent, it holds an explicit goal, predicts what each action would lead to, and picks actions that make the goal reachable. Part 1 explains <em>what</em> this agent type is. This Part explains <em>how</em> it decides: by <strong>planning</strong>.</p>
+
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;display:block;margin:0 auto">
+      <defs><marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#555"/></marker></defs>
+      <text x="360" y="24" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="600" letter-spacing="1.5">REFLEX AGENT VS. GOAL-BASED AGENT</text>
+
+      <rect x="30" y="45" width="300" height="130" rx="8" fill="#fff0f0" stroke="#b83232" stroke-width="1.5"/>
+      <text x="180" y="68" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#7a0000" font-weight="700">SIMPLE REFLEX</text>
+      <rect x="50" y="80" width="110" height="34" rx="5" fill="#f2c7c7"/><text x="105" y="101" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9">Percept</text>
+      <line x1="160" y1="97" x2="195" y2="97" stroke="#7a0000" stroke-width="2" marker-end="url(#a1)"/>
+      <rect x="200" y="80" width="110" height="34" rx="5" fill="#f2c7c7"/><text x="255" y="101" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9">Action</text>
+      <text x="180" y="140" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#444">Fixed rule: condition -&gt; action.</text>
+      <text x="180" y="155" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#444">No memory, no lookahead.</text>
+
+      <rect x="390" y="45" width="300" height="130" rx="8" fill="#edfaf3" stroke="#2a7a4b" stroke-width="1.5"/>
+      <text x="540" y="68" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a5c38" font-weight="700">GOAL-BASED</text>
+      <rect x="405" y="80" width="90" height="34" rx="5" fill="#c8ead6"/><text x="450" y="101" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8">Percept</text>
+      <line x1="495" y1="97" x2="520" y2="97" stroke="#1a5c38" stroke-width="2" marker-end="url(#a1)"/>
+      <rect x="525" y="65" width="90" height="34" rx="5" fill="#c8ead6"/><text x="570" y="86" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8">Predict outcome</text>
+      <rect x="525" y="105" width="90" height="34" rx="5" fill="#c8ead6"/><text x="570" y="126" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8">Compare to goal</text>
+      <text x="540" y="155" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#444">Chooses actions that make the</text>
+      <text x="540" y="167" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#444">GOAL more reachable — searches ahead.</text>
+    </svg>
+    <div class="diagram-caption">FIG 1 — A reflex agent has no notion of "why" — the rule fires or it doesn't. A goal-based agent explicitly evaluates candidate actions against how much closer they get it to a stated goal, which is what makes search (Section 03) meaningful in the first place.</div>
+  </div>
+
+  <h3>The two families of planning</h3>
+
+  <p>A goal-based agent can plan in two main ways. What separates them is <strong>how a state is represented</strong>, and that choice decides which search technique and which action description you can use.</p>
+
+  <table>
+    <tr><th></th><th>Family 1: Goal-based (search) planning</th><th>Family 2: Classical (STRIPS) planning</th></tr>
+    <tr><td><strong>State</strong></td><td><strong>Atomic</strong>: a black-box label, e.g. <code>In(Arad)</code></td><td><strong>Factored</strong>: a set of logical facts, e.g. <code>{On(C,A), Clear(B), HandEmpty}</code></td></tr>
+    <tr><td><strong>Actions</strong></td><td>A successor function <code>Result(s,a)</code>, looked up in a map or graph</td><td>STRIPS schemas with PRE / ADD / DEL lists the planner can inspect</td></tr>
+    <tr><td><strong>How the plan is found</strong></td><td>State-space <strong>graph search</strong>: BFS, DFS, A*</td><td>State-space search over <em>fact sets</em>: <strong>forward</strong> (progression) or <strong>backward</strong> (regression)</td></tr>
+    <tr><td><strong>Heuristic</strong></td><td>Hand-crafted for each problem (e.g. straight-line distance)</td><td>Can be <strong>derived automatically</strong> from the schemas (e.g. count unsatisfied goal facts, ignore delete lists)</td></tr>
+    <tr><td><strong>Generality</strong></td><td>One formulation per problem</td><td><strong>Domain-independent</strong>: one planner solves any problem written in STRIPS/PDDL</td></tr>
+    <tr><td><strong>Environment</strong></td><td>Any (search also extends to stochastic and partially observable settings)</td><td>Fully observable, deterministic, static, discrete (Section 04)</td></tr>
+    <tr><td><strong>Running example</strong></td><td>Romania: Arad → Bucharest</td><td>Blocks World: the 3-block Sussman problem</td></tr>
+    <tr><td><strong>Covered in</strong></td><td>Section 02 (formulation) and Section 03 (search algorithms)</td><td>Section 04 (classical planning), Section 05 (STRIPS), Section 06 (STRIPS search)</td></tr>
+  </table>
+
+  <div class="callout callout-red">
+    <strong>One-line exam answer:</strong> classical planning <em>is</em> goal-based planning. Both search for an action sequence that reaches a goal. The difference is that in Family 1, a state like <code>In(Arad)</code> is a closed box. In Family 2, the state is opened up into logical facts and the actions are described in STRIPS, which lets a single general-purpose planner reason about any problem. <strong>State-space search is used in both.</strong> Family 1 searches a graph of labels; Family 2 searches over sets of facts.
+  </div>
+
+  <div class="callout">
+    <strong>Planning vs. reactive response:</strong> a purely reactive agent (Part 1, Section 04) maps the current observation directly to an action — no lookahead. A planner explicitly reasons about the <em>consequences</em> of actions before committing, searching several steps ahead before acting even once. This lookahead-before-acting distinction reappears in the plan-and-execute strategy (Section 09).
+  </div>
+
+  <div class="callout callout-purple">
+    <strong>Where this connects to LLM agents:</strong> Part 1 (Section 04) places this agent type in the deliberative family. An LLM agent prompted with a goal and asked to plan its own steps (ReAct and plan-and-execute, Sections 08–09) is a goal-based agent in this exact classical sense — just with a language model doing the "compare to goal" reasoning instead of hand-coded symbolic logic.
+  </div>
+</section>
+<div class="family-banner">
+  <div class="family-tag">Family 1</div>
+  <div class="family-title">Goal-Based (Search) Planning</div>
+  <div class="family-sub">Atomic states · state-space graph search (BFS, DFS, A*) · Romania</div>
+</div>
+<section class="section" id="s2">
+  <div class="section-eyebrow">Section 02 · Family 1</div>
+  <h2>Problem Formulation with Atomic States</h2>
+
+  <p>In Family 1, the agent treats each state as an indivisible label. It can only ask two things: "which states can I reach from here?" and "is this the goal?". The classic example is route finding.</p>
+
+  <h3>Worked example — route finding with atomic states (Arad → Bucharest)</h3>
+
+  <p>This is the classic goal-based agent from Russell &amp; Norvig. A tourist in <strong>Arad</strong>, Romania, has a flight out of <strong>Bucharest</strong> tomorrow and needs the shortest driving route.</p>
+
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 700 310" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;display:block;margin:0 auto">
+      <g stroke="#999" stroke-width="1.5">
+        <line x1="130" y1="30" x2="90" y2="95"/>
+        <line x1="90" y1="95" x2="70" y2="165"/>
+        <line x1="70" y1="165" x2="80" y2="260"/>
+        <line x1="130" y1="30" x2="250" y2="140"/>
+        <line x1="250" y1="140" x2="400" y2="120"/>
+        <line x1="280" y1="210" x2="340" y2="285"/>
+        <line x1="440" y1="230" x2="340" y2="285"/>
+        <line x1="400" y1="120" x2="610" y2="240"/>
+      </g>
+      <g stroke="#2a7a4b" stroke-width="3.5">
+        <line x1="70" y1="165" x2="250" y2="140"/>
+        <line x1="250" y1="140" x2="280" y2="210"/>
+        <line x1="280" y1="210" x2="440" y2="230"/>
+        <line x1="440" y1="230" x2="610" y2="240"/>
+      </g>
+      <g font-family="IBM Plex Mono,monospace" font-size="9" fill="#555" style="paint-order:stroke;stroke:#fff;stroke-width:3px">
+        <text x="104" y="58" text-anchor="end">71</text>
+        <text x="74" y="132" text-anchor="end">75</text>
+        <text x="70" y="214" text-anchor="end">118</text>
+        <text x="198" y="80">151</text>
+        <text x="160" y="145" text-anchor="middle" fill="#1a5c38" font-weight="700">140</text>
+        <text x="325" y="122" text-anchor="middle">99</text>
+        <text x="272" y="178" fill="#1a5c38" font-weight="700">80</text>
+        <text x="360" y="212" text-anchor="middle" fill="#1a5c38" font-weight="700">97</text>
+        <text x="302" y="254" text-anchor="end">146</text>
+        <text x="398" y="268">138</text>
+        <text x="512" y="174">211</text>
+        <text x="525" y="228" text-anchor="middle" fill="#1a5c38" font-weight="700">101</text>
+      </g>
+      <g fill="#fff" stroke="#333" stroke-width="1.5">
+        <circle cx="130" cy="30" r="6"/><circle cx="90" cy="95" r="6"/><circle cx="80" cy="260" r="6"/>
+        <circle cx="400" cy="120" r="6"/><circle cx="340" cy="285" r="6"/>
+        <circle cx="250" cy="140" r="6" fill="#c8ead6"/><circle cx="280" cy="210" r="6" fill="#c8ead6"/><circle cx="440" cy="230" r="6" fill="#c8ead6"/>
+      </g>
+      <circle cx="70" cy="165" r="8" fill="#c7d9f2" stroke="#2255aa" stroke-width="2"/>
+      <circle cx="610" cy="240" r="8" fill="#c8ead6" stroke="#2a7a4b" stroke-width="2"/>
+      <g font-family="IBM Plex Mono,monospace" font-size="10" fill="#222" style="paint-order:stroke;stroke:#fff;stroke-width:3px">
+        <text x="142" y="34">Oradea <tspan fill="#e8a020">380</tspan></text>
+        <text x="102" y="99">Zerind <tspan fill="#e8a020">374</tspan></text>
+        <text x="70" y="188" text-anchor="middle" font-weight="700" fill="#1a3a5c">Arad <tspan fill="#e8a020">366</tspan></text>
+        <text x="92" y="264">Timisoara <tspan fill="#e8a020">329</tspan></text>
+        <text x="262" y="124">Sibiu <tspan fill="#e8a020">253</tspan></text>
+        <text x="400" y="106" text-anchor="middle">Fagaras <tspan fill="#e8a020">176</tspan></text>
+        <text x="268" y="214" text-anchor="end">Rimnicu Vilcea <tspan fill="#e8a020">193</tspan></text>
+        <text x="446" y="252">Pitesti <tspan fill="#e8a020">100</tspan></text>
+        <text x="352" y="296">Craiova <tspan fill="#e8a020">160</tspan></text>
+        <text x="610" y="264" text-anchor="middle" font-weight="700" fill="#1a5c38">Bucharest <tspan fill="#e8a020">0</tspan></text>
+      </g>
+    </svg>
+    <div class="diagram-caption">FIG 2 — Part of the Romania road map (Russell &amp; Norvig). Grey numbers are road distances in km. <span style="color:#e8a020">Orange numbers</span> are the straight-line distance to Bucharest, which is the heuristic h(n). The green route is the optimal path, 418 km.</div>
+  </div>
+
+  <p><strong>Problem formulation.</strong> Each state is just the name of a city. That's what <em>atomic</em> means.</p>
+
+  <table>
+    <tr><th>Component</th><th>Romania route finding</th></tr>
+    <tr><td><strong>States</strong></td><td><code>In(Arad)</code>, <code>In(Sibiu)</code>, <code>In(Bucharest)</code>, … (one indivisible label per city, 20 states in the full map)</td></tr>
+    <tr><td><strong>Initial state</strong></td><td><code>In(Arad)</code></td></tr>
+    <tr><td><strong>Actions</strong></td><td><code>Actions(In(Arad)) = { Go(Sibiu), Go(Timisoara), Go(Zerind) }</code></td></tr>
+    <tr><td><strong>Transition model</strong></td><td><code>Result(In(Arad), Go(Sibiu)) = In(Sibiu)</code>. This is a lookup in the road map, not a rule the agent can inspect.</td></tr>
+    <tr><td><strong>Goal test</strong></td><td><code>state == In(Bucharest)</code></td></tr>
+    <tr><td><strong>Path cost</strong></td><td>Sum of road distances (km)</td></tr>
+    <tr><td><strong>Heuristic</strong></td><td>h(n) = straight-line distance to Bucharest. This is <em>extra knowledge supplied from outside</em> (it comes from geography, not from the state).</td></tr>
+  </table>
+</section>
+<section class="section" id="s3">
+  <div class="section-eyebrow">Section 03 · Family 1</div>
+  <h2>State Space Search</h2>
+
+  <p>Once a problem is framed as "find a path from initial state to goal state," it becomes a graph search problem: states are nodes, actions are edges. Classical planning is, at its core, an application of search algorithms to this graph.</p>
+
+  <table>
+    <tr><th>Algorithm</th><th>Strategy</th><th>Guarantees</th></tr>
+    <tr><td><strong>BFS (Breadth-First Search)</strong></td><td>Explore all states at depth d before depth d+1</td><td>Finds the shortest plan (fewest actions), but memory-expensive</td></tr>
+    <tr><td><strong>DFS (Depth-First Search)</strong></td><td>Follow one branch as deep as possible before backtracking</td><td>Memory-efficient, but can find a needlessly long plan first</td></tr>
+    <tr><td><strong>A\* Search</strong></td><td>Best-first search guided by <code>f(n) = g(n) + h(n)</code> — cost so far plus a heuristic estimate to the goal</td><td>Finds the optimal plan, IF the heuristic never overestimates true cost (admissible)</td></tr>
+  </table>
+
+  <div class="math-box"><span class="comment">// A* evaluation function — the heuristic is what makes it smarter than plain BFS</span>
+<span class="var">f(n)</span> = <span class="eq">g(n) + h(n)</span>
+<span class="comment">//   g(n) = actual cost of the path from start to node n (known exactly)</span>
+<span class="comment">//   h(n) = ESTIMATED cost from n to the goal (a heuristic guess)</span>
+<span class="comment">// A* expands the node with lowest f(n) first — cheapest so far + most promising remaining</span></div>
+
+  <h3>Worked example — BFS vs. DFS vs. A* on one graph</h3>
+
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 620 225" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:620px;display:block;margin:0 auto">
+      <defs>
+        <marker id="a3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#555"/></marker>
+        <marker id="a3g" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2a7a4b"/></marker>
+      </defs>
+      <line x1="79" y1="103" x2="199" y2="58" stroke="#2a7a4b" stroke-width="3" marker-end="url(#a3g)"/>
+      <line x1="79" y1="117" x2="199" y2="162" stroke="#555" stroke-width="1.5" marker-end="url(#a3)"/>
+      <line x1="240" y1="50" x2="358" y2="50" stroke="#2a7a4b" stroke-width="3" marker-end="url(#a3g)"/>
+      <line x1="240" y1="54" x2="518" y2="106" stroke="#555" stroke-width="1.5" marker-end="url(#a3)"/>
+      <line x1="399" y1="57" x2="519" y2="102" stroke="#2a7a4b" stroke-width="3" marker-end="url(#a3g)"/>
+      <line x1="240" y1="166" x2="518" y2="114" stroke="#555" stroke-width="1.5" marker-end="url(#a3)"/>
+      <text x="132" y="70" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a5c38" font-weight="700">1</text>
+      <text x="132" y="160" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333">4</text>
+      <text x="300" y="42" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a5c38" font-weight="700">1</text>
+      <text x="330" y="88" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333">12</text>
+      <text x="470" y="68" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#1a5c38" font-weight="700">3</text>
+      <text x="380" y="162" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333">5</text>
+      <circle cx="60" cy="110" r="20" fill="#c7d9f2" stroke="#2255aa" stroke-width="1.5"/><text x="60" y="115" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#1a3a5c">S</text>
+      <circle cx="220" cy="50" r="20" fill="#fff" stroke="#555" stroke-width="1.5"/><text x="220" y="55" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13">A</text>
+      <circle cx="220" cy="170" r="20" fill="#fff" stroke="#555" stroke-width="1.5"/><text x="220" y="175" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13">B</text>
+      <circle cx="380" cy="50" r="20" fill="#fff" stroke="#555" stroke-width="1.5"/><text x="380" y="55" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13">C</text>
+      <circle cx="540" cy="110" r="20" fill="#c8ead6" stroke="#2a7a4b" stroke-width="1.5"/><text x="540" y="115" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#1a5c38">G</text>
+      <text x="60" y="148" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#e8a020">h=4</text>
+      <text x="220" y="20" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#e8a020">h=4</text>
+      <text x="220" y="208" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#e8a020">h=4</text>
+      <text x="380" y="20" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#e8a020">h=3</text>
+      <text x="540" y="148" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#e8a020">h=0</text>
+    </svg>
+    <div class="diagram-caption">FIG 3 — Start S, goal G. Numbers on edges are action costs, and h is the heuristic estimate to G. The green path S→A→C→G (cost 5) is optimal. h is admissible: it never exceeds the true remaining cost (S:5, A:4, B:5, C:3).</div>
+  </div>
+
+  <div class="math-box"><span class="comment">// BFS — FIFO queue, successors in alphabetical order</span>
+expand S  → frontier [A, B]
+expand A  → frontier [B, C, G]      <span class="comment">// G reached at depth 2</span>
+<span class="var">result</span>: <span class="hi">S → A → G</span>   2 actions, cost <span class="hi">13</span>    <span class="comment">// fewest ACTIONS, not cheapest</span>
+
+<span class="comment">// DFS — LIFO stack, always dive into the first successor</span>
+S → A → C → G
+<span class="var">result</span>: S → A → C → G   cost 5                  <span class="comment">// lucky: depends on successor order.</span>
+                                                  <span class="comment">// If A tried G before C, DFS returns cost 13</span>
+
+<span class="comment">// A* — expand lowest f = g + h</span>
+expand S (f=0+4=4)  → A: f=1+4=<span class="eq">5</span>    B: f=4+4=8
+expand A (f=5)      → C: f=2+3=<span class="eq">5</span>    G: f=13+0=13
+expand C (f=5)      → G: f=5+0=<span class="eq">5</span>    <span class="comment">// cheaper path to G found, so update it</span>
+expand G (f=5)      → GOAL
+<span class="var">result</span>: <span class="eq">S → A → C → G</span>   cost <span class="eq">5</span>  (optimal)  <span class="comment">// B was never expanded: the heuristic pruned it</span></div>
+
+  <h3>Worked example — A* on the Romania map (Section 02)</h3>
+
+  <div class="math-box"><span class="comment">// A* from Arad   (f = g + h,  always expand the lowest f)</span>
+expand <span class="var">Arad</span>      (366)  → Sibiu 140+253=<span class="eq">393</span>   Timisoara 118+329=447   Zerind 75+374=449
+expand <span class="var">Sibiu</span>     (393)  → Rimnicu 220+193=<span class="eq">413</span>  Fagaras 239+176=415     Oradea 291+380=671
+expand <span class="var">Rimnicu</span>   (413)  → Pitesti 317+100=<span class="eq">417</span>  Craiova 366+160=526
+expand <span class="var">Fagaras</span>   (415)  → Bucharest 450+0=450                  <span class="comment">// a route to the goal, but not yet the cheapest</span>
+expand <span class="var">Pitesti</span>   (417)  → Bucharest 418+0=<span class="eq">418</span>                <span class="comment">// cheaper route to Bucharest found, so update it</span>
+expand <span class="var">Bucharest</span> (418)  → GOAL ✓
+
+<span class="var">plan</span>: <span class="eq">Go(Sibiu) → Go(Rimnicu Vilcea) → Go(Pitesti) → Go(Bucharest)</span>    418 km
+<span class="comment">// Greedy best-first (h only) would take Sibiu → Fagaras → Bucharest = </span><span class="hi">450 km</span><span class="comment">: fast to find, but not optimal</span></div>
+
+  <div class="callout callout-red">
+    <strong>Exam favourite:</strong> "Why does A* need an admissible heuristic to guarantee optimality?" — if <code>h(n)</code> ever overestimates the true remaining cost, A* can be tricked into abandoning a node that was actually on the optimal path, in favor of one that only looked cheaper. Admissibility (never overestimating) guarantees the algorithm never prunes away the true optimal solution.
+  </div>
+
+  <div class="callout callout-blue">
+    <strong>This is why "search" and "reasoning" are related words in this course.</strong> Tree-of-Thoughts (Module 2 Part 2 Section 01) is state-space search with an LLM as both the successor-generator and the heuristic evaluator — the exact same BFS/best-first machinery from this section, just operating over "partial reasoning states" instead of classical planning states.
+  </div>
+</section>
+<div class="family-banner">
+  <div class="family-tag">Family 2</div>
+  <div class="family-title">Classical (STRIPS) Planning</div>
+  <div class="family-sub">Factored states · STRIPS actions · forward &amp; backward search · Blocks World</div>
+</div>
+<section class="section" id="s4">
+  <div class="section-eyebrow">Section 04 · Family 2</div>
+  <h2>Classical Planning: Factored States</h2>
+
+  <p>Family 2 opens up the state. Instead of a label, a state is a set of facts that are true in the world, and actions say exactly which facts they need and which they change. This is <strong>classical planning</strong>.</p>
+
+  <h3>Atomic vs. factored: the step from Family 1 to Family 2</h3>
+
+  <table>
+    <tr><th></th><th>Atomic (Romania)</th><th>Factored (Blocks World, below and Section 05)</th></tr>
+    <tr><td><strong>A state looks like</strong></td><td><code>In(Sibiu)</code>, a single label</td><td><code>{On(C,A), OnTable(A), OnTable(B), Clear(C), Clear(B), HandEmpty}</code></td></tr>
+    <tr><td><strong>What the agent can ask of a state</strong></td><td>Only "is this the goal?" (yes or no)</td><td>"<em>Which</em> goal facts are already true, and which are missing?"</td></tr>
+    <tr><td><strong>How close is <code>In(Pitesti)</code> to the goal?</strong></td><td>The state can't tell you. You need an external table of straight-line distances.</td><td>The state tells you: count the unsatisfied goal facts. <code>On(A,B)</code> is missing, so the state is "1 fact away".</td></tr>
+    <tr><td><strong>Where actions come from</strong></td><td>A road map: <code>Result(s,a)</code> is a black-box lookup</td><td>STRIPS schemas: PRE / ADD / DEL that a planner can reason about</td></tr>
+    <tr><td><strong>Consequence</strong></td><td>You need a problem-specific search plus a hand-made heuristic</td><td>A <em>domain-independent</em> planner can derive its own heuristics and solve any problem written in STRIPS</td></tr>
+  </table>
+
+  <div class="callout callout-blue">
+    <strong>Key insight:</strong> the Romania agent and the Blocks World planner are <em>both</em> goal-based. Both search for a sequence of actions that reaches a goal. The difference is that in Romania, <code>In(Arad)</code> is a closed box. In Blocks World, the state is opened up into logical facts. That one change in representation is what turns "goal-based search" into "classical planning".
+  </div>
+
+  <h3>Worked example — the four ingredients for a 3-block problem</h3>
+
+  <p>This one problem is reused in Section 05 and Section 06, so you can follow the same task from problem statement, to STRIPS encoding, to a finished plan.</p>
+
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 560 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;display:block;margin:0 auto">
+      <defs><marker id="a0" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#555"/></marker></defs>
+      <text x="130" y="22" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="600" letter-spacing="1.5">INITIAL STATE</text>
+      <text x="430" y="22" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="600" letter-spacing="1.5">GOAL</text>
+      <rect x="40" y="105" width="50" height="45" fill="#c7d9f2" stroke="#2255aa"/><text x="65" y="133" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#1a3a5c">A</text>
+      <rect x="40" y="60" width="50" height="45" fill="#c8ead6" stroke="#2a7a4b"/><text x="65" y="88" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#1a5c38">C</text>
+      <rect x="150" y="105" width="50" height="45" fill="#f2c7c7" stroke="#b83232"/><text x="175" y="133" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#7a0000">B</text>
+      <line x1="20" y1="150" x2="240" y2="150" stroke="#888" stroke-width="2"/>
+      <line x1="260" y1="105" x2="330" y2="105" stroke="#555" stroke-width="2" marker-end="url(#a0)"/>
+      <text x="295" y="95" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#e8a020">plan = ?</text>
+      <rect x="405" y="125" width="50" height="40" fill="#c8ead6" stroke="#2a7a4b"/><text x="430" y="150" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#1a5c38">C</text>
+      <rect x="405" y="85" width="50" height="40" fill="#f2c7c7" stroke="#b83232"/><text x="430" y="110" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#7a0000">B</text>
+      <rect x="405" y="45" width="50" height="40" fill="#c7d9f2" stroke="#2255aa"/><text x="430" y="70" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#1a3a5c">A</text>
+      <line x1="350" y1="165" x2="510" y2="165" stroke="#888" stroke-width="2"/>
+      <text x="130" y="175" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#888">C on A; A and B on the table</text>
+      <text x="430" y="183" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#888">A on B on C</text>
+    </svg>
+    <div class="diagram-caption">FIG 4 — The "Sussman anomaly" problem. It looks trivial, but you can't solve it by completing one goal fact at a time. Section 06 shows why.</div>
+  </div>
+
+  <table>
+    <tr><th>Ingredient</th><th>For this problem</th></tr>
+    <tr><td><strong>Initial state</strong></td><td><code>On(C,A) ∧ OnTable(A) ∧ OnTable(B) ∧ Clear(C) ∧ Clear(B) ∧ HandEmpty</code>, a <em>complete</em> list of what is true. Any fact not listed is false (the closed-world assumption).</td></tr>
+    <tr><td><strong>Actions</strong></td><td><code>Pickup(x)</code>, <code>Putdown(x)</code>, <code>Stack(x,y)</code>, <code>Unstack(x,y)</code>: a robot hand that holds one block at a time (written out in STRIPS in Section 05).</td></tr>
+    <tr><td><strong>Goal</strong></td><td><code>On(A,B) ∧ On(B,C)</code>. This is <em>partial</em>: it doesn't say whether the hand is empty or what is clear.</td></tr>
+    <tr><td><strong>Plan</strong></td><td><code>Unstack(C,A) → Putdown(C) → Pickup(B) → Stack(B,C) → Pickup(A) → Stack(A,B)</code> (6 actions)</td></tr>
+  </table>
+
+  <h3>The assumptions that make planning "classical"</h3>
+  <table>
+    <tr><th>Assumption</th><th>Meaning</th><th>Example of breaking it</th></tr>
+    <tr><td><strong>Fully observable</strong></td><td>The agent knows the complete current state</td><td>A robot that can't see behind a box</td></tr>
+    <tr><td><strong>Deterministic</strong></td><td>Each action has exactly one outcome</td><td>A gripper that drops the block 10% of the time</td></tr>
+    <tr><td><strong>Static</strong></td><td>Nothing changes except through the agent's own actions</td><td>Another robot rearranging the blocks at the same time</td></tr>
+    <tr><td><strong>Discrete &amp; finite</strong></td><td>A countable set of states and actions</td><td>Continuous joint angles of a robot arm</td></tr>
+    <tr><td><strong>Offline</strong></td><td>Plan fully first, then execute without re-checking</td><td>Re-planning after every step (an online agent)</td></tr>
+  </table>
+</section>
+<section class="section" id="s5">
+  <div class="section-eyebrow">Section 05 · Family 2</div>
+  <h2>STRIPS: Describing Actions</h2>
+
+  <p><strong>STRIPS</strong> (Stanford Research Institute Problem Solver, 1971) is the classical formal language for representing planning actions — precise enough that a program can search over it automatically. Its core idea: represent each action by what it <em>requires</em> and what it <em>changes</em>.</p>
+
+  <div class="math-box"><span class="comment">// A STRIPS action has three parts</span>
+<span class="var">Action</span>: Pickup(block)
+  <span class="var">Precondition</span>: <span class="eq">Clear(block) ∧ OnTable(block) ∧ HandEmpty</span>
+  <span class="var">Add list</span>:      <span class="eq">Holding(block)</span>            <span class="comment">// facts made TRUE by this action</span>
+  <span class="var">Delete list</span>:   <span class="eq">OnTable(block), HandEmpty, Clear(block)</span>  <span class="comment">// facts made FALSE</span>
+
+<span class="comment">// A plan is valid if, applying each action's add/delete list in order,</span>
+<span class="comment">// every action's precondition holds in the state that precedes it,</span>
+<span class="comment">// and the final state satisfies the goal.</span></div>
+
+  <h3>Worked example — the classic Blocks World</h3>
+
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;display:block;margin:0 auto">
+      <defs><marker id="a2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#555"/></marker></defs>
+      <text x="350" y="22" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="600" letter-spacing="1.5">GOAL: STACK A ON B (both start on the table)</text>
+
+      <rect x="60" y="130" width="80" height="90" fill="#eee" stroke="#ccc"/>
+      <rect x="70" y="150" width="60" height="60" fill="#c7d9f2" stroke="#2255aa"/><text x="100" y="184" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#1a3a5c">A</text>
+      <rect x="180" y="130" width="80" height="90" fill="#eee" stroke="#ccc"/>
+      <rect x="190" y="150" width="60" height="60" fill="#f2c7c7" stroke="#b83232"/><text x="220" y="184" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#7a0000">B</text>
+      <text x="160" y="205" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#888">initial state</text>
+
+      <line x1="290" y1="170" x2="340" y2="170" stroke="#555" stroke-width="2" marker-end="url(#a2)"/>
+      <text x="315" y="155" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#e8a020">Pickup(A)</text>
+
+      <rect x="360" y="130" width="80" height="90" fill="#eee" stroke="#ccc"/>
+      <rect x="480" y="130" width="80" height="90" fill="#eee" stroke="#ccc"/>
+      <rect x="490" y="150" width="60" height="60" fill="#f2c7c7" stroke="#b83232"/><text x="520" y="184" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#7a0000">B</text>
+      <rect x="390" y="60" width="60" height="55" fill="#c7d9f2" stroke="#2255aa"/><text x="420" y="92" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#1a3a5c">A</text>
+      <text x="500" y="205" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#888">Holding(A)</text>
+
+      <line x1="610" y1="170" x2="660" y2="170" stroke="#555" stroke-width="2" marker-end="url(#a2)"/>
+      <text x="635" y="155" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#e8a020">Stack(A,B)</text>
+    </svg>
+    <div class="diagram-caption">FIG 5 — Two STRIPS actions chained into a plan. <code>Pickup(A)</code> requires <code>Clear(A) ∧ HandEmpty</code> and produces <code>Holding(A)</code> while deleting <code>HandEmpty</code>; <code>Stack(A,B)</code> requires <code>Holding(A) ∧ Clear(B)</code> and produces <code>On(A,B)</code> — the plan is valid because each action's precondition is satisfied by the state the previous action's add/delete lists produced.</div>
+  </div>
+
+  <h3>The complete Blocks World operator set</h3>
+
+  <p>These are the four actions used to solve the 3-block problem from Section 04, all written in STRIPS:</p>
+
+  <div class="math-box"><span class="var">Pickup(x)</span>        <span class="comment">// lift x from the table</span>
+  PRE: <span class="eq">Clear(x) ∧ OnTable(x) ∧ HandEmpty</span>
+  ADD: <span class="eq">Holding(x)</span>
+  DEL: <span class="hi">OnTable(x), Clear(x), HandEmpty</span>
+
+<span class="var">Putdown(x)</span>       <span class="comment">// place the held block on the table</span>
+  PRE: <span class="eq">Holding(x)</span>
+  ADD: <span class="eq">OnTable(x), Clear(x), HandEmpty</span>
+  DEL: <span class="hi">Holding(x)</span>
+
+<span class="var">Unstack(x, y)</span>    <span class="comment">// lift x off the top of y</span>
+  PRE: <span class="eq">On(x,y) ∧ Clear(x) ∧ HandEmpty</span>
+  ADD: <span class="eq">Holding(x), Clear(y)</span>
+  DEL: <span class="hi">On(x,y), Clear(x), HandEmpty</span>
+
+<span class="var">Stack(x, y)</span>      <span class="comment">// put the held block x on top of y</span>
+  PRE: <span class="eq">Holding(x) ∧ Clear(y)</span>
+  ADD: <span class="eq">On(x,y), Clear(x), HandEmpty</span>
+  DEL: <span class="hi">Holding(x), Clear(y)</span>
+
+<span class="comment">// Applying an action:  Result(s, a) = (s − DEL(a)) ∪ ADD(a)    only if PRE(a) ⊆ s</span>
+<span class="comment">// Any fact not in ADD or DEL is left unchanged. This is how STRIPS sidesteps the "frame problem".</span></div>
+
+  <div class="callout callout-green">
+    <strong>Why STRIPS still matters in an LLM-agent course:</strong> modern tool-calling schemas (Part 3, Section 02; Module 2 Section 04.2) are structurally identical to STRIPS operators — a tool has a signature (its "precondition": required arguments and types) and an effect (what changes once it's called). Frameworks like PDDL (STRIPS' modern successor) are even used today to give LLM planners a formally verifiable planning layer underneath their natural-language reasoning.
+  </div>
+</section>
+<section class="section" id="s6">
+  <div class="section-eyebrow">Section 06 · Family 2</div>
+  <h2>Searching the STRIPS State Space: Forward &amp; Backward</h2>
+
+  <p>Once the actions are written in STRIPS, the planner builds the state space as it goes: each node is a set of facts, and each edge is an action that can be applied. As in Section 03, it is still state-space search, but now there are two directions to search in.</p>
+
+  <table>
+    <tr><th></th><th>Forward (progression) search</th><th>Backward (regression) search</th></tr>
+    <tr><td><strong>Starts from</strong></td><td>The initial state</td><td>The goal</td></tr>
+    <tr><td><strong>Each step</strong></td><td>Apply any action whose preconditions hold → a new <em>concrete state</em></td><td>Choose an action that achieves part of the goal → a new <em>sub-goal</em> (a set of states)</td></tr>
+    <tr><td><strong>Stops when</strong></td><td>The current state satisfies the goal</td><td>The sub-goal is satisfied by the initial state</td></tr>
+    <tr><td><strong>Strength</strong></td><td>Simple; every state it visits is a real, valid state</td><td>Only considers <em>relevant</em> actions, so it branches less</td></tr>
+    <tr><td><strong>Weakness</strong></td><td>Branches on many irrelevant actions (e.g. shuffling blocks that don't matter)</td><td>Works with partial states, which makes heuristics harder to design</td></tr>
+  </table>
+
+  <h3>Forward (progression) search on the 3-block problem</h3>
+
+  <p>Start from the initial state and apply actions until the goal <code>On(A,B) ∧ On(B,C)</code> holds:</p>
+
+  <div class="math-box"><span class="var">S0</span>: {On(C,A), OnTable(A), OnTable(B), Clear(C), Clear(B), HandEmpty}
+ │ <span class="var">Unstack(C,A)</span>   DEL On(C,A), Clear(C), HandEmpty   ADD Holding(C), Clear(A)
+<span class="var">S1</span>: {OnTable(A), OnTable(B), Clear(A), Clear(B), Holding(C)}
+ │ <span class="var">Putdown(C)</span>     DEL Holding(C)                     ADD OnTable(C), Clear(C), HandEmpty
+<span class="var">S2</span>: {OnTable(A), OnTable(B), OnTable(C), Clear(A), Clear(B), Clear(C), HandEmpty}
+ │ <span class="var">Pickup(B)</span>      DEL OnTable(B), Clear(B), HandEmpty ADD Holding(B)
+<span class="var">S3</span>: {OnTable(A), OnTable(C), Clear(A), Clear(C), Holding(B)}
+ │ <span class="var">Stack(B,C)</span>     DEL Holding(B), Clear(C)           ADD On(B,C), Clear(B), HandEmpty
+<span class="var">S4</span>: {OnTable(A), OnTable(C), On(B,C), Clear(A), Clear(B), HandEmpty}
+ │ <span class="var">Pickup(A)</span>      DEL OnTable(A), Clear(A), HandEmpty ADD Holding(A)
+<span class="var">S5</span>: {OnTable(C), On(B,C), Clear(B), Holding(A)}
+ │ <span class="var">Stack(A,B)</span>     DEL Holding(A), Clear(B)           ADD On(A,B), Clear(A), HandEmpty
+<span class="var">S6</span>: {OnTable(C), <span class="eq">On(B,C)</span>, <span class="eq">On(A,B)</span>, Clear(A), HandEmpty}     <span class="comment">// ✓ goal satisfied</span></div>
+
+  <h3>Backward (regression) search on the same problem</h3>
+
+  <p>Start from the goal. Choose an action that <em>adds</em> a goal fact and <em>deletes</em> none of them. Then replace the goal with what must have been true before that action:</p>
+
+  <div class="math-box"><span class="comment">// Regression:  g' = (g − ADD(a)) ∪ PRE(a)</span>
+
+<span class="var">G0</span>: {On(A,B), On(B,C)}
+ │ regress through <span class="var">Stack(A,B)</span>     <span class="comment">// adds On(A,B) ✓</span>
+<span class="var">G1</span>: {On(B,C), Holding(A), Clear(B)}
+ │ regress through <span class="var">Pickup(A)</span>      <span class="comment">// adds Holding(A) ✓</span>
+<span class="var">G2</span>: {On(B,C), Clear(B), Clear(A), OnTable(A), HandEmpty}
+ │ regress through <span class="var">Stack(B,C)</span>     <span class="comment">// adds On(B,C) ✓</span>
+<span class="var">G3</span>: {Clear(A), OnTable(A), Holding(B), Clear(C)}
+ │ regress through <span class="var">Pickup(B)</span>      <span class="comment">// adds Holding(B) ✓</span>
+<span class="var">G4</span>: {Clear(A), OnTable(A), Clear(B), OnTable(B), Clear(C), HandEmpty}
+ │ regress through <span class="var">Putdown(C)</span>     <span class="comment">// adds Clear(C), HandEmpty ✓</span>
+<span class="var">G5</span>: {Clear(A), OnTable(A), Clear(B), OnTable(B), Holding(C)}
+ │ regress through <span class="var">Unstack(C,A)</span>   <span class="comment">// adds Holding(C), Clear(A) ✓</span>
+<span class="var">G6</span>: {OnTable(A), OnTable(B), Clear(B), On(C,A), Clear(C), HandEmpty}
+
+<span class="eq">G6 ⊆ S0</span>  → stop.  Read the actions bottom-to-top → <span class="eq">the same 6-step plan</span></div>
+
+  <div class="callout callout-red">
+    <strong>Why this example is famous (the Sussman anomaly):</strong> try to solve the goals <em>one at a time</em> and you fail. If you achieve <code>On(A,B)</code> first (move C off A, then stack A on B), you have to pull A back off to get B onto C. If you achieve <code>On(B,C)</code> first (C is still sitting on A), you build the tower B–C–A, and A is buried at the bottom, so you have to take the tower apart. No order of "finish goal 1, then goal 2" works. The planner has to <strong>interleave</strong> the subgoals, which is what the 6-step plan above does. This exposed the limits of early linear planners and led to partial-order planning.
+  </div>
+</section>
+
+<div class="family-banner">
+  <div class="family-tag">Modern planning</div>
+  <div class="family-title">How LLM Agents Plan</div>
+  <div class="family-sub">ReAct · plan-and-execute · reflection · tree search</div>
+</div>
+
+<section class="section" id="s7">
+  <div class="section-eyebrow">Section 07</div>
+  <h2>From Classical Planning to LLM Planning</h2>
+
+  <p>Every ingredient of classical planning survives in an LLM agent. What changes is how much the agent knows <em>before</em> it starts.</p>
+
+  <table>
+    <tr><th>Ingredient</th><th>Classical planner (Sections 01–06)</th><th>LLM agent</th></tr>
+    <tr><td><strong>State</strong></td><td>A label or a set of logical facts</td><td>The conversation so far: the request, previous thoughts and tool results, in natural language</td></tr>
+    <tr><td><strong>Actions</strong></td><td>STRIPS operators with PRE / ADD / DEL</td><td>Tools described by a name, a description and a JSON schema (Part 3)</td></tr>
+    <tr><td><strong>Transition model</strong></td><td>Known in advance: <code>Result(s,a)</code> is computable</td><td><strong>Unknown</strong>: the agent only learns what a search or API returns by actually calling it</td></tr>
+    <tr><td><strong>Goal</strong></td><td>A logical formula, e.g. <code>On(A,B) ∧ On(B,C)</code></td><td>A task in natural language, e.g. "summarise this week's incidents"</td></tr>
+    <tr><td><strong>Search</strong></td><td>An explicit algorithm (BFS, A*, regression)</td><td>The model's own reasoning, optionally wrapped in an explicit search (Section 11)</td></tr>
+    <tr><td><strong>World</strong></td><td>Closed, deterministic, fully observable</td><td>Open, uncertain, partly observable</td></tr>
+  </table>
+
+  <div class="callout callout-blue">
+    <strong>The key consequence:</strong> because an LLM agent can't predict what a tool will return, it can't compute a whole plan offline the way STRIPS does. It must <strong>interleave planning with acting and observing</strong>. The four strategies below differ in <em>how far ahead</em> they plan before acting, and in what they do when things go wrong.
+  </div>
+
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 720 150" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;display:block;margin:0 auto">
+      <defs><marker id="p7" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#888"/></marker></defs>
+      <text x="360" y="22" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="600" letter-spacing="1.5">HOW FAR AHEAD DOES THE AGENT PLAN?</text>
+      <line x1="50" y1="80" x2="680" y2="80" stroke="#ccc" stroke-width="2" marker-end="url(#p7)"/>
+      <circle cx="110" cy="80" r="7" fill="#2a7a4b"/><text x="110" y="58" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" font-weight="700" fill="#1a5c38">ReAct</text><text x="110" y="105" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666">one step at a time</text>
+      <circle cx="290" cy="80" r="7" fill="#2255aa"/><text x="290" y="58" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" font-weight="700" fill="#1a3a5c">Plan-and-execute</text><text x="290" y="105" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666">whole plan up front</text>
+      <circle cx="470" cy="80" r="7" fill="#e8a020"/><text x="470" y="58" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" font-weight="700" fill="#7a5000">+ Reflection</text><text x="470" y="105" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666">critique and retry</text>
+      <circle cx="630" cy="80" r="7" fill="#6b3fa0"/><text x="630" y="58" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" font-weight="700" fill="#4a1a80">Tree search</text><text x="630" y="105" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#666">explore many plans</text>
+      <text x="360" y="138" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#888">left: cheap and adaptive · right: more LLM calls, more deliberate</text>
+    </svg>
+    <div class="diagram-caption">FIG 6 — Four planning strategies for LLM agents, ordered by how much they deliberate before committing to an action.</div>
+  </div>
+</section>
+
+<section class="section" id="s8">
+  <div class="section-eyebrow">Section 08</div>
+  <h2>ReAct: Plan One Step at a Time</h2>
+
+  <p><strong>ReAct</strong> (Yao et al., 2022) interleaves a <em>Thought</em> (reason about what to do next), an <em>Action</em> (a tool call) and an <em>Observation</em> (the tool's result) until the agent can answer. In planning terms it is <strong>online planning with one-step lookahead</strong>: it never commits to more than the next action.</p>
+
+  <div class="math-box"><span class="comment">// Task: "How many days can the Orbital Relay Station keep operating?"   (the lab's knowledge base)</span>
+<span class="var">Thought 1</span>:     I need the station's fuel reserve and daily consumption.
+<span class="var">Action 1</span>:      <span class="eq">lookup_fact("orbital relay station")</span>
+<span class="var">Observation 1</span>: 340 units of fuel, consuming 28 units per day.
+<span class="var">Thought 2</span>:     Days = 340 / 28. I should calculate rather than guess.
+<span class="var">Action 2</span>:      <span class="eq">calculator("340 / 28")</span>
+<span class="var">Observation 2</span>: 12.142857
+<span class="var">Thought 3</span>:     I have what I need.
+<span class="var">Final Answer</span>:  About 12 days (12.1) of normal operation.</div>
+
+  <table>
+    <tr><th>Classical concept</th><th>ReAct's version</th></tr>
+    <tr><td>Perception</td><td>The Observation returned by the last tool call</td></tr>
+    <tr><td>Search / lookahead</td><td>One step: the Thought chooses only the next Action</td></tr>
+    <tr><td>Replanning</td><td>Automatic: every step re-decides from the latest Observation</td></tr>
+  </table>
+
+  <div class="callout callout-purple">
+    <strong>ReAct is not "reactive".</strong> The names are close but they sit on opposite halves of Part 1's ladder. A <em>reactive</em> agent maps the current input straight to an action with a fixed rule, with no goal and no lookahead. A <em>ReAct</em> agent (<strong>Re</strong>ason + <strong>Act</strong>) holds a goal, reasons about it, chooses the action expected to move it closer, and re-plans after every observation. That makes it <strong>goal-based, i.e. deliberative</strong>, though with only one step of lookahead.
+  </div>
+
+  <div class="callout callout-red">
+    <strong>ReAct's limitation:</strong> with no lookahead it can <em>wander</em>, taking a locally sensible step that turns into a dead end several steps later, and it spends one LLM call per step. Sections 09–11 each fix part of this.
+  </div>
+</section>
+
+<section class="section" id="s9">
+  <div class="section-eyebrow">Section 09</div>
+  <h2>Plan-and-Execute: Commit to a Plan First</h2>
+
+  <p>The <strong>plan-and-execute</strong> (planner–executor) strategy splits the agent in two. A <strong>planner</strong> writes the whole multi-step plan up front, like a classical planner. An <strong>executor</strong> carries it out step by step, and the planner is called again only if a step fails. This is BDI's "intention" from Part 1: commit to a plan, and re-plan only when necessary.</p>
+
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;display:block;margin:0 auto">
+      <defs><marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#555"/></marker></defs>
+      <text x="360" y="22" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="600" letter-spacing="1.5">PLAN FIRST, THEN EXECUTE (WITH REPLANNING)</text>
+
+      <rect x="30" y="45" width="150" height="50" rx="7" fill="#1a3a5c"/>
+      <text x="105" y="66" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">Goal</text>
+      <text x="105" y="82" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#cce">"book me a trip to Goa"</text>
+
+      <line x1="180" y1="70" x2="215" y2="70" stroke="#555" stroke-width="2" marker-end="url(#a1)"/>
+      <rect x="220" y="45" width="160" height="50" rx="7" fill="#6b3fa0"/>
+      <text x="300" y="66" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">Planner</text>
+      <text x="300" y="82" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#e0d0ff">produces ordered steps</text>
+
+      <line x1="380" y1="70" x2="415" y2="70" stroke="#555" stroke-width="2" marker-end="url(#a1)"/>
+      <rect x="420" y="20" width="260" height="100" rx="8" fill="#fafaf7" stroke="#ccc" stroke-dasharray="4,3"/>
+      <text x="550" y="38" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#666" font-weight="700">PLAN</text>
+      <text x="435" y="55" font-family="IBM Plex Mono,monospace" font-size="8" fill="#333">1. search_flights(Goa)</text>
+      <text x="435" y="70" font-family="IBM Plex Mono,monospace" font-size="8" fill="#333">2. search_hotels(Goa)</text>
+      <text x="435" y="85" font-family="IBM Plex Mono,monospace" font-size="8" fill="#333">3. compare_budget()</text>
+      <text x="435" y="100" font-family="IBM Plex Mono,monospace" font-size="8" fill="#333">4. confirm_booking()</text>
+
+      <line x1="300" y1="95" x2="300" y2="150" stroke="#555" stroke-width="2" marker-end="url(#a1)"/>
+      <rect x="220" y="155" width="160" height="50" rx="7" fill="#2a7a4b"/>
+      <text x="300" y="176" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#fff" font-weight="700">Executor</text>
+      <text x="300" y="192" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#c8ead6">runs steps 1-4 in order</text>
+
+      <path d="M380 190 L580 190 L580 130 L550 100" stroke="#b83232" stroke-width="1.8" fill="none" stroke-dasharray="4,3" marker-end="url(#a1)"/>
+      <text x="590" y="160" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#b83232">step fails -&gt;</text>
+      <text x="590" y="172" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#b83232">replan</text>
+    </svg>
+    <div class="diagram-caption">FIG 7 — Unlike ReAct's one-step-at-a-time loop, the planner commits to a full sequence before execution begins — closer to classical planning (Sections 04–06), with the LLM as both planner and (if a step fails) replanner.</div>
+  </div>
+
+  <table>
+    <tr><th></th><th>ReAct</th><th>Plan-and-execute</th></tr>
+    <tr><td>Lookahead</td><td>None: one step at a time</td><td>Full plan before execution</td></tr>
+    <tr><td>Adapts mid-task?</td><td>Naturally, every step</td><td>Only on explicit re-planning</td></tr>
+    <tr><td>LLM calls</td><td>One per step</td><td>One plan, then cheap execution; more only on failure</td></tr>
+    <tr><td>Best for</td><td>Exploratory tasks where the path becomes clear as you go</td><td>Tasks whose overall shape is knowable up front</td></tr>
+  </table>
+
+  <h3>Two well-known variants</h3>
+  <table>
+    <tr><th>Variant</th><th>Idea</th><th>Why it helps</th></tr>
+    <tr><td><strong>ReWOO</strong> (Xu et al., 2023)</td><td>The planner writes the plan with placeholders, e.g. <code>#E1 = search(...)</code>, <code>#E2 = calculator(#E1 / 28)</code>; a worker fills them in without calling the LLM between steps</td><td>Far fewer LLM calls and tokens than ReAct</td></tr>
+    <tr><td><strong>LLMCompiler</strong> (Kim et al., 2023)</td><td>The plan is a graph of tool calls; independent calls run in parallel</td><td>Lower latency when steps don't depend on each other</td></tr>
+  </table>
+</section>
+
+<section class="section" id="s10">
+  <div class="section-eyebrow">Section 10</div>
+  <h2>Reflection: Repair the Plan After Failure</h2>
+
+  <p>Neither ReAct nor plan-and-execute <em>learns</em> from a failed attempt. <strong>Reflection</strong> adds an evaluate-and-retry loop: after an attempt, the agent (or a separate critic) checks the result, writes a short critique in natural language, and uses it to plan the next attempt. <strong>Reflexion</strong> (Shinn et al., 2023) keeps these critiques in memory across attempts. It is plan repair driven by feedback.</p>
+
+  <div class="math-box"><span class="comment">// Task: write is_prime(n). Checked by unit tests.</span>
+<span class="var">Attempt 1</span>:    returns True for n = 1                         <span class="hi">✗ test_one fails</span>
+<span class="var">Reflection</span>:   "1 is not prime. Handle n &lt; 2 before the loop."  <span class="comment">// stored in memory</span>
+<span class="var">Attempt 2</span>:    adds  if n &lt; 2: return False                   <span class="eq">✓ all tests pass</span></div>
+
+  <div class="callout callout-green">
+    <strong>Reflection works best with an external signal:</strong> unit tests, a validator, a tool error or a human rating. Self-critique with no outside check can talk itself into a wrong answer just as confidently. In Part 4 the same loop appears as the <em>evaluator–optimizer</em> workflow pattern; here it is a planning strategy.
+  </div>
+</section>
+
+<section class="section" id="s11">
+  <div class="section-eyebrow">Section 11</div>
+  <h2>Tree Search: Explore Several Plans</h2>
+
+  <p>The most deliberate strategy brings back Section 03's search algorithms, with the LLM doing two jobs: <strong>proposing</strong> next steps (the successor function) and <strong>evaluating</strong> partial plans (the heuristic).</p>
+
+  <table>
+    <tr><th>Method</th><th>Search used</th><th>Classical link</th></tr>
+    <tr><td><strong>Tree of Thoughts</strong> (Yao et al., 2023)</td><td>Breadth- or depth-first search over partial reasoning steps, with the LLM scoring each branch</td><td>BFS / DFS from Section 03, with an LLM heuristic</td></tr>
+    <tr><td><strong>LATS</strong> (Zhou et al., 2023)</td><td>Monte Carlo tree search over actions, with reflection on failed branches</td><td>Best-first search plus learning from failures</td></tr>
+  </table>
+
+  <div class="callout callout-red">
+    <strong>Cost warning:</strong> exploring <em>b</em> branches to depth <em>d</em> can need on the order of <em>b × d</em> LLM calls or more. Use tree search when a wrong answer is expensive and the task has a checkable answer (puzzles, code, maths), not for everyday assistant requests.
+  </div>
+</section>
+
+<section class="section" id="s12">
+  <div class="section-eyebrow">Section 12</div>
+  <h2>Choosing a Planning Strategy</h2>
+
+  <table>
+    <tr><th>If the task…</th><th>Use</th><th>Typical LLM calls</th></tr>
+    <tr><td>is short, exploratory, and each result shapes the next step</td><td>ReAct</td><td>One per step</td></tr>
+    <tr><td>has a predictable shape (fetch A, fetch B, compare, report)</td><td>Plan-and-execute (ReWOO if cost matters, LLMCompiler if latency matters)</td><td>1 plan + few re-plans</td></tr>
+    <tr><td>has a checker (tests, validator) and first attempts often fail</td><td>Add reflection to either of the above</td><td>× number of attempts</td></tr>
+    <tr><td>is hard, high-stakes and checkable</td><td>Tree search (ToT, LATS)</td><td>Many</td></tr>
+    <tr><td>is fully specified with known actions and effects</td><td>A classical planner, with the LLM translating the request into PDDL</td><td>Very few</td></tr>
+  </table>
+
+  <div class="callout callout-purple">
+    <strong>Where the plan comes from vs. who executes it:</strong> every strategy here needs <em>actions</em> to plan over. In LLM agents those actions are tools, which is what Part 3 is about.
+  </div>
+</section>
+
+<section class="section" id="s13">
+  <div class="section-eyebrow">Section 13</div>
+  <h2>Key Takeaways &amp; Exam Prep</h2>
+
+  <div class="steps">
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Planning = search over states</h4><p>Initial state, actions, goal, and a search to connect them.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Two classical families</h4><p>Atomic states with graph search; factored states with STRIPS.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>A* needs an admissible heuristic</h4><p>Overestimating can prune away the optimal plan.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>LLM agents can't plan fully offline</h4><p>Tool results are unknown in advance, so they interleave planning and acting.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Four LLM strategies</h4><p>ReAct, plan-and-execute, reflection, tree search: more deliberation, more cost.</p></div>
+  </div>
+
+  <h3>Common exam questions</h3>
+  <table>
+    <tr><th>Question</th><th>Short answer</th></tr>
+    <tr><td>What are the four components of a planning problem?</td><td>Initial state, actions (with preconditions and effects), goal, and the plan connecting them</td></tr>
+    <tr><td>What are the two classical families of planning?</td><td>Goal-based search over atomic states (BFS, DFS, A*) and classical STRIPS planning over factored states (forward or backward search over fact sets)</td></tr>
+    <tr><td>Give the STRIPS state-update rule.</td><td><code>Result(s,a) = (s − DEL(a)) ∪ ADD(a)</code>, applicable only when <code>PRE(a) ⊆ s</code></td></tr>
+    <tr><td>Why is A* optimal only with an admissible heuristic?</td><td>It never overestimates the remaining cost, so A* never discards a node on the optimal path</td></tr>
+    <tr><td>Why can't an LLM agent plan like STRIPS?</td><td>Its transition model is unknown: it learns what a tool returns only by calling it, so it must interleave planning, acting and observing</td></tr>
+    <tr><td>ReAct vs. plan-and-execute?</td><td>ReAct decides one step at a time and adapts every step; plan-and-execute commits to a full plan first and re-plans only on failure, using fewer LLM calls on predictable tasks</td></tr>
+    <tr><td>What does reflection add, and what makes it reliable?</td><td>An evaluate–critique–retry loop that repairs the plan after failure; it is most reliable with an external signal such as tests or a validator</td></tr>
+    <tr><td>How is Tree of Thoughts related to classical search?</td><td>It is BFS/DFS over partial reasoning states, with the LLM acting as both successor generator and heuristic</td></tr>
+  </table>
+
+  <div class="callout" style="margin-top:2rem">
+    <strong>References:</strong><br>
+    Fikes &amp; Nilsson (1971) — STRIPS. Hart, Nilsson &amp; Raphael (1968) — A*.<br>
+    Russell &amp; Norvig — Artificial Intelligence: A Modern Approach (search and planning chapters).<br>
+    Yao et al. (2022) — ReAct. Xu et al. (2023) — ReWOO. Kim et al. (2023) — An LLM Compiler for Parallel Function Calling.<br>
+    Shinn et al. (2023) — Reflexion. Yao et al. (2023) — Tree of Thoughts. Zhou et al. (2023) — Language Agent Tree Search (LATS).
+  </div>
+</section>
+
+<footer>Module 4 · Part 2 — How Agents Plan · Builds on Part 1 · Continues in Part 3 (Tools, MCP &amp; Agent vs. Tool)</footer>
+
+</body>
+</html>

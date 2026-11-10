@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Challenges in Multimodal AI — Study Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Fraunces:ital,wght@0,300;0,700;1,300&family=Inter:wght@400;500;600&display=swap');
+  :root {
+    --ink: #0f1117; --paper: #f7f6f2; --mid: #e8e5dd; --rule: #c9c4b8; --accent: #1a3a5c;
+    --highlight: #e8a020; --green: #2a7a4b; --red: #b83232; --blue: #2255aa; --purple: #6b3fa0; --teal: #0d7a7a;
+    --mono: 'IBM Plex Mono', monospace; --display: 'Fraunces', Georgia, serif; --body: 'Inter', system-ui, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--body); background: var(--paper); color: var(--ink); line-height: 1.7; font-size: 16px; }
+  .hero { background: linear-gradient(160deg, #0f1117 0%, #1a3a5c 100%); color: #fff; padding: 4rem 2rem 3rem; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 20% 30%, rgba(232,160,32,0.10), transparent 40%), radial-gradient(circle at 80% 70%, rgba(42,122,75,0.12), transparent 40%); }
+  .hero-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--highlight); margin-bottom: 1rem; position: relative; }
+  .hero h1 { font-family: var(--display); font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; line-height: 1.1; margin-bottom: 1rem; position: relative; }
+  .hero p { font-size: 1.1rem; opacity: 0.82; max-width: 640px; margin: 0 auto; position: relative; }
+  .toc { background: var(--ink); color: #fff; padding: 1.2rem 2rem; display: flex; gap: 1.2rem; flex-wrap: wrap; justify-content: center; position: sticky; top: 0; z-index: 100; }
+  .toc a { color: rgba(255,255,255,0.7); text-decoration: none; font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.03em; transition: color 0.2s; }
+  .toc a:hover { color: var(--highlight); }
+  .section { max-width: 900px; margin: 0 auto; padding: 4rem 2rem; border-bottom: 1px solid var(--rule); }
+  .section-eyebrow { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.5rem; }
+  .section h2 { font-family: var(--display); font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 700; margin-bottom: 1.5rem; color: var(--ink); }
+  .section h3 { font-family: var(--display); font-size: 1.25rem; font-weight: 700; margin: 2rem 0 0.8rem; color: var(--accent); }
+  .section p { margin-bottom: 1rem; color: #333; }
+  .callout { border-left: 4px solid var(--highlight); background: #fff8ee; padding: 1rem 1.25rem; border-radius: 0 6px 6px 0; margin: 1.5rem 0; font-size: 0.95rem; }
+  .callout strong { color: var(--accent); }
+  .callout-blue  { border-left-color: var(--blue);   background: #eef3ff; }
+  .callout-green { border-left-color: var(--green);  background: #edfaf3; }
+  .callout-red   { border-left-color: var(--red);    background: #fff0f0; }
+  .callout-purple{ border-left-color: var(--purple); background: #f5f0ff; }
+  .math-box { background: var(--ink); color: #e8e8e8; font-family: var(--mono); font-size: 0.86rem; line-height: 1.9; padding: 1.5rem; border-radius: 8px; margin: 1.5rem 0; overflow-x: auto; white-space: pre; }
+  .math-box .comment { color: #6a9f6a; } .math-box .var { color: #f0b060; } .math-box .eq { color: #7ab8f5; } .math-box .hi { color: #ff9090; }
+  table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.88rem; }
+  th { background: var(--accent); color: #fff; padding: 0.6rem 0.9rem; text-align: left; font-family: var(--mono); font-size: 0.76rem; letter-spacing: 0.04em; }
+  td { padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--mid); vertical-align: top; }
+  tr:nth-child(even) td { background: #fafaf7; }
+  .diagram-wrap { background: #fff; border: 1px solid var(--rule); border-radius: 10px; padding: 1.5rem; margin: 2rem 0; overflow-x: auto; }
+  .diagram-caption { text-align: center; font-family: var(--mono); font-size: 0.74rem; color: #777; margin-top: 0.75rem; letter-spacing: 0.04em; line-height: 1.6; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+  .step-card { background: #fff; border: 1px solid var(--rule); border-radius: 8px; padding: 1.1rem; }
+  .step-num { font-family: var(--mono); font-size: 1.9rem; font-weight: 600; color: var(--mid); line-height: 1; margin-bottom: 0.4rem; }
+  .step-card h4 { font-size: 0.88rem; font-weight: 600; color: var(--accent); margin-bottom: 0.35rem; }
+  .step-card p { font-size: 0.82rem; margin: 0; color: #444; }
+  @media (max-width: 620px) { .steps { grid-template-columns: 1fr 1fr; } .section { padding: 2.5rem 1.2rem; } }
+
+  .roadmap { max-width: 900px; margin: 2.5rem auto 0; padding: 0 2rem; }
+  .roadmap-inner { background: #fff; border: 1px solid var(--rule); border-left: 5px solid var(--highlight); border-radius: 10px; padding: 1.3rem 1.5rem; }
+  .roadmap-path { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; margin-bottom: 1rem; font-family: var(--mono); font-size: 0.72rem; }
+  .roadmap-path a, .roadmap-path span.cur { padding: 0.25rem 0.6rem; border-radius: 999px; text-decoration: none; border: 1px solid var(--rule); color: #555; }
+  .roadmap-path span.cur { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+  .roadmap-path a:hover { border-color: var(--highlight); color: var(--accent); }
+  .roadmap-path i { color: #aaa; font-style: normal; }
+  .roadmap-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+  .roadmap-grid h5 { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin: 0 0 0.35rem; }
+  .roadmap-grid p, .roadmap-grid li { font-size: 0.9rem; color: #333; margin: 0 0 0.3rem; }
+  .roadmap-grid ul { margin: 0 0 0 1.1rem; padding: 0; }
+  .roadmap-contrast { margin-top: 1rem; padding: 0.7rem 0.9rem; background: var(--paper); border-radius: 8px; font-size: 0.88rem; color: #333; }
+  .next-part { max-width: 900px; margin: 2rem auto; padding: 0 2rem; text-align: right; font-family: var(--mono); font-size: 0.85rem; }
+  .next-part a { color: var(--accent); text-decoration: none; border: 1px solid var(--accent); border-radius: 6px; padding: 0.5rem 0.9rem; display: inline-block; }
+  .next-part a:hover { background: var(--accent); color: #fff; }
+  @media (max-width: 620px) { .roadmap, .next-part { padding: 0 1.2rem; } }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-label">Module 5 · Part 3 — Study Guide</div>
+  <h1>Challenges in Multimodal AI</h1>
+  <p>Data, alignment, hallucination, evaluation, and compute — the five reasons multimodal systems are harder to build reliably than their single-modality counterparts, and why each one shapes real deployment decisions.</p>
+</div>
+
+<nav class="toc">
+  <a href="#s1">01 Data Availability</a>
+  <a href="#s2">02 Alignment Complexity</a>
+  <a href="#s3">03 Hallucinations</a>
+  <a href="#s4">04 Evaluation</a>
+  <a href="#s5">05 Compute</a>
+  <a href="#s6">06 Takeaways</a>
+</nav>
+
+<div class="roadmap"><div class="roadmap-inner">
+  <div class="roadmap-path"><a href="1_Foundations_of_Multimodal_AI.html">1 Foundations</a> <i>→</i> <a href="2a_Alignment_CLIP.html">2a Alignment</a> <i>→</i> <a href="2b_Generation_VLMs.html">2b Generation</a> <i>→</i> <span class="cur">3 Challenges</span> <i>→</i> <a href="4_Multimodal_Applications.html">4 Applications</a> <i>→</i> <a href="Lab/1_Multimodal_PDF_QA_Lab.ipynb">Lab</a></div>
+  <div class="roadmap-grid">
+    <div><h5>What you learned before</h5><ul><li>Part 2a: how alignment models (CLIP) are built.</li><li>Part 2b: how generative VLMs are built on top of them.</li></ul></div>
+    <div><h5>What this part answers</h5><ul><li>Where these models break in practice: data, alignment errors, hallucination, evaluation and compute cost.</li></ul></div>
+    <div><h5>Where it leads</h5><ul><li>Part 4: building real systems that work around these limits.</li></ul></div>
+  </div>
+  
+</div></div>
+
+
+<section class="section" id="s1">
+  <div class="section-eyebrow">Section 01</div>
+  <h2>Data Availability</h2>
+
+  <p>Text-only LLM pretraining (Module 1 §01) draws on an enormous, relatively easy-to-collect corpus: the open web's text. Paired multimodal data is scarcer and lower quality by comparison.</p>
+
+  <table>
+    <tr><th>Data need</th><th>Availability</th></tr>
+    <tr><td>Raw images</td><td>Abundant</td></tr>
+    <tr><td>Images <em>paired with accurate, detailed text</em></td><td>Much scarcer — most web images have short, generic, or missing alt-text</td></tr>
+    <tr><td>Domain-specific pairs (medical scans + reports, technical diagrams + captions)</td><td>Scarce and often privacy-restricted or proprietary</td></tr>
+    <tr><td>Non-English / low-resource-language image-text pairs</td><td>Severely underrepresented relative to English</td></tr>
+  </table>
+
+  <div class="callout callout-blue">
+    <strong>Why this specifically limits fine-grained visual understanding:</strong> a model can learn "this is a dog" from millions of loosely-captioned dog photos, but learning to reliably answer "is the dog's left ear torn?" needs images paired with <em>that level of detail</em> in the text — data that's dramatically rarer. General object recognition saturates faster than fine-grained visual question answering, purely because of what data exists.
+  </div>
+</section>
+
+<section class="section" id="s2">
+  <div class="section-eyebrow">Section 02</div>
+  <h2>Alignment Complexity, Revisited</h2>
+
+  <p>Module 5 Part 2a §07 showed alignment problems at the embedding level (the modality gap, Winoground and ARO results) and §05 the typographic attack. At the full vision-language-model level (Part 2b §01–§06), the same underlying problem — text and vision carry information at different granularities — resurfaces as harder failure modes.</p>
+
+  <table>
+    <tr><th>Failure mode</th><th>Root cause</th></tr>
+    <tr><td>Missing fine detail in generated descriptions</td><td>Training captions were themselves coarse (Part 1 §01) — the model learned to describe at that same coarse level</td></tr>
+    <tr><td>Spatial relationship errors ("the cup is on the left" when it's on the right)</td><td>Contrastive training (Part 2a §03) optimizes whole-image-to-whole-caption similarity, with no explicit supervision for fine spatial relationships</td></tr>
+    <tr><td>Poor compositional generalization</td><td>Rare attribute-object combinations in training data (Part 2a §07) — the model has seen "red car" and "blue truck" separately far more than "blue car"</td></tr>
+    <tr><td>Noisy web pairs</td><td>Alt-text is often generic, wrong or unrelated to the image; scale partly compensates (ALIGN, Part 2a §06), but curation still gives large gains (DataComp, MetaCLIP)</td></tr>
+    <tr><td>Reading beats seeing</td><td>Text inside an image is a strong, easy signal, so written words can override the object itself (the “iPod” apple, Part 2a §05) — the root of prompt injection through images</td></tr>
+  </table>
+</section>
+
+<section class="section" id="s3">
+  <div class="section-eyebrow">Section 03</div>
+  <h2>Hallucinations — the Multimodal Version</h2>
+
+  <p>Module 2 discussed hallucination implicitly (grounding via ReAct, Module 2 §04). In vision-language models, <strong>hallucination</strong> takes a specific, well-studied form: the model confidently describes objects, attributes, or relationships that are <em>not present in the image</em>.</p>
+
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 700 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;display:block;margin:0 auto">
+      <text x="350" y="22" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#333" font-weight="600" letter-spacing="1.5">A TYPICAL VLM HALLUCINATION PATTERN</text>
+      <rect x="30" y="45" width="180" height="110" rx="8" fill="#eee" stroke="#999"/>
+      <text x="120" y="100" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#666">[photo: a kitchen</text>
+      <text x="120" y="115" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#666">counter with a bowl</text>
+      <text x="120" y="130" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#666">of apples]</text>
+
+      <rect x="250" y="55" width="420" height="90" rx="8" fill="#fff0f0" stroke="#b83232" stroke-width="1.5"/>
+      <text x="265" y="80" font-family="IBM Plex Mono,monospace" font-size="9" fill="#7a0000" font-weight="700">Model output:</text>
+      <text x="265" y="100" font-family="Inter,sans-serif" font-size="9" fill="#333">"A kitchen counter with a bowl of apples</text>
+      <text x="265" y="115" font-family="Inter,sans-serif" font-size="9" fill="#b83232" font-weight="600">and a banana next to a coffee mug."</text>
+      <text x="265" y="135" font-family="Inter,sans-serif" font-size="8" fill="#7a0000" font-style="italic">-- neither the banana nor the mug is in the image</text>
+    </svg>
+    <div class="diagram-caption">FIG 1 — A classic hallucination pattern: apples and kitchen counters co-occur frequently with bananas and coffee mugs in training data, so the model's language-generation prior "fills in" statistically common companions rather than being fully constrained by what's actually visible.</div>
+  </div>
+
+  <table>
+    <tr><th>Cause</th><th>Why it produces hallucination</th></tr>
+    <tr><td>Language prior overriding visual evidence</td><td>The text-generation side of a VLM (often a large pretrained LLM, Part 2b §01) has strong statistical expectations about what co-occurs — "kitchen counter" strongly predicts "coffee mug" in text, independent of this specific image</td></tr>
+    <tr><td>Coarse training captions (§01/§02)</td><td>If training captions rarely enumerate everything absent, the model never learned to reliably signal absence</td></tr>
+    <tr><td>Ambiguous or low-resolution visual input</td><td>When the vision encoder's signal is genuinely weak, the language model's prior fills the gap with a plausible guess</td></tr>
+  </table>
+
+  <div class="callout callout-red">
+    <strong>Exam favourite:</strong> "Why are VLMs specifically prone to object hallucination, more than text-only LLMs are prone to factual hallucination?" — because a VLM has <em>two</em> competing sources of "truth": the actual visual input, and the language model's learned statistical priors about what typically co-occurs in captions. When the two disagree, the more confidently-trained language prior often wins, unlike a text-only LLM which only ever has one signal (its training distribution) to draw from.
+  </div>
+  <h3>How hallucination is measured</h3>
+  <ul>
+    <li><b>CHAIR</b> (Rohrbach et al., 2018): the fraction of objects mentioned in generated captions that are not in the image's annotations.</li>
+    <li><b>POPE</b> (Li et al., 2023): asks yes/no questions “Is there a &lt;object&gt; in the image?” with negatives sampled randomly, from frequent objects, or from objects that commonly co-occur with what is present (“adversarial”). Models do worst on the co-occurrence setting — direct evidence that the language prior causes hallucination.</li>
+  </ul>
+
+  <h3>Mitigations, from cheapest to most involved</h3>
+  <ol>
+    <li><b>Higher resolution and better grounding data</b> — the model hallucinates less when it can actually see the detail.</li>
+    <li><b>Instruction data that includes “not present” answers</b>, so the model learns to say no.</li>
+    <li><b>Preference tuning:</b> LLaVA-RLHF (Sun et al., 2023) used RLHF with a reward model given extra factual information (“factually augmented RLHF”); RLHF-V (Yu et al., 2023) used fine-grained human corrections of hallucinated segments with a DPO-style objective. (How preference tuning works: Part 1 §04, FIG 7.)</li>
+    <li><b>Decoding-time fixes:</b> Visual Contrastive Decoding (Leng et al., 2024) compares the model's next-token probabilities on the real image and on a distorted version, and down-weights tokens the language prior would produce anyway.</li>
+    <li><b>System design:</b> cross-check captions with an object detector, and ask the model to say when it is unsure (Part 4 §06).</li>
+  </ol>
+</section>
+
+<section class="section" id="s4">
+  <div class="section-eyebrow">Section 04</div>
+  <h2>Evaluation Challenges</h2>
+
+  <p>Module 3 §08 defined RAG evaluation metrics with well-established ground truth (a gold document). Multimodal evaluation is harder precisely because "correct" is often less binary — describing an image well admits many valid phrasings, and ground truth itself is expensive to produce.</p>
+
+  <table>
+    <tr><th>Task</th><th>Evaluation difficulty</th></tr>
+    <tr><td>Image captioning</td><td>Many valid captions exist for one image; automatic metrics (BLEU, CIDEr) correlate imperfectly with human judgment of quality</td></tr>
+    <tr><td>Visual question answering</td><td>Open-ended answers are hard to score automatically without exact-match being overly strict</td></tr>
+    <tr><td>Object hallucination (§03)</td><td>Requires exhaustively verifying every claim against the actual image — expensive to do at scale, and easy to under-detect</td></tr>
+    <tr><td>Document/OCR-heavy tasks (Module 5 Part 4)</td><td>Small layout misreads compound — a shifted table column can silently corrupt every downstream number</td></tr>
+  </table>
+
+  <h3>The standard benchmarks</h3>
+  <table>
+    <tr><th>Capability</th><th>Benchmark</th><th>Metric</th></tr>
+    <tr><td>Zero-shot classification</td><td>ImageNet and its shifted variants</td><td>Top-1 accuracy</td></tr>
+    <tr><td>Retrieval</td><td>MS-COCO, Flickr30K</td><td>Recall@K (Module 3)</td></tr>
+    <tr><td>General visual QA</td><td>VQAv2, GQA, OK-VQA</td><td>VQA accuracy (agreement with 10 human answers)</td></tr>
+    <tr><td>Text in images</td><td>TextVQA, DocVQA, ChartQA, OCRBench</td><td>Accuracy / ANLS</td></tr>
+    <tr><td>Expert multi-discipline reasoning</td><td>MMMU</td><td>Accuracy on college-level questions with diagrams</td></tr>
+    <tr><td>Broad skills</td><td>MMBench, SEED-Bench</td><td>Multiple-choice accuracy</td></tr>
+    <tr><td>Hallucination</td><td>POPE, CHAIR (§03)</td><td>F1 on yes/no; hallucinated-object rate</td></tr>
+    <tr><td>Open-ended chat</td><td>LLaVA-Bench</td><td>GPT-4-as-judge score relative to a reference answer</td></tr>
+  </table>
+
+  <div class="callout callout-red">
+    <strong>Read benchmark claims carefully:</strong> many VQA benchmarks can be partly solved without looking at the image (language priors), training data may overlap test images, and GPT-4-as-judge scores are relative and can favour verbose answers. Always ask: was the image necessary, was the test set clean, and who judged?
+  </div>
+
+  <div class="callout callout-purple">
+    <strong>Connects directly to Module 3 §08:</strong> RAG's "faithfulness" metric (is every claim traceable to the retrieved context?) has a direct multimodal analogue: is every claim in a VLM's description traceable to something actually visible in the image? Building that checker reliably is an open, active research problem — there's no equivalent yet to RAG's relatively mature evaluation tooling.
+  </div>
+</section>
+
+<section class="section" id="s5">
+  <div class="section-eyebrow">Section 05</div>
+  <h2>Compute Requirements</h2>
+
+  <p>Images are expensive input. A single image, once patch-encoded (Module 5 Part 2a §02's ViT), can consume hundreds to thousands of "tokens" worth of sequence length — before a single word of the actual prompt is processed.</p>
+
+  <div class="math-box"><span class="comment">// visual tokens = (image side / patch side)²   — derivation in Part 2a §02</span>
+224px, 16px patches (ViT-B/16)   → (224/16)² = <span class="eq">196</span> tokens
+336px, 14px patches (LLaVA-1.5)  → (336/14)² = <span class="eq">576</span> tokens
+<span class="comment">// Self-attention cost (Module 1 §03) is O(n² · d) in sequence length n, so the image</span>
+<span class="comment">// doesn't just add cost linearly — it inflates the QUADRATIC term every text token pays.</span>
+576 vs 196 tokens → (576/196)² ≈ <span class="hi">8.6× more attention compute</span></div>
+
+  <h3>Visual-token budgets of real models</h3>
+  <table>
+    <tr><th>Model / setting</th><th>Visual tokens per image</th><th>Share of a prompt with a 200-token question</th></tr>
+    <tr><td>BLIP-2 (Q-Former)</td><td>32</td><td>14%</td></tr>
+    <tr><td>LLaVA v1 (224px)</td><td>256</td><td>56%</td></tr>
+    <tr><td>LLaVA-1.5 (336px)</td><td>576</td><td>74%</td></tr>
+    <tr><td>LLaVA-NeXT AnyRes (672px)</td><td>up to ~2,880</td><td>~94%</td></tr>
+    <tr><td>PaliGemma (896px)</td><td>4,096</td><td>~95%</td></tr>
+  </table>
+
+  <table>
+    <tr><th>Cost driver</th><th>Practical consequence</th></tr>
+    <tr><td>Image tokenization overhead</td><td>Every image inflates the effective context length substantially before any text is processed</td></tr>
+    <tr><td>Multi-image / video input</td><td>Cost scales with the number of frames/images — a short video can dwarf a long text document in token count</td></tr>
+    <tr><td>High-resolution inputs</td><td>More patches per image = more tokens = more attention cost, trading fidelity against compute directly</td></tr>
+  </table>
+
+  <h3>Levers for reducing the cost</h3>
+  <ul>
+    <li><b>Prefill dominates:</b> with hundreds of image tokens, most of the work happens before the first answer token is produced.</li>
+    <li><b>Cache the vision encoder output</b> when asking several questions about the same image.</li>
+    <li><b>Choose resolution per task:</b> classification and captions are fine at low resolution; documents, charts and small text need high resolution or tiling.</li>
+    <li><b>Token reduction:</b> compress visual tokens with a query bridge (BLIP-2's 32 queries) or merge neighbouring patches (Qwen2-VL's 2×2 merge) — the main lever for speed.</li>
+    <li><b>Quantisation</b> (4-bit or 8-bit weights, Module 1) applies to the LLM part exactly as for text models.</li>
+  </ul>
+
+  <div class="callout callout-green">
+    <strong>Why this matters for Module 5 Part 4's applications directly:</strong> a multimodal RAG or document-intelligence system processing hundreds of scanned pages has to make a deliberate resolution/cost trade-off per page — this is the same "chunk size" hyperparameter tension from Module 3 §05, now with a much steeper cost curve because image tokens are expensive in a way text tokens aren't.
+  </div>
+</section>
+
+<section class="section" id="s6">
+  <div class="section-eyebrow">Section 06</div>
+  <h2>Key Takeaways &amp; Exam Prep</h2>
+
+  <div class="steps">
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Paired data is the real bottleneck</h4><p>Not raw images, but images paired with accurate, detailed, diverse text.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Alignment errors trace back to granularity mismatch</h4><p>Spatial and compositional errors are downstream of coarse training captions.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Hallucination is a two-signal conflict</h4><p>Language priors about what "usually" co-occurs can override actual visual evidence.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Evaluation lacks RAG's maturity</h4><p>Open-ended visual tasks resist the clean ground-truth Module 3's metrics rely on.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Images are expensive tokens</h4><p>Quadratic attention cost makes image input a much steeper compute trade-off than text.</p></div>
+  </div>
+
+  <h3>Common exam questions</h3>
+  <table>
+    <tr><th>Question</th><th>Short answer</th></tr>
+    <tr><td>Why are VLMs specifically prone to object hallucination?</td><td>They have two competing signals — actual visual input and the language model's learned co-occurrence priors — and the language prior can override weak or ambiguous visual evidence</td></tr>
+    <tr><td>Why does image input cost more compute than an equivalent amount of text?</td><td>Each image is tokenized into many patch-tokens (e.g. ~196 for a standard ViT patch size), and self-attention's O(n²) cost means this inflates the quadratic term substantially before any text is even processed</td></tr>
+    <tr><td>Why is multimodal evaluation generally harder than RAG evaluation (Module 3 §08)?</td><td>Multimodal tasks like captioning and VQA are more open-ended with many valid answers, and verifying claims against an image (the multimodal analogue of "faithfulness") lacks RAG's more mature, established evaluation tooling</td></tr>
+    <tr><td>What does POPE measure and what does it reveal?</td><td>Object hallucination via yes/no questions; models fail most on objects that co-occur with the scene, showing the language prior overriding the image</td></tr>
+    <tr><td>Name three ways to reduce object hallucination.</td><td>Any three of: higher resolution / better grounding data; instruction data with “not present” answers; preference tuning (LLaVA-RLHF, RLHF-V); visual contrastive decoding; cross-checking with an object detector</td></tr>
+    <tr><td>How many visual tokens does LLaVA-1.5 use per image, and how can you reduce that cost?</td><td>576 (24×24 patches at 336px); reduce by lower resolution, a query bridge, patch merging, caching encoder output for repeated questions</td></tr>
+  </table>
+
+  <div class="callout" style="margin-top:2rem">
+    <strong>References:</strong><br>
+    Rohrbach et al. (2018) — Object Hallucination in Image Captioning.<br>
+    Li et al. (2023) — Evaluating Object Hallucination in Large Vision-Language Models (POPE).<br>
+    Vedantam, Zitnick &amp; Parikh (2015) — CIDEr: Consensus-based Image Description Evaluation.<br>
+    Dosovitskiy et al. (2020) — An Image is Worth 16x16 Words (ViT compute characteristics).<br>
+    Sun et al. (2023) — LLaVA-RLHF · Yu et al. (2023) — RLHF-V · Leng et al. (2024) — Visual Contrastive Decoding.<br>
+    Yue et al. (2023) — MMMU · Thrush et al. (2022) — Winoground · Gadre et al. (2023) — DataComp.
+  </div>
+</section>
+
+<footer style="text-align:center;padding:2rem;font-family:var(--mono);font-size:0.75rem;color:#aaa;border-top:1px solid var(--rule)">
+  Module 5 · Part 3 — Challenges in Multimodal AI · Companion to Part 2a (Alignment: CLIP), Part 2b (VLMs) and Part 4 (Applications)
+</footer>
+
+
+<div class="next-part"><a href="4_Multimodal_Applications.html">Next: Part 4 — Multimodal Applications →</a></div>
+</body>
+</html>

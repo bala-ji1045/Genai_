@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evaluation of GenAI Systems — Study Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Fraunces:ital,wght@0,300;0,700;1,300&family=Inter:wght@400;500;600&display=swap');
+  :root {
+    --ink: #0f1117; --paper: #f7f6f2; --mid: #e8e5dd; --rule: #c9c4b8; --accent: #1a3a5c;
+    --highlight: #e8a020; --green: #2a7a4b; --red: #b83232; --blue: #2255aa; --purple: #6b3fa0; --teal: #0d7a7a;
+    --mono: 'IBM Plex Mono', monospace; --display: 'Fraunces', Georgia, serif; --body: 'Inter', system-ui, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--body); background: var(--paper); color: var(--ink); line-height: 1.7; font-size: 16px; }
+  .hero { background: linear-gradient(160deg, #0f1117 0%, #1a3a5c 100%); color: #fff; padding: 4rem 2rem 3rem; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 20% 30%, rgba(232,160,32,0.10), transparent 40%), radial-gradient(circle at 80% 70%, rgba(42,122,75,0.12), transparent 40%); }
+  .hero-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--highlight); margin-bottom: 1rem; position: relative; }
+  .hero h1 { font-family: var(--display); font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; line-height: 1.1; margin-bottom: 1rem; position: relative; }
+  .hero p { font-size: 1.1rem; opacity: 0.82; max-width: 640px; margin: 0 auto; position: relative; }
+  .toc { background: var(--ink); color: #fff; padding: 1.2rem 2rem; display: flex; gap: 1.2rem; flex-wrap: wrap; justify-content: center; position: sticky; top: 0; z-index: 100; }
+  .toc a { color: rgba(255,255,255,0.7); text-decoration: none; font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.03em; transition: color 0.2s; }
+  .toc a:hover { color: var(--highlight); }
+  .section { max-width: 900px; margin: 0 auto; padding: 4rem 2rem; border-bottom: 1px solid var(--rule); }
+  .section-eyebrow { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.5rem; }
+  .section h2 { font-family: var(--display); font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 700; margin-bottom: 1.5rem; color: var(--ink); }
+  .section h3 { font-family: var(--display); font-size: 1.25rem; font-weight: 700; margin: 2rem 0 0.8rem; color: var(--accent); }
+  .section p { margin-bottom: 1rem; color: #333; }
+  .callout { border-left: 4px solid var(--highlight); background: #fff8ee; padding: 1rem 1.25rem; border-radius: 0 6px 6px 0; margin: 1.5rem 0; font-size: 0.95rem; }
+  .callout strong { color: var(--accent); }
+  .callout-blue  { border-left-color: var(--blue);   background: #eef3ff; }
+  .callout-green { border-left-color: var(--green);  background: #edfaf3; }
+  .callout-red   { border-left-color: var(--red);    background: #fff0f0; }
+  .callout-purple{ border-left-color: var(--purple); background: #f5f0ff; }
+  .math-box { background: var(--ink); color: #e8e8e8; font-family: var(--mono); font-size: 0.86rem; line-height: 1.9; padding: 1.5rem; border-radius: 8px; margin: 1.5rem 0; overflow-x: auto; white-space: pre; }
+  .math-box .comment { color: #6a9f6a; } .math-box .var { color: #f0b060; } .math-box .eq { color: #7ab8f5; } .math-box .hi { color: #ff9090; }
+  table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.88rem; }
+  th { background: var(--accent); color: #fff; padding: 0.6rem 0.9rem; text-align: left; font-family: var(--mono); font-size: 0.76rem; letter-spacing: 0.04em; }
+  td { padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--mid); vertical-align: top; }
+  tr:nth-child(even) td { background: #fafaf7; }
+  .diagram-wrap { background: #fff; border: 1px solid var(--rule); border-radius: 10px; padding: 1.5rem; margin: 2rem 0; overflow-x: auto; }
+  .diagram-caption { text-align: center; font-family: var(--mono); font-size: 0.74rem; color: #777; margin-top: 0.75rem; letter-spacing: 0.04em; line-height: 1.6; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+  .step-card { background: #fff; border: 1px solid var(--rule); border-radius: 8px; padding: 1.1rem; }
+  .step-num { font-family: var(--mono); font-size: 1.9rem; font-weight: 600; color: var(--mid); line-height: 1; margin-bottom: 0.4rem; }
+  .step-card h4 { font-size: 0.88rem; font-weight: 600; color: var(--accent); margin-bottom: 0.35rem; }
+  .step-card p { font-size: 0.82rem; margin: 0; color: #444; }
+  @media (max-width: 620px) { .steps { grid-template-columns: 1fr 1fr; } .section { padding: 2.5rem 1.2rem; } }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-label">Module 6 · Part 1 — Study Guide</div>
+  <h1>Evaluation of GenAI Systems</h1>
+  <p>How do you know if an LLM application is actually working? Hallucination detection, groundedness, BERTScore, the RAGAS framework, and why human evaluation is still the ground truth everything else is checked against.</p>
+</div>
+
+<nav class="toc">
+  <a href="#s1">01 Hallucination Detection</a>
+  <a href="#s2">02 Groundedness</a>
+  <a href="#s3">03 BERTScore</a>
+  <a href="#s4">04 RAGAS</a>
+  <a href="#s5">05 Human Evaluation</a>
+  <a href="#s6">06 Takeaways</a>
+</nav>
+
+<section class="section" id="s1">
+  <div class="section-eyebrow">Section 01</div>
+  <h2>Hallucination Detection</h2>
+
+  <p>Module 5 Part 3 §03 introduced hallucination in vision-language models — text-only LLMs hallucinate too, generating fluent, confident claims that are simply false. Detecting this automatically, at scale, is the first evaluation problem any production GenAI system has to solve.</p>
+
+  <table>
+    <tr><th>Detection approach</th><th>How it works</th><th>Trade-off</th></tr>
+    <tr><td><strong>Fact-checking against a knowledge source</strong></td><td>Extract claims, verify each against a trusted reference (a knowledge base, retrieved documents)</td><td>Reliable when a reference exists; nothing to check against for open-ended generation</td></tr>
+    <tr><td><strong>Self-consistency checking</strong></td><td>Sample the same query multiple times (Module 2 §04); claims that vary wildly across samples are suspect</td><td>Cheap, no reference needed; catches inconsistency, not confident-but-consistent falsehood</td></tr>
+    <tr><td><strong>NLI-based entailment scoring</strong></td><td>A natural language inference model checks whether the source text <em>entails</em> the generated claim</td><td>Directly answers "is this claim supported," at the cost of another model call</td></tr>
+    <tr><td><strong>LLM-as-judge</strong></td><td>Prompt a (typically stronger) LLM to assess whether a claim is supported by given context</td><td>Flexible and scalable; inherits whatever biases and blind spots the judge model has</td></tr>
+  </table>
+
+  <div class="callout callout-blue">
+    <strong>The recurring problem across all four approaches:</strong> detecting hallucination requires <em>something</em> to check the claim against — a reference, other samples, an entailment model, or a judge. There is no way to verify truthfulness from the generated text alone; every detection method smuggles in an external source of ground truth, explicitly or implicitly.
+  </div>
+</section>
+
+<section class="section" id="s2">
+  <div class="section-eyebrow">Section 02</div>
+  <h2>Groundedness</h2>
+
+  <p>Module 3 §08 defined <strong>faithfulness</strong> for RAG specifically: is every claim in the answer traceable to the retrieved context? <strong>Groundedness</strong> is the same idea generalized — the degree to which a model's output is supported by whatever source material it was given, independent of whether the output happens to also be true.</p>
+
+  <div class="math-box"><span class="comment">// A simple groundedness check, conceptually</span>
+<span class="kw">for</span> claim <span class="kw">in</span> extract_claims(generated_answer):
+    supported = nli_model.entails(source_context, claim)   <span class="comment">// does context ENTAIL claim?</span>
+    <span class="kw">if not</span> supported:
+        flag_as_ungrounded(claim)
+
+<span class="var">groundedness_score</span> = <span class="eq">supported_claims / total_claims</span></div>
+
+  <div class="callout callout-red">
+    <strong>Exam favourite:</strong> "Can an answer be groundless but still correct?" — Yes, and this is precisely why groundedness is measured separately from factual accuracy. An answer can happen to be true by coincidence — drawn from the LLM's own parametric knowledge rather than the provided context — which is exactly the failure mode Module 3 §08 flagged: unfaithful but not wrong. A production system that can't distinguish these will look fine on accuracy metrics while silently not actually using its retrieval step.
+  </div>
+</section>
+
+<section class="section" id="s3">
+  <div class="section-eyebrow">Section 03</div>
+  <h2>BERTScore</h2>
+
+  <p>Comparing a generated answer to a reference answer word-for-word (like classic n-gram metrics such as BLEU) penalizes paraphrase heavily — "the cat sat on the mat" and "a feline rested on the rug" mean nearly the same thing but share almost no words. <strong>BERTScore</strong> (Zhang et al., 2019) compares meaning instead, using contextual embeddings (Module 1 §03's embeddings, from a BERT-style encoder) rather than exact token overlap.</p>
+
+  <div class="math-box"><span class="comment">// BERTScore, conceptually — for each token in the candidate, find its best-matching</span>
+<span class="comment">// token (by embedding cosine similarity) in the reference, and vice versa</span>
+<span class="var">Precision</span> = <span class="eq">avg over candidate tokens of  max cosine similarity to any reference token</span>
+<span class="var">Recall</span>    = <span class="eq">avg over reference tokens of  max cosine similarity to any candidate token</span>
+<span class="var">F1</span>        = <span class="eq">2 · Precision · Recall / (Precision + Recall)</span>
+
+<span class="comment">// Unlike BLEU's exact n-gram matching, two tokens with different surface forms but</span>
+<span class="comment">// similar embeddings ("rested" <-> "sat") still contribute a high similarity score.</span></div>
+
+  <table>
+    <tr><th>Metric</th><th>Matches on</th><th>Handles paraphrase?</th></tr>
+    <tr><td>BLEU / ROUGE (n-gram overlap)</td><td>Exact word/phrase sequences</td><td>Poorly — different wording scores low even if correct</td></tr>
+    <tr><td>BERTScore</td><td>Contextual embedding similarity per token</td><td>Well — captures near-synonymous phrasing</td></tr>
+  </table>
+
+  <div class="callout callout-green">
+    <strong>Where this connects back:</strong> BERTScore is doing, at the token level, exactly what Module 3 §01's cosine similarity does at the sentence/document level — the same "compare meaning via embedding distance, not surface text" idea, just applied to scoring generated text against a reference instead of to retrieval.
+  </div>
+</section>
+
+<section class="section" id="s4">
+  <div class="section-eyebrow">Section 04</div>
+  <h2>RAGAS</h2>
+
+  <p><strong>RAGAS</strong> (RAG Assessment, Es et al., 2023) is a framework purpose-built for evaluating RAG pipelines (Module 3) — it doesn't invent new individual metrics so much as it formalizes and automates the exact evaluation layers Module 3 §08 introduced, computing them with an LLM-as-judge (SS01) rather than needing hand-labeled ground truth for every query.</p>
+
+  <table>
+    <tr><th>RAGAS metric</th><th>What it measures</th><th>Maps to Module 3 §08's...</th></tr>
+    <tr><td><strong>Faithfulness</strong></td><td>Fraction of claims in the answer supported by retrieved context</td><td>Groundedness (SS02)</td></tr>
+    <tr><td><strong>Answer relevance</strong></td><td>Does the answer actually address the question asked?</td><td>Answer relevance</td></tr>
+    <tr><td><strong>Context precision</strong></td><td>Of the retrieved chunks, how many were actually relevant?</td><td>Context precision</td></tr>
+    <tr><td><strong>Context recall</strong></td><td>Of the chunks that were needed, how many were actually retrieved?</td><td>Context recall</td></tr>
+
+  </table>
+
+  <div class="math-box"><span class="comment">// RAGAS faithfulness, conceptually — this IS SS01's hallucination detection,</span>
+<span class="comment">// applied specifically to a RAG system's retrieved context as the reference</span>
+<span class="var">faithfulness</span> = <span class="eq">(# claims in answer supported by retrieved context) / (total claims in answer)</span></div>
+
+  <div class="callout callout-purple">
+    <strong>Why RAGAS uses an LLM as the judge rather than requiring labeled data:</strong> hand-labeling "is this chunk relevant" for every query in a large evaluation set doesn't scale. An LLM judge, prompted carefully, can assess relevance/faithfulness/entailment automatically across thousands of query-answer pairs — at the cost of inheriting whatever the judge model's own blind spots are (the same trade-off SS01 flagged for LLM-as-judge hallucination detection generally).
+  </div>
+</section>
+
+<section class="section" id="s5">
+  <div class="section-eyebrow">Section 05</div>
+  <h2>Human Evaluation</h2>
+
+  <p>Every automated metric above (BERTScore, RAGAS, LLM-as-judge) is ultimately validated against — and often initially calibrated against — <strong>human judgment</strong>. Human evaluation remains the ground truth other metrics are checked against, precisely because it's the only method that doesn't require deciding in advance what "correct" formally means.</p>
+
+  <table>
+    <tr><th>Human eval method</th><th>How it works</th></tr>
+    <tr><td><strong>Direct rating</strong></td><td>Human raters score a response on a scale (e.g. 1-5) against defined criteria</td></tr>
+    <tr><td><strong>Pairwise comparison</strong></td><td>Raters choose which of two responses is better — often more reliable than absolute scoring, since relative judgments are easier to make consistently</td></tr>
+    <tr><td><strong>Rubric-based annotation</strong></td><td>Raters check specific criteria (factual accuracy, tone, completeness) individually rather than giving one holistic score</td></tr>
+  </table>
+
+  <div class="callout callout-red">
+    <strong>Exam favourite:</strong> "If human evaluation is the gold standard, why not just always use it?" — cost and speed: human evaluation doesn't scale to the volume of continuous testing a production system needs (every deploy, every prompt change), and inter-rater disagreement is real even among careful humans. The practical pattern: use automated metrics (BERTScore, RAGAS) for continuous, high-volume checks, and periodic human evaluation to calibrate and validate that those automated metrics still track what actually matters.
+  </div>
+</section>
+
+<section class="section" id="s6">
+  <div class="section-eyebrow">Section 06</div>
+  <h2>Key Takeaways &amp; Exam Prep</h2>
+
+  <div class="steps">
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Hallucination detection needs an external reference</h4><p>No method verifies truthfulness from generated text alone — every approach checks against something.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Groundedness ≠ correctness</h4><p>An answer can be true by coincidence and still ungrounded — that distinction matters for debugging RAG.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>BERTScore compares meaning, not surface tokens</h4><p>Embedding similarity per token instead of exact n-gram overlap.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>RAGAS formalizes Module 3's evaluation layer</h4><p>Automates faithfulness/relevance/context metrics via LLM-as-judge, no hand-labeling required.</p></div>
+    <div class="step-card"><div class="step-num" style="color:#e8a020">✓</div><h4>Human evaluation calibrates everything else</h4><p>Automated metrics scale; human judgment validates that scaling didn't drift from what actually matters.</p></div>
+  </div>
+
+  <h3>Common exam questions</h3>
+  <table>
+    <tr><th>Question</th><th>Short answer</th></tr>
+    <tr><td>Why can't hallucination be detected from the generated text alone?</td><td>There's no internal signal that distinguishes a true claim from a false one — every detection method needs an external reference (a knowledge source, other samples, an entailment model, or a judge) to check against</td></tr>
+    <tr><td>What's the key difference between BLEU/ROUGE and BERTScore?</td><td>BLEU/ROUGE match exact n-grams and penalize valid paraphrasing; BERTScore compares contextual embedding similarity per token, so semantically equivalent but differently-worded text still scores well</td></tr>
+    <tr><td>What does RAGAS's faithfulness metric measure, and what does it map to?</td><td>The fraction of claims in a generated answer that are actually supported by the retrieved context — the same concept as groundedness (SS02) and Module 3 §08's faithfulness, automated via LLM-as-judge</td></tr>
+    <tr><td>Why is human evaluation still necessary if automated metrics like RAGAS exist?</td><td>Automated metrics need periodic validation against human judgment to confirm they still track what actually matters; human evaluation is the ground truth other methods are calibrated against, even though it doesn't scale to continuous, high-volume testing</td></tr>
+  </table>
+
+  <div class="callout" style="margin-top:2rem">
+    <strong>References:</strong><br>
+    Zhang et al. (2019) — BERTScore: Evaluating Text Generation with BERT.<br>
+    Es et al. (2023) — RAGAS: Automated Evaluation of Retrieval Augmented Generation.<br>
+    Ji et al. (2023) — Survey of Hallucination in Natural Language Generation.<br>
+    Papineni et al. (2002) — BLEU: a Method for Automatic Evaluation of Machine Translation.
+  </div>
+
+  <div class="callout callout-blue" style="margin-top:1.5rem">
+    <strong>Companion notebook:</strong> <code>1_Evaluate_and_Monitor_Lab.ipynb</code> implements RAGAS-style evaluation metrics against a real RAG pipeline (reusing Module 3's system) — the syllabus lab for this module.
+  </div>
+</section>
+
+<footer style="text-align:center;padding:2rem;font-family:var(--mono);font-size:0.75rem;color:#aaa;border-top:1px solid var(--rule)">
+  Module 6 · Part 1 — Evaluation of GenAI Systems · Companion to Part 2 (Safety and Security)
+</footer>
+
+</body>
+</html>
